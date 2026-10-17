@@ -1,0 +1,61 @@
+# .github/workflows/security-dast.yml: the baseline scan of OWASP ZAP of the application, as a PDF report
+name: Security (DAST)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    # Every Monday: the rules of ZAP are updated with its image
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cakephp_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      # The test database of the application (APP_ENV=test), as for the tests
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8mb4
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql
+          coverage: none
+
+      - run: composer install --no-interaction --no-progress
+
+      # Load the tables of the test database here, as your tests or your deployment do
+
+      # Japanese fonts for a Japanese report
+      - run: sudo apt-get install -y fonts-noto-cjk
+
+      - name: Scan the application
+        run: vendor/bin/security-dast --pdf=tmp/security-dast.pdf --fail-on=medium --language=ja
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: tmp/security-dast.pdf
+          archive: false
+          retention-days: 30

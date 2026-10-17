@@ -1,0 +1,25 @@
+# Define the line ending behavior of the different file extensions
+* text=auto
+* text eol=lf
+
+*.php text
+*.css text
+*.json text
+*.md text
+*.xml text
+*.yml text
+
+*.png binary
+*.pdf binary
+
+# Development files, not in the Composer package
+/.github export-ignore
+/.qlty export-ignore
+/tests export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/phpcs.xml export-ignore
+/phpstan.neon export-ignore
+/docs/examples export-ignore
+/phpunit.xml.dist export-ignore

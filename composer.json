@@ -1,0 +1,36 @@
+{
+    "name": "pieceofcake2/security-dast",
+    "description": "Dynamic application security testing of a running CakePHP 2 application with the OWASP ZAP baseline scan, as a PDF report by alert and risk",
+    "type": "library",
+    "keywords": ["security", "dast", "owasp", "zap", "zaproxy", "cakephp", "cakephp2", "report", "pdf"],
+    "license": "MIT",
+    "homepage": "https://pieceofcake2.github.io/security-dast/",
+    "require": {
+        "php": ">=8.0",
+        "pieceofcake2/report": "^1.0.1"
+    },
+    "require-dev": {
+        "cakephp/cakephp-codesniffer": "^5.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "PieceOfCake2\\SecurityDast\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PieceOfCake2\\SecurityDast\\Test\\": "tests/TestCase/"
+        }
+    },
+    "bin": [
+        "bin/security-dast"
+    ],
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

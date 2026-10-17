@@ -1,0 +1,30 @@
+/* The risks of the alerts and the requests, added to the CSS of pieceofcake2/report */
+:root { --high: #b3261e; --medium: #c25e00; --low: #8a6d00; --info: #2f5f8a; }
+.badge.high { background: var(--high); } .badge.medium { background: var(--medium); }
+.badge.low { background: var(--low); } .badge.info { background: var(--info); }
+.t-high { color: var(--high); } .t-medium { color: var(--medium); } .t-low { color: var(--low); } .t-info { color: var(--info); }
+/* The number of requests in the last column of the list, and the longer labels of the tables of the pages */
+.list col.time { width: 22mm; }
+.meta th { width: 34mm; }
+.kv th { width: 36mm; }
+h4 { margin: 5mm 0 2mm; font-size: 9.5pt; }
+.text { margin: 0; font-size: 9pt; }
+.links { margin: 0; padding-left: 5mm; font-size: 8.5pt; }
+.links li { overflow-wrap: anywhere; }
+/* The requests of an alert: a card with the method and the URL, then the details. The method is centered on
+   the height of its capitals (text-box), not on the line box with the room of the descenders */
+.instances { margin-top: 1mm; }
+.instance { break-inside: avoid; margin-bottom: 2mm; border: 1pt solid var(--frame); }
+.instance .req { display: flex; align-items: flex-start; gap: 2.5mm; padding: 4px 7px 3px; line-height: 20px; background: var(--soft); }
+.instance .method { flex: none; min-width: 11mm; margin-top: 3px; padding: 4px 5px; border-radius: 2px; background: var(--ink); color: #fff; font: 700 6.5pt/1 "SF Mono", Menlo, "DejaVu Sans Mono", monospace; text-align: center; letter-spacing: 0.03em; text-box: trim-both cap alphabetic; }
+/* The common colors of the methods, as in Swagger UI */
+.method.get { background: #2f80c8; } .method.post { background: #2e9e6a; } .method.put { background: #d98a14; }
+.method.delete { background: #d33a3a; } .method.patch { background: #1e9c8c; } .method.head { background: #7b3fc4; }
+.method.options { background: #0d5aa7; }
+.instance .uri { min-width: 0; font-family: "SF Mono", Menlo, "DejaVu Sans Mono", monospace; font-size: 8pt; overflow-wrap: anywhere; }
+.instance .origin { color: var(--sub); }
+.instance .path { font-weight: 700; }
+.instance .detail { margin: 0; border: 0; border-top: 1px solid var(--line); font-size: 7.5pt; }
+.instance .detail th { width: 26mm; background: #fff; color: var(--sub); font-weight: 600; }
+.instance .detail td { border-right: 0; font-family: "SF Mono", Menlo, "DejaVu Sans Mono", monospace; }
+.instance-more { color: var(--sub); font-size: 8pt; }

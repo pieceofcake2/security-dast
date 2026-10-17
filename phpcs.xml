@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+    <config name="php_version" value="80000"/>
+
+    <arg value="ps"/>
+    <arg name="colors"/>
+    <arg name="parallel" value="16"/>
+    <arg name="extensions" value="php,security-dast"/>
+
+    <file>bin</file>
+    <file>resources</file>
+    <file>src</file>
+    <file>tests</file>
+
+    <!-- The fixture application is a page without the security headers, for the tests of the scan -->
+    <exclude-pattern>tests/fixtures/*</exclude-pattern>
+
+    <rule ref="CakePHP">
+        <!-- Exclude line length checks (consistent with the other pieceofcake2 packages) -->
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <rule ref="Generic.Formatting.MultipleStatementAlignment">
+        <properties>
+            <property name="maxPadding" value="1"/>
+        </properties>
+    </rule>
+
+    <!-- The template is a PHP file with HTML -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>resources/*</exclude-pattern>
+    </rule>
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>bin/*</exclude-pattern>
+    </rule>
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes.DeclareStrictTypesMissing">
+        <exclude-pattern>resources/*</exclude-pattern>
+        <exclude-pattern>tests/bootstrap.php</exclude-pattern>
+    </rule>
+
+    <rule ref="CakePHP.Commenting.FunctionComment.Missing">
+        <exclude-pattern>tests/TestCase/*</exclude-pattern>
+    </rule>
+
+    <!-- Require return type hints for tests/TestCase only -->
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint">
+        <include-pattern>tests/TestCase/*</include-pattern>
+    </rule>
+</ruleset>

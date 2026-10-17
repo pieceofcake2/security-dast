@@ -1,0 +1,239 @@
+<?php
+declare(strict_types=1);
+
+namespace PieceOfCake2\SecurityDast;
+
+use DateTimeImmutable;
+use DateTimeZone;
+use InvalidArgumentException;
+use PieceOfCake2\Report\Environment;
+use PieceOfCake2\Report\ReportWriter;
+use Throwable;
+
+/**
+ * The command `security-dast`: runs the application with PHP's built-in web server (or takes the URL of a running
+ * one), scans it with the baseline scan of OWASP ZAP and writes the PDF report.
+ *
+ * The exit code is 0 when no alert reaches `--fail-on`, 1 when one does, and 2 when the scan or the report fails.
+ */
+final class Command
+{
+    public const SUCCESS = 0;
+    public const FAILURE = 1;
+    public const ERROR = 2;
+
+    /**
+     * Constructor
+     *
+     * @param resource $stdout Output
+     * @param resource $stderr Error output
+     * @param \PieceOfCake2\SecurityDast\Zap|null $zap ZAP, default: with the settings
+     * @param \PieceOfCake2\Report\ReportWriter|null $writer Writer of the PDF
+     * @param \PieceOfCake2\Report\Environment|null $environment Environment, default: detected
+     */
+    public function __construct(
+        private $stdout = STDOUT,
+        private $stderr = STDERR,
+        private ?Zap $zap = null,
+        private ?ReportWriter $writer = null,
+        private ?Environment $environment = null,
+    ) {
+    }
+
+    /**
+     * Runs the command
+     *
+     * @param array<string> $argv Arguments, without the name of the command
+     * @param array<string, mixed> $env Environment variables, e.g. `$_SERVER`
+     * @return int Exit code
+     */
+    public function run(array $argv, array $env = []): int
+    {
+        try {
+            $config = self::config($argv, $env);
+        } catch (Throwable $e) {
+            fwrite($this->stderr, $e->getMessage() . "\n\n" . self::usage());
+
+            return self::ERROR;
+        }
+        if ($config === null) {
+            fwrite($this->stdout, self::usage());
+
+            return self::SUCCESS;
+        }
+
+        $server = null;
+        try {
+            $timezone = new DateTimeZone(date_default_timezone_get());
+            $startedAt = new DateTimeImmutable('now', $timezone);
+            $url = $config->url;
+            if ($url === null) {
+                $server = new WebServer($config->webroot(), $config->project, ['APP_ENV' => $config->appEnv]);
+                $url = $server->start();
+            }
+            $result = ($this->zap ?? $config->zap())->scan($url, $config->language);
+            $result->ignore($config->ignore);
+            $server?->stop();
+            $server = null;
+            $finishedAt = new DateTimeImmutable('now', $timezone);
+
+            $translator = ReportBuilder::translator($config->language, $config->localeDir);
+            $doc = (new ReportBuilder($translator))->build($result, $config, $this->environment ?? Environment::detect($config->project), $startedAt, $finishedAt);
+            ($this->writer ?? new ReportWriter())->write($doc, $config->pdf);
+        } catch (Throwable $e) {
+            $server?->stop();
+            fwrite($this->stderr, 'security-dast: ' . $e->getMessage() . "\n");
+
+            return self::ERROR;
+        }
+
+        $summary = [];
+        foreach ($result->counts() as $severity => $count) {
+            if ($count > 0) {
+                $summary[] = $count . ' ' . $severity;
+            }
+        }
+        fwrite($this->stdout, sprintf(
+            "%d alerts%s on %d URLs of %s (ZAP %s). Report: %s\n",
+            count($result->alerts),
+            $summary === [] ? '' : ' (' . implode(', ', $summary) . ')',
+            $result->urls(),
+            $result->target,
+            $result->version ?? '?',
+            $config->pdf,
+        ));
+
+        return $result->fails($config->failOn) ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * The settings of the arguments, the environment variables and the settings file, or null for `--help`
+     *
+     * @param array<string> $argv Arguments
+     * @param array<string, mixed> $env Environment variables
+     * @return \PieceOfCake2\SecurityDast\Config|null
+     * @throws \InvalidArgumentException When an argument is invalid
+     */
+    public static function config(array $argv, array $env = []): ?Config
+    {
+        $value = static function (string $name) use ($env): ?string {
+            $value = $env[$name] ?? null;
+
+            return is_scalar($value) && trim((string)$value) !== '' ? (string)$value : null;
+        };
+        $options = [
+            'pdf' => $value('SECURITY_DAST_PDF'),
+            'fail-on' => $value('SECURITY_DAST_FAIL_ON'),
+            'project' => null,
+            'url' => $value('SECURITY_DAST_URL'),
+            'webroot' => $value('SECURITY_DAST_WEBROOT'),
+            'app-env' => $value('SECURITY_DAST_APP_ENV'),
+            'image' => $value('SECURITY_DAST_IMAGE'),
+            'docker' => $value('SECURITY_DAST_DOCKER'),
+            'minutes' => $value('SECURITY_DAST_MINUTES'),
+            'ajax-spider' => $value('SECURITY_DAST_AJAX_SPIDER'),
+            'ignore' => $value('SECURITY_DAST_IGNORE'),
+            'zap-options' => $value('SECURITY_DAST_ZAP_OPTIONS'),
+            'language' => $value('SECURITY_REPORT_LANGUAGE'),
+            'locale-dir' => $value('SECURITY_REPORT_LOCALE_DIR'),
+            'title' => $value('SECURITY_DAST_TITLE'),
+            'project-name' => $value('SECURITY_REPORT_PROJECT'),
+            'note' => $value('SECURITY_DAST_NOTE'),
+        ];
+        $arguments = [];
+        foreach ($argv as $arg) {
+            if ($arg === '--help' || $arg === '-h') {
+                return null;
+            }
+            if (!preg_match('/\A--([a-z-]+)=(.*)\z/s', $arg, $matches) || (!array_key_exists($matches[1], $options) && $matches[1] !== 'settings')) {
+                throw new InvalidArgumentException(sprintf('Unknown option: %s', $arg));
+            }
+            $arguments[$matches[1]] = $matches[2];
+        }
+
+        // The options of the command, then the environment variables, then the settings file
+        $file = Settings::options((string)($arguments['project'] ?? '.'), 'dast', $arguments['settings'] ?? $value('SECURITY_SETTINGS'), 'security-dast.pdf');
+        foreach ($file as $name => $setting) {
+            if (!array_key_exists($name, $options) || $name === 'project') {
+                throw new InvalidArgumentException(sprintf('Unknown setting of the dast section: %s', $name));
+            }
+            $options[$name] ??= is_bool($setting) ? ($setting ? '1' : '0') : $setting;
+        }
+        unset($arguments['settings']);
+        $options = array_merge($options, $arguments);
+
+        $failOn = strtolower((string)($options['fail-on'] ?? Severity::HIGH));
+        if (!in_array($failOn, Config::THRESHOLDS, true)) {
+            throw new InvalidArgumentException(sprintf('--fail-on must be one of %s.', implode(', ', Config::THRESHOLDS)));
+        }
+        $minutes = filter_var($options['minutes'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($minutes === false) {
+            throw new InvalidArgumentException('--minutes must be a number of 1 or more.');
+        }
+        $url = $options['url'];
+        if ($url !== null && !preg_match('#\Ahttps?://#i', $url)) {
+            throw new InvalidArgumentException('--url must be an http or https URL.');
+        }
+
+        return new Config(
+            (string)($options['pdf'] ?? 'tmp/security-dast.pdf'),
+            $failOn,
+            (string)($options['project'] ?? '.'),
+            $url,
+            $options['webroot'],
+            (string)($options['app-env'] ?? 'test'),
+            (string)($options['image'] ?? Zap::IMAGE),
+            (string)($options['docker'] ?? 'docker'),
+            $minutes,
+            filter_var($options['ajax-spider'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            array_values(array_filter(array_map('trim', explode(',', (string)$options['ignore'])), static fn(string $id): bool => $id !== '')),
+            (string)($options['zap-options'] ?? ''),
+            (string)($options['language'] ?? 'en'),
+            $options['locale-dir'],
+            $options['title'],
+            $options['project-name'],
+            $options['note'],
+        );
+    }
+
+    /**
+     * The help of the command
+     *
+     * @return string
+     */
+    public static function usage(): string
+    {
+        return <<<'TEXT'
+Usage: vendor/bin/security-dast [options]
+
+Runs the application with PHP's built-in web server (or takes the URL of a running one), scans it with the
+baseline scan of OWASP ZAP (Docker), and writes a PDF report of the alerts by risk.
+
+Options:
+  --pdf=PATH             PDF report (SECURITY_DAST_PDF, default: tmp/security-dast.pdf)
+  --fail-on=RISK         Lowest risk that fails: high, medium, low, info or none
+                         (SECURITY_DAST_FAIL_ON, default: high)
+  --project=DIR          Directory of the project (default: the current directory)
+  --url=URL              URL of a running application to scan instead (SECURITY_DAST_URL)
+  --webroot=DIR          Document root of the built-in web server (SECURITY_DAST_WEBROOT,
+                         default: WWW_ROOT of config/define.php, or webroot or app/webroot)
+  --app-env=ENV          APP_ENV of the built-in web server (SECURITY_DAST_APP_ENV, default: test)
+  --image=IMAGE          Docker image of ZAP (SECURITY_DAST_IMAGE, default: ghcr.io/zaproxy/zaproxy:stable)
+  --docker=COMMAND       Docker command (SECURITY_DAST_DOCKER, default: docker)
+  --minutes=N            Minutes to crawl the site (SECURITY_DAST_MINUTES, default: 1)
+  --ajax-spider=1        Crawl with a browser too, for pages built by JavaScript (SECURITY_DAST_AJAX_SPIDER)
+  --ignore=LIST          Alert IDs to leave out of the report, comma separated, e.g. 10038 (SECURITY_DAST_IGNORE)
+  --zap-options=OPTIONS  More options of ZAP (SECURITY_DAST_ZAP_OPTIONS)
+  --language=LANG        en or ja (SECURITY_REPORT_LANGUAGE, default: en)
+  --locale-dir=DIR       Directory of <language>.json files (SECURITY_REPORT_LOCALE_DIR)
+  --title=TITLE          Title of the report (SECURITY_DAST_TITLE)
+  --project-name=NAME    Name of the project (SECURITY_REPORT_PROJECT, default: the name in composer.json)
+  --note=TEXT            Note on the cover (SECURITY_DAST_NOTE)
+  --settings=FILE        Settings file (SECURITY_SETTINGS, default: config/security.php or app/Config/security.php)
+  --help                 Show this help
+
+Exit code: 0 passed, 1 an alert reaches --fail-on, 2 error.
+
+TEXT;
+    }
+}

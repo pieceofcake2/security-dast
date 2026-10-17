@@ -1,0 +1,16 @@
+*.diff
+*.err
+*.orig
+*.rej
+*.swo
+*.swp
+*~
+.DS_Store
+.cache
+
+/composer.lock
+/vendor
+phpunit.xml
+.phpunit.result.cache
+.phpunit.cache
+/tmp
