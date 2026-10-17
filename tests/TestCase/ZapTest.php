@@ -96,7 +96,7 @@ class ZapTest extends TestCase
         $this->assertSame(self::TARGET . '/users/login', $context['authentication']['parameters']['loginPageUrl']);
         $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => 'secret']]], $context['users']);
         $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
-        $this->assertSame(['context' => 'app', 'user' => 'user', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
+        $this->assertSame(['context' => 'app', 'user' => 'user', 'policy' => 'Default Policy', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
         $this->assertSame('auth-report-json', $plan['jobs'][6]['parameters']['template']);
 
         // Without the crawl, for a scenario

@@ -100,6 +100,21 @@ class ReportBuilderTest extends TestCase
         $this->assertStringNotContainsString('secret', $html);
     }
 
+    public function testEndToEndTests(): void
+    {
+        $result = self::result();
+        $result->endToEndExitCode = 1;
+        $html = self::html($result, new Config(scan: 'full', endToEnd: 'vendor/bin/phpunit --testsuite EndToEnd'));
+
+        $this->assertStringContainsString('OWASP ZAP: check the requests and responses of the End-to-End tests, and attack them', $html);
+        $this->assertMatchesRegularExpression('#<th>End-to-End tests</th>\s*<td>\s*vendor/bin/phpunit --testsuite EndToEnd\s*<br><span class="warn">The tests failed \(exit code 1\)#', $html);
+
+        // Passed tests: no warning
+        $passed = self::result();
+        $passed->endToEndExitCode = 0;
+        $this->assertStringNotContainsString('class="warn"', self::html($passed, new Config(endToEnd: 'phpunit')));
+    }
+
     public function testNoAlert(): void
     {
         $html = self::html(new ScanResult([], ZapTest::URL, '2.17.0'), new Config(projectName: 'Acme', note: 'Staging'));

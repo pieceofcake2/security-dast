@@ -298,7 +298,9 @@ final class Zap
         }
         $jobs[] = ['type' => 'passiveScan-wait'];
         if ($this->scan === 'full') {
-            $jobs[] = ['type' => 'activeScan', 'parameters' => ['context' => 'app'] + $user + ['maxScanDurationInMins' => $this->scanMinutes]];
+            // The policy by its name: with the Japanese locale, the default policy of ZAP turns off many rules, e.g.
+            // those of XSS and SQL injection
+            $jobs[] = ['type' => 'activeScan', 'parameters' => ['context' => 'app'] + $user + ['policy' => 'Default Policy', 'maxScanDurationInMins' => $this->scanMinutes]];
             // The responses of the attacks
             $jobs[] = ['type' => 'passiveScan-wait'];
         }
