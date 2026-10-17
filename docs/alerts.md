@@ -115,8 +115,12 @@ The headers that tell the browser to limit what a page can do: which scripts it 
 another site may frame it (clickjacking), whether it may guess the type of a file, and which features and
 cross-origin resources it may use.
 
-Set them for every page of the application in `AppController::beforeFilter()`. The error pages (404, 500) get
-them too: `CakeErrorController` extends `AppController`.
+Set them in **one** place:
+
+- **In the web server** (recommended): every response gets them, also the files of `webroot/` and the errors of
+  the web server. See [Web Server Settings](web-server.md) for complete settings of nginx and Apache.
+- **In `AppController`**, when you cannot change the web server: every page of CakePHP gets them, the error pages
+  (404, 500) too, as `CakeErrorController` extends `AppController`; the files of `webroot/` do not.
 
 ```php
 // src/Controller/AppController.php (app/Controller/AppController.php)
@@ -138,18 +142,7 @@ public function beforeFilter()
 }
 ```
 
-The files of `webroot/` (CSS, JavaScript, images) are sent by the web server, not by CakePHP: set the headers
-there too, for all the responses. With Apache, in `webroot/.htaccess` (`mod_headers`):
-
-```apache
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set Cross-Origin-Resource-Policy "same-origin"
-</IfModule>
-```
-
-With nginx, in the `server` block: `add_header X-Content-Type-Options "nosniff" always;`. When the web
-server sets a header for all the responses, it can be left out of `AppController`.
+Not in both: a header sent twice, e.g. two `X-Frame-Options`, is invalid for some browsers.
 
 - **CSP**: `default-src 'self'` allows the scripts, styles and images of the application only. A page with
   inline scripts (`<script>...</script>`, `$this->Html->scriptBlock()`, `onclick="..."`) or files of other
@@ -197,8 +190,8 @@ pieceofcake2/security-sast.
   ]);
   ```
 
-  `CookieComponent` has no option for it; with Apache, add it to all the cookies:
-  `Header always edit Set-Cookie "^((?!.*;\s*SameSite=).*)$" "$1; SameSite=Lax"`.
+  `CookieComponent` has no option for it: add it in the web server, with `Header always edit Set-Cookie` of
+  Apache, or `proxy_cookie_flags` of nginx in front of another server ([Web Server Settings](web-server.md)).
 
 Do not set `session.cookie_httponly` or `session.cookie_secure` to false; pieceofcake2/security-sast checks
 this in the configuration (`cakephp2-config-session-cookie`). Check the cookies with `curl -sI` or in the
@@ -218,7 +211,8 @@ Disclosure" on many pages of the scan means that they failed with an error 500: 
 
 - `X-Powered-By: PHP/8.x` comes from PHP: set `expose_php = Off` in `php.ini` of production.
 - `Server: Apache/2.4.x (Ubuntu)` comes from the web server: `ServerTokens Prod` (Apache) or
-  `server_tokens off;` (nginx).
+  `server_tokens off;` (nginx). With PHP-FPM behind nginx, `fastcgi_hide_header X-Powered-By;` hides the version
+  of PHP too ([Web Server Settings](web-server.md)).
 
 The built-in web server of the scan sends `X-Powered-By` with the `php.ini` of the machine of CI, so this alert
 may show there and not in production: check the headers of production, or ignore it in the scan with

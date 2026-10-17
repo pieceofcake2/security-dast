@@ -116,8 +116,12 @@ pieceofcake2/security-sast のルール
 入れてよいか (クリックジャッキング)、ファイルの種類を推測してよいか、使ってよい機能やほかのオリジンのリソースを
 指定します。
 
-アプリケーションのすべてのページに、`AppController::beforeFilter()` で付けます。エラーページ (404、500) にも付きます。
-`CakeErrorController` は `AppController` を継承しているからです。
+**1 か所だけ**で付けてください。
+
+- **Web サーバーで** (推奨): `webroot/` のファイルや Web サーバー自体のエラーも含め、すべてのレスポンスに付きます。
+  nginx と Apache の完全な設定は [Web サーバーの設定](web-server.md) をご覧ください。
+- **`AppController` で**: Web サーバーを変えられないときです。CakePHP のすべてのページに付き、エラーページ (404、500)
+  にも付きます (`CakeErrorController` は `AppController` を継承しています)。`webroot/` のファイルには付きません。
 
 ```php
 // src/Controller/AppController.php (app/Controller/AppController.php)
@@ -139,18 +143,8 @@ public function beforeFilter()
 }
 ```
 
-`webroot/` のファイル (CSS、JavaScript、画像) は CakePHP ではなく Web サーバーが返します。そちらでも、すべての
-レスポンスにヘッダーを付けてください。Apache では `webroot/.htaccess` に書きます (`mod_headers`)。
-
-```apache
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set Cross-Origin-Resource-Policy "same-origin"
-</IfModule>
-```
-
-nginx では `server` ブロックに `add_header X-Content-Type-Options "nosniff" always;` と書きます。Web サーバーが
-すべてのレスポンスに付けるヘッダーは、`AppController` から省けます。
+両方では付けないでください。`X-Frame-Options` が 2 つになるなど、2 回送ったヘッダーは、ブラウザによっては無効に
+なります。
 
 - **CSP**: `default-src 'self'` は、アプリケーション自身のスクリプト、スタイル、画像だけを許します。インラインの
   スクリプト (`<script>...</script>`、`$this->Html->scriptBlock()`、`onclick="..."`) やほかのサイトのファイルを使う
@@ -198,8 +192,8 @@ ZAP が指摘するのは、HTML で書いたフォーム (`<form method="post">
   ]);
   ```
 
-  `CookieComponent` にはこのオプションがありません。Apache なら、すべての Cookie に付けられます。
-  `Header always edit Set-Cookie "^((?!.*;\s*SameSite=).*)$" "$1; SameSite=Lax"`
+  `CookieComponent` にはこのオプションがありません。Web サーバーで付けます。Apache の `Header always edit Set-Cookie`
+  か、ほかのサーバーの前に置いた nginx の `proxy_cookie_flags` です ([Web サーバーの設定](web-server.md))。
 
 `session.cookie_httponly` や `session.cookie_secure` を false にしないでください。pieceofcake2/security-sast が設定で
 検査します (`cakephp2-config-session-cookie`)。Cookie は `curl -sI` か開発者ツールで確かめます。セッションの各
@@ -219,7 +213,8 @@ ZAP が指摘するのは、HTML で書いたフォーム (`<form method="post">
 
 - `X-Powered-By: PHP/8.x` は PHP が付けます。本番の `php.ini` で `expose_php = Off` にします。
 - `Server: Apache/2.4.x (Ubuntu)` は Web サーバーが付けます。`ServerTokens Prod` (Apache) か `server_tokens off;`
-  (nginx) にします。
+  (nginx) にします。nginx の後ろの PHP-FPM では、`fastcgi_hide_header X-Powered-By;` で PHP のバージョンも隠せます
+  ([Web サーバーの設定](web-server.md))。
 
 スキャンの組み込みウェブサーバーは CI のマシンの `php.ini` で動くので、本番では出ないのにスキャンでは `X-Powered-By`
 が出ることがあります。本番のヘッダーを確かめ、本番を設定したならスキャンでは `--ignore=10037` で除外してください。

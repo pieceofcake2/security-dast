@@ -11,6 +11,7 @@ alert reaches a risk.
 - [Configuration](configuration.md): the options, the environment variables and the settings file
 - [The Report](report.md): reading it, and ignoring an alert
 - [Alerts](alerts.md): what each alert means, and how to fix it in a CakePHP 2 application
+- [Web Server Settings](web-server.md): complete settings of nginx and Apache for the security headers
 - [CI with GitHub Actions](ci.md)
 - [Troubleshooting](troubleshooting.md)
 
