@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.0.0
 
 - First release: `vendor/bin/security-dast` runs a CakePHP 2 application with PHP's built-in web server
   (`APP_ENV=test`, the document root of the application) or takes the URL of a running one, scans it with the
