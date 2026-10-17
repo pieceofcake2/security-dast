@@ -42,6 +42,11 @@ final class Zap
     public const CSRF_TOKENS = ['data[_Token][key]'];
 
     /**
+     * The names of the session cookies, the default of CakePHP
+     */
+    public const SESSION_COOKIES = ['CAKEPHP'];
+
+    /**
      * The fields of the forms of SecurityComponent that the active scan leaves alone: their values are checked by
      * the hash of data[_Token][fields], so an attack on them is only black-holed
      */
@@ -137,6 +142,10 @@ final class Zap
             $proxy = $daemon->start();
             $target = $this->targetFromContainer($url);
             $scenario($proxy, $target);
+            if ($this->login === null) {
+                // As a user, ZAP keeps the session of its own login
+                $daemon->useLastSession($target);
+            }
             $daemon->runPlan($this->plan($target, false));
 
             return $this->reports($dir, $url, $target);

@@ -68,7 +68,13 @@ class ZapDaemonTest extends TestCase
 
     public function testRunPlanWithoutId(): void
     {
-        $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static fn(string $url): string => str_contains($url, 'version') ? '{"version":"2.17.0"}' : 'Internal error');
+        $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url): string {
+            if (str_contains($url, 'version')) {
+                return '{"version":"2.17.0"}';
+            }
+
+            return str_contains($url, 'httpSessions') ? '{"Result":"OK"}' : 'Internal error';
+        });
         $daemon->start();
 
         $this->expectException(RuntimeException::class);
@@ -90,6 +96,28 @@ class ZapDaemonTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('The plan of ZAP did not finish in 0 seconds.');
         $daemon->runPlan(['jobs' => []], 0);
+    }
+
+    public function testUseLastSession(): void
+    {
+        $urls = [];
+        $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url) use (&$urls): string {
+            $urls[] = urldecode((string)preg_replace('/apikey=[0-9a-f]+&?/', '', substr($url, strlen('http://127.0.0.1:8090/JSON/'))));
+            if (str_contains($url, 'version')) {
+                return '{"version":"2.17.0"}';
+            }
+
+            return str_contains($url, 'view/sessions') ? '{"sessions":[{"session":["Session 0",{}]},{"session":["Session 1",{}]}]}' : '{"Result":"OK"}';
+        });
+        $daemon->start();
+        $daemon->useLastSession('http://host.docker.internal:8123/');
+
+        $this->assertSame([
+            'core/view/version/?',
+            'httpSessions/action/addDefaultSessionToken/?sessionToken=CAKEPHP',
+            'httpSessions/view/sessions/?site=host.docker.internal:8123',
+            'httpSessions/action/setActiveSession/?site=host.docker.internal:8123&session=Session 1',
+        ], $urls);
     }
 
     public function testStartFailed(): void

@@ -199,9 +199,10 @@ use relative URLs in them (`$client->request('GET', '/contacts/add')`), so that 
 output goes to the error output of the command. When they fail, the scan goes on with the requests made until
 then, and the cover of the report says so. With `--login-url`, the attacks of the full scan run as that user.
 
-A limit to know: on the forms of `SecurityComponent` recorded from the browser of the tests, `SecurityComponent`
-may reject the attacks of the full scan, so these forms can be checked less than with the crawl. Check the
-views of these forms with [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) too.
+On the forms of `SecurityComponent`, ZAP gets a new token for each of its attacks, in the session of the tests,
+so that the attacks are not rejected. Still, the active scan is bounded by `--scan-minutes` and does not reach
+every parameter in a long scenario, so a full scan finds many vulnerabilities, not all: check the views with
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) too.
 
 
 ## The Report

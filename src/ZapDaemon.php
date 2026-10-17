@@ -83,6 +83,10 @@ final class ZapDaemon
         $deadline = microtime(true) + $timeout;
         while (microtime(true) < $deadline) {
             if (str_contains((string)($this->get)($this->api('core/view/version')), '"version"')) {
+                foreach (Zap::SESSION_COOKIES as $name) {
+                    $this->call('httpSessions/action/addDefaultSessionToken', ['sessionToken' => $name]);
+                }
+
                 return $this->proxy();
             }
             usleep(500000);
@@ -168,6 +172,28 @@ final class ZapDaemon
             usleep(2000000);
         }
         throw new RuntimeException(sprintf('The plan of ZAP did not finish in %d seconds.', $timeout));
+    }
+
+    /**
+     * Makes the last session of a site the one of the requests of ZAP, e.g. of its attacks: ZAP gets the new CSRF
+     * token of an attack from the page that had it, and the token must be of the session of the attack, where
+     * SecurityComponent keeps its tokens. The page may have been the first of the scenario, without a session cookie
+     * yet.
+     *
+     * @param string $site URL of the site
+     * @return void
+     */
+    public function useLastSession(string $site): void
+    {
+        $host = (string)parse_url($site, PHP_URL_HOST);
+        $port = parse_url($site, PHP_URL_PORT);
+        $host .= ':' . ($port ?? (str_starts_with($site, 'https:') ? 443 : 80));
+        $sessions = $this->call('httpSessions/view/sessions', ['site' => $host])['sessions'] ?? [];
+        $last = is_array($sessions) && $sessions !== [] ? end($sessions) : null;
+        $name = is_array($last) ? ($last['session'][0] ?? null) : null;
+        if (is_string($name)) {
+            $this->call('httpSessions/action/setActiveSession', ['site' => $host, 'session' => $name]);
+        }
     }
 
     /**
