@@ -54,7 +54,7 @@ class ZapDaemonTest extends TestCase
             $commands[] = implode(' ', array_slice($command, 0, 3));
 
             return [0, "id\n", ''];
-        }, get: static fn(string $url): string|false => false);
+        }, get: static fn(string $url) => false);
 
         try {
             $daemon->start(0);
@@ -74,6 +74,22 @@ class ZapDaemonTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('ZAP did not answer automation/action/runPlan: Internal error');
         $daemon->runPlan(['jobs' => []]);
+    }
+
+    public function testRunPlanTimeout(): void
+    {
+        $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url): string {
+            if (str_contains($url, 'version')) {
+                return '{"version":"2.17.0"}';
+            }
+
+            return str_contains($url, 'runPlan') ? '{"planId":"2"}' : '{"finished":""}';
+        });
+        $daemon->start();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The plan of ZAP did not finish in 0 seconds.');
+        $daemon->runPlan(['jobs' => []], 0);
     }
 
     public function testStartFailed(): void

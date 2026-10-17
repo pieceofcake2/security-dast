@@ -147,6 +147,29 @@ class ZapTest extends TestCase
         $this->assertSame(self::URL . '/login', $result->alerts[0]->instances[0]['uri']);
     }
 
+    public function testScanScenarioWithoutReport(): void
+    {
+        $daemon = static fn(string $dir, array $options): ZapDaemon => new ZapDaemon($dir, $options, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url): string {
+            if (str_contains($url, 'version')) {
+                return '{"version":"2.17.0"}';
+            }
+
+            return str_contains($url, 'runPlan') ? '{"planId":"0"}' : '{"finished":"2026-10-17T10:00:00Z","error":[]}';
+        });
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('ZAP wrote no report.');
+        (new Zap(os: 'Darwin'))->scanScenario(self::URL, static function (string $proxy, string $site): void {
+        }, 'en', $daemon);
+    }
+
+    public function testLoggedIn(): void
+    {
+        $this->assertTrue(Zap::loggedIn((array)json_decode((string)file_get_contents(self::FIXTURES . DS . 'zap-auth.json'), true)));
+        $this->assertFalse(Zap::loggedIn((array)json_decode((string)file_get_contents(self::FIXTURES . DS . 'zap-auth-failed.json'), true)));
+        $this->assertFalse(Zap::loggedIn([]));
+    }
+
     public function testLogin(): void
     {
         $plans = [];
@@ -283,5 +306,18 @@ class ZapTest extends TestCase
         $this->assertSame('test@example.com', $result->user);
         $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
         $this->assertNotEmpty(preg_grep('#/account#', $uris));
+
+        // A scenario through the proxy of ZAP: the page that it opens is checked
+        $server = new WebServer(self::FIXTURES . DS . 'app' . DS . 'webroot', self::FIXTURES . DS . 'app');
+        try {
+            $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site): void {
+                $context = stream_context_create(['http' => ['proxy' => str_replace('http://', 'tcp://', $proxy), 'request_fulluri' => true, 'ignore_errors' => true]]);
+                file_get_contents($site . '/login', false, $context);
+            });
+        } finally {
+            $server->stop();
+        }
+        $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
+        $this->assertNotEmpty(preg_grep('#/login#', $uris));
     }
 }
