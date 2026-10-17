@@ -1,0 +1,67 @@
+# .github/workflows/security-dast-full.yml: the full scan of OWASP ZAP on the End-to-End tests, every night,
+# as a user of the test database
+name: Security (DAST, full)
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cakephp_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      # The test database of the application (APP_ENV=test), as for the tests
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8mb4
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql
+          coverage: none
+
+      - run: composer install --no-interaction --no-progress
+
+      # Load the tables of the test database here, as your tests or your deployment do, then the user of the
+      # scan (see docs/login.md of pieceofcake2/security-dast)
+
+      # The chromedriver of the End-to-End tests, and Japanese fonts for a Japanese report
+      - run: vendor/bin/bdi detect drivers
+      - run: sudo apt-get install -y fonts-noto-cjk
+
+      - name: Scan the End-to-End tests with attacks
+        env:
+          SECURITY_DAST_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+        run: >-
+          vendor/bin/security-dast --scan=full --scan-minutes=30
+          --end-to-end="vendor/bin/phpunit --testsuite EndToEnd"
+          --login-url=/users/login --username=test@example.com
+          --image=ghcr.io/zaproxy/zaproxy:2.17.0
+          --pdf=tmp/security-dast-full.pdf --fail-on=high --language=ja
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: tmp/security-dast-full.pdf
+          archive: false
+          retention-days: 30

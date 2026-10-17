@@ -1,13 +1,29 @@
 # アラート
 
-CakePHP 2 アプリケーションで、ZAP のベースラインスキャンがよく出すアラートと、その意味、直し方です。報告書の各ページ
+CakePHP 2 アプリケーションで、ZAP がベースラインスキャンとフルスキャンでよく出すアラートと、その意味、修正方法です。報告書の各ページ
 にも ZAP の説明と対策があり、[zaproxy.org](https://www.zaproxy.org/docs/alerts/) のアラートのページへのリンクが
 あります。
 
-ほとんどのアラートは、アプリケーション全体に一度で直せます。セキュリティヘッダーは `AppController` と Web サーバーで、
-Cookie は `config/core.php` で、エラーページはデバッグレベルで直します。
+ほとんどのアラートは、アプリケーション全体に一度で修正できます。セキュリティヘッダーは `AppController` と Web サーバーで、
+Cookie は `config/core.php` で、エラーページはデバッグレベルで修正します。フルスキャンのアラート (XSS、SQL
+インジェクションなど) は、そのページのコードで修正します。同じ箇所は
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/rules) のルールでも見つけられ、そちらに
+さらに多くの修正方法があります。
 
-| アラート ID | アラート | リスク | 直し方 |
+## 修正できたことを確かめる
+
+1. レスポンスを自分で見ます。たとえば、ページのヘッダーと Cookie です。
+
+   ```bash
+   curl -sI https://staging.example.com/ | grep -iE 'content-security|x-frame|x-content-type|set-cookie|x-powered'
+   ```
+
+   ブラウザの開発者ツール (Network でリクエストのヘッダー、Application で Cookie) でも同じものが見られます。
+2. もう一度スキャンします。報告書からそのアラートが消えます。
+3. 本番も確かめます。ステージングや本番に `--url` でベースラインスキャンをします。本番の Web サーバー、プロキシ、PHP は、
+   スキャンのものとは違います。
+
+| アラート ID | アラート | リスク | 修正方法 |
 | --- | --- | --- | --- |
 | 40012、40014、40026 | クロスサイトスクリプティング (反射型、持続型、DOM ベース) | 高 | [XSS](#xss) (フルスキャン) |
 | 40018、40019、40020、40021、40022、40024 | SQL インジェクション | 高 | [SQL インジェクション](#sql-インジェクション) (フルスキャン) |
@@ -47,7 +63,7 @@ Cookie は `config/core.php` で、エラーページはデバッグレベルで
 <!-- 見つかる書き方 -->
 <p>Sent: <?php echo $message; ?></p>
 
-<!-- 直し方 -->
+<!-- 修正方法 -->
 <p>Sent: <?= h($message) ?></p>
 ```
 
@@ -65,7 +81,7 @@ Content Security Policy ([セキュリティヘッダー](#セキュリティヘ
 // 見つかる書き方
 $this->Post->query("SELECT * FROM posts WHERE title LIKE '%" . $q . "%'");
 
-// 直し方
+// 修正方法
 $this->Post->find('all', ['conditions' => ['Post.title LIKE' => '%' . $q . '%']]);
 $this->Post->query('SELECT * FROM posts WHERE title LIKE ?', ['%' . $q . '%']);
 ```
@@ -139,8 +155,12 @@ nginx では `server` ブロックに `add_header X-Content-Type-Options "nosnif
 - **CSP**: `default-src 'self'` は、アプリケーション自身のスクリプト、スタイル、画像だけを許します。インラインの
   スクリプト (`<script>...</script>`、`$this->Html->scriptBlock()`、`onclick="..."`) やほかのサイトのファイルを使う
   ページでは、足りません。スクリプトを `webroot/js/` のファイルに移すか、`script-src 'self' https://cdn.example.com`
-  のようにサイトをポリシーに足してください。ポリシーは、まず `Content-Security-Policy-Report-Only` で試せます。
-  ブラウザのコンソールに報告するだけで、何もブロックしません。
+  のようにサイトをポリシーに足してください。ポリシーは段階的に導入します。
+  1. `Content-Security-Policy-Report-Only` で送ります。何もブロックせず、ブロックするはずのものをブラウザの
+     コンソールに出します。
+  2. ページを一通り開き (End-to-End テストが開きます)、インラインのスクリプトとスタイルをファイルに移すか、ページに
+     必要なサイトを足します。
+  3. コンソールに何も出なくなったら、`Content-Security-Policy` で送ります。
 - **Cross-Origin-Embedder-Policy** (`require-corp`) は、許可していないほかのサイトの画像やスクリプトをブロックします。
   そうしたリソースを使わないページでだけ付けてください。このアラートのリスクは低です。
 - **Strict-Transport-Security** は HTTPS のときだけ付けます。ブラウザは `max-age` 秒のあいだ覚えているので、先に
@@ -182,7 +202,8 @@ ZAP が指摘するのは、HTML で書いたフォーム (`<form method="post">
   `Header always edit Set-Cookie "^((?!.*;\s*SameSite=).*)$" "$1; SameSite=Lax"`
 
 `session.cookie_httponly` や `session.cookie_secure` を false にしないでください。pieceofcake2/security-sast が設定で
-検査します (`cakephp2-config-session-cookie`)。
+検査します (`cakephp2-config-session-cookie`)。Cookie は `curl -sI` か開発者ツールで確かめます。セッションの各
+`Set-Cookie` に、`HttpOnly`、`Secure` (HTTPS のとき)、`SameSite=Lax` が付いています。
 
 ## エラーページ
 
@@ -226,7 +247,7 @@ echo $this->Html->script('https://cdn.example.com/lib.min.js', [
 
 ## 情報
 
-次のアラートは情報で、ほとんどのアプリケーションで直す必要はありません。
+次のアラートは情報で、ほとんどのアプリケーションで修正する必要はありません。
 
 - **モダン Web アプリケーション**: ページが JavaScript を使っています。`--ajax-spider=1` でそのリンクもクロールします。
 - **認証リクエストの特定**: ZAP がログインフォームを見つけました。
