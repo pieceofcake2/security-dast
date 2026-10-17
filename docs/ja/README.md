@@ -11,6 +11,7 @@ CakePHP 2 アプリケーションの動的アプリケーションセキュリ�
 - [設定](configuration.md): オプション、環境変数、設定ファイル
 - [報告書](report.md): 読み方と、アラートの除外
 - [アラート](alerts.md): 各アラートの意味と、CakePHP 2 アプリケーションでの修正方法
+- [Web サーバーの設定](web-server.md): セキュリティヘッダーのための nginx と Apache の完全な設定
 - [GitHub Actions での CI](ci.md)
 - [トラブルシューティング](troubleshooting.md)
 
