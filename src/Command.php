@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PieceOfCake2\SecurityDast;
 
+use Closure;
 use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
@@ -30,6 +31,8 @@ final class Command
      * @param \PieceOfCake2\SecurityDast\Zap|null $zap ZAP, default: with the settings
      * @param \PieceOfCake2\Report\ReportWriter|null $writer Writer of the PDF
      * @param \PieceOfCake2\Report\Environment|null $environment Environment, default: detected
+     * @param (\Closure(string, array<string>): \PieceOfCake2\SecurityDast\ZapDaemon)|null $daemon Creates the ZAP of
+     *  the End-to-End tests
      */
     public function __construct(
         private $stdout = STDOUT,
@@ -37,6 +40,7 @@ final class Command
         private ?Zap $zap = null,
         private ?ReportWriter $writer = null,
         private ?Environment $environment = null,
+        private ?Closure $daemon = null,
     ) {
     }
 
@@ -71,7 +75,19 @@ final class Command
                 $server = new WebServer($config->webroot(), $config->project, ['APP_ENV' => $config->appEnv]);
                 $url = $server->start();
             }
-            $result = ($this->zap ?? $config->zap())->scan($url, $config->language);
+            $zap = $this->zap ?? $config->zap();
+            if ($config->endToEnd !== null) {
+                // The output of the tests goes to the error output, so that the output stays the summary
+                $tests = new EndToEndTests($config->endToEnd, $config->project, ['APP_ENV' => $config->appEnv]);
+                $exitCode = null;
+                $stderr = $this->stderr;
+                $result = $zap->scanScenario($url, static function (string $proxy, string $site) use ($tests, &$exitCode, $stderr): void {
+                    $exitCode = $tests->run($proxy, $site, $stderr);
+                }, $config->language, $this->daemon);
+                $result->endToEndExitCode = $exitCode;
+            } else {
+                $result = $zap->scan($url, $config->language);
+            }
             $result->ignore($config->ignore);
             $server?->stop();
             $server = null;
@@ -133,6 +149,7 @@ final class Command
             'docker' => $value('SECURITY_DAST_DOCKER'),
             'minutes' => $value('SECURITY_DAST_MINUTES'),
             'ajax-spider' => $value('SECURITY_DAST_AJAX_SPIDER'),
+            'end-to-end' => $value('SECURITY_DAST_END_TO_END'),
             'scan' => $value('SECURITY_DAST_SCAN'),
             'scan-minutes' => $value('SECURITY_DAST_SCAN_MINUTES'),
             'login-url' => $value('SECURITY_DAST_LOGIN_URL'),
@@ -202,6 +219,7 @@ final class Command
             docker: (string)($options['docker'] ?? 'docker'),
             minutes: $minutes,
             ajaxSpider: filter_var($options['ajax-spider'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            endToEnd: $options['end-to-end'],
             scan: $scan,
             scanMinutes: $scanMinutes,
             loginUrl: $options['login-url'],
@@ -242,6 +260,8 @@ Options:
   --app-env=ENV          APP_ENV of the built-in web server (SECURITY_DAST_APP_ENV, default: test)
   --image=IMAGE          Docker image of ZAP (SECURITY_DAST_IMAGE, default: ghcr.io/zaproxy/zaproxy:stable)
   --docker=COMMAND       Docker command (SECURITY_DAST_DOCKER, default: docker)
+  --end-to-end=COMMAND   End-to-End tests to scan as the scenario, instead of the crawl, e.g.
+                         "vendor/bin/phpunit --testsuite EndToEnd" (pieceofcake2/panther) (SECURITY_DAST_END_TO_END)
   --scan=SCAN            baseline (crawl and check the responses) or full (attack the pages too: on a test
                          environment only) (SECURITY_DAST_SCAN, default: baseline)
   --scan-minutes=N       Most minutes of the attacks of the full scan (SECURITY_DAST_SCAN_MINUTES, default: 10)

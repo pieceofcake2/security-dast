@@ -42,6 +42,12 @@ final class Zap
     public const CSRF_TOKENS = ['data[_Token][key]'];
 
     /**
+     * The fields of the forms of SecurityComponent that the active scan leaves alone: their values are checked by
+     * the hash of data[_Token][fields], so an attack on them is only black-holed
+     */
+    public const LOCKED_FIELDS = ['_method', 'data[_Token][fields]', 'data[_Token][unlocked]', 'data[_Token][debug]'];
+
+    /**
      * The locales of ZAP for the languages of the report
      */
     public const LOCALES = ['ja' => 'ja_JP'];
@@ -92,35 +98,107 @@ final class Zap
      */
     public function scan(string $url, string $language = 'en'): ScanResult
     {
-        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'security-dast-' . bin2hex(random_bytes(6));
-        mkdir($dir, 0777, true);
-        // ZAP runs as the user zap of the image
-        chmod($dir, 0777);
+        $dir = self::workDir();
         try {
             $target = $this->targetFromContainer($url);
             // JSON is YAML too
             file_put_contents($dir . DIRECTORY_SEPARATOR . 'plan.yaml', json_encode($this->plan($target), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
             [$code, $output, $error] = ($this->run)($this->command($dir, $language), $dir);
-            $report = $dir . DIRECTORY_SEPARATOR . 'zap.json';
-            if (!is_file($report)) {
+            if (!is_file($dir . DIRECTORY_SEPARATOR . 'zap.json')) {
                 throw new RuntimeException(sprintf('ZAP failed (exit code %d): %s', $code, self::tail($output . "\n" . $error)));
             }
-            $result = self::result(self::json($report), $url, $target);
-            if ($this->login !== null) {
-                $auth = $dir . DIRECTORY_SEPARATOR . 'auth.json';
-                if (!self::loggedIn(is_file($auth) ? self::json($auth) : [])) {
-                    throw new RuntimeException(sprintf('ZAP could not log in as %s on %s: check the user name, the password, and that the user is in the database of the application.', $this->login->username, $this->login->urlOn($url)));
-                }
-                $result->user = $this->login->username;
-            }
 
-            return $result;
+            return $this->reports($dir, $url, $target);
         } finally {
-            foreach (glob($dir . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
-                unlink($file);
-            }
-            rmdir($dir);
+            self::removeDir($dir);
         }
+    }
+
+    /**
+     * Scans what a scenario does on a site, e.g. End-to-End tests: ZAP runs as a proxy while the scenario runs, then
+     * checks (and attacks, for the full scan) the requests that it recorded
+     *
+     * @param string $url URL of the site, e.g. `http://127.0.0.1:8123`
+     * @param \Closure(string, string): void $scenario Runs the scenario with the URL of the proxy, and the URL of the
+     *  site to use through it
+     * @param string $language Language of the alerts
+     * @param \Closure(string, array<string>): \PieceOfCake2\SecurityDast\ZapDaemon|null $daemon Creates the daemon
+     *  with the directory of the plan and the options of ZAP
+     * @return \PieceOfCake2\SecurityDast\ScanResult
+     * @throws \RuntimeException When ZAP fails, or cannot log in
+     */
+    public function scanScenario(string $url, Closure $scenario, string $language = 'en', ?Closure $daemon = null): ScanResult
+    {
+        $dir = self::workDir();
+        $daemon = $daemon !== null
+            ? $daemon($dir, $this->zapOptions($language))
+            : new ZapDaemon($dir, $this->zapOptions($language), $this->image, $this->docker, $this->os, run: $this->run);
+        try {
+            $proxy = $daemon->start();
+            $target = $this->targetFromContainer($url);
+            $scenario($proxy, $target);
+            $daemon->runPlan($this->plan($target, false));
+
+            return $this->reports($dir, $url, $target);
+        } finally {
+            $daemon->stop();
+            self::removeDir($dir);
+        }
+    }
+
+    /**
+     * The result of the reports of ZAP in a directory
+     *
+     * @param string $dir Directory of the reports
+     * @param string $url URL of the site as given
+     * @param string $target URL of the site from the container
+     * @return \PieceOfCake2\SecurityDast\ScanResult
+     * @throws \RuntimeException When there is no report, or ZAP could not log in
+     */
+    private function reports(string $dir, string $url, string $target): ScanResult
+    {
+        $report = $dir . DIRECTORY_SEPARATOR . 'zap.json';
+        if (!is_file($report)) {
+            throw new RuntimeException('ZAP wrote no report.');
+        }
+        $result = self::result(self::json($report), $url, $target);
+        if ($this->login !== null) {
+            $auth = $dir . DIRECTORY_SEPARATOR . 'auth.json';
+            if (!self::loggedIn(is_file($auth) ? self::json($auth) : [])) {
+                throw new RuntimeException(sprintf('ZAP could not log in as %s on %s: check the user name, the password, and that the user is in the database of the application.', $this->login->username, $this->login->urlOn($url)));
+            }
+            $result->user = $this->login->username;
+        }
+
+        return $result;
+    }
+
+    /**
+     * A new directory for the plan and the reports, that ZAP (the user zap of the image) can write
+     *
+     * @return string
+     */
+    private static function workDir(): string
+    {
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'security-dast-' . bin2hex(random_bytes(6));
+        mkdir($dir, 0777, true);
+        chmod($dir, 0777);
+
+        return $dir;
+    }
+
+    /**
+     * Removes a directory of `workDir()`
+     *
+     * @param string $dir Directory
+     * @return void
+     */
+    private static function removeDir(string $dir): void
+    {
+        foreach (glob($dir . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
+            unlink($file);
+        }
+        rmdir($dir);
     }
 
     /**
@@ -137,30 +215,51 @@ final class Zap
             $command[] = '--network';
             $command[] = 'host';
         }
-        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml');
+        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...$this->zapOptions($language));
+
+        return $command;
+    }
+
+    /**
+     * The options of ZAP: the CSRF tokens of CakePHP, the locale, and the options given
+     *
+     * @param string $language Language of the alerts
+     * @return array<string>
+     */
+    public function zapOptions(string $language = 'en'): array
+    {
+        // Only the whole names: _token of the names of ZAP would match data[_Token][fields] and
+        // data[_Token][unlocked] of SecurityComponent too, which are not new in each form, so ZAP would not get a new
+        // data[_Token][key] for its attacks, and SecurityComponent would black-hole them
+        $options = ['-config', 'anticsrf.partialMatchingEnabled=false'];
         foreach (self::CSRF_TOKENS as $i => $name) {
             // After the tokens that ZAP knows
-            array_push($command, '-config', sprintf('anticsrf.tokens.token(%d).name=%s', 100 + $i, $name), '-config', sprintf('anticsrf.tokens.token(%d).enabled=true', 100 + $i));
+            array_push($options, '-config', sprintf('anticsrf.tokens.token(%d).name=%s', 100 + $i, $name), '-config', sprintf('anticsrf.tokens.token(%d).enabled=true', 100 + $i));
+        }
+        array_push($options, '-config', 'scanner.excludeAntiCsrfTokens=true');
+        foreach (self::LOCKED_FIELDS as $i => $name) {
+            array_push($options, '-config', sprintf('scanner.excludedParameters(%d).name=%s', $i, $name), '-config', sprintf('scanner.excludedParameters(%d).type=-1', $i));
         }
         if (isset(self::LOCALES[$language])) {
-            array_push($command, '-config', 'view.locale=' . self::LOCALES[$language]);
+            array_push($options, '-config', 'view.locale=' . self::LOCALES[$language]);
         }
         foreach (preg_split('/\s+/', trim($this->options)) ?: [] as $option) {
             if ($option !== '') {
-                $command[] = $option;
+                $options[] = $option;
             }
         }
 
-        return $command;
+        return $options;
     }
 
     /**
      * The plan of the Automation Framework of ZAP
      *
      * @param string $target URL of the site from the container
+     * @param bool $crawl Whether to crawl the site, or only check what ZAP recorded
      * @return array<string, mixed>
      */
-    public function plan(string $target): array
+    public function plan(string $target, bool $crawl = true): array
     {
         $target = rtrim($target, '/');
         $context = [
@@ -181,13 +280,18 @@ final class Zap
             $user = ['user' => 'user'];
         }
 
-        $jobs = [['type' => 'spider', 'parameters' => ['context' => 'app'] + $user + ['maxDuration' => $this->minutes]]];
-        if ($this->ajaxSpider) {
+        $jobs = [];
+        if ($crawl) {
+            $jobs[] = ['type' => 'spider', 'parameters' => ['context' => 'app'] + $user + ['maxDuration' => $this->minutes]];
+        }
+        if ($crawl && $this->ajaxSpider) {
             $jobs[] = ['type' => 'spiderAjax', 'parameters' => ['context' => 'app'] + $user + ['maxDuration' => $this->minutes, 'browserId' => 'firefox-headless']];
         }
         $jobs[] = ['type' => 'passiveScan-wait'];
         if ($this->scan === 'full') {
             $jobs[] = ['type' => 'activeScan', 'parameters' => ['context' => 'app'] + $user + ['maxScanDurationInMins' => $this->scanMinutes]];
+            // The responses of the attacks
+            $jobs[] = ['type' => 'passiveScan-wait'];
         }
         $jobs[] = ['type' => 'report', 'parameters' => ['template' => 'traditional-json', 'reportDir' => '/zap/wrk', 'reportFile' => 'zap']];
         if ($this->login !== null) {

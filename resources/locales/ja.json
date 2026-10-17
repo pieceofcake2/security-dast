@@ -45,5 +45,9 @@
     "scan.full": "OWASP ZAP のフルスキャン：クロール（{minutes} 分）、レスポンスの確認と攻撃（最大 {scanMinutes} 分）",
     "login.none": "なし（訪問者として）",
     "login.user": "{url} で {user} としてログイン",
-    "note.active": "フルスキャンは、攻撃者と同じようにスクリプトや SQL などでページとパラメーターを攻撃します。多くの脆弱性を見つけますが、クロールできなかったページのものなど、すべてではありません。"
+    "note.active": "フルスキャンは、攻撃者と同じようにスクリプトや SQL などでページとパラメーターを攻撃します。多くの脆弱性を見つけますが、クロールできなかったページのものなど、すべてではありません。",
+    "field.endToEnd": "End-to-End テスト",
+    "endToEnd.failed": "テストが失敗しました（終了コード {code}）。失敗のあとのページは検査されていないことがあります",
+    "scan.endToEnd.baseline": "OWASP ZAP：End-to-End テストのリクエストとレスポンスの確認",
+    "scan.endToEnd.full": "OWASP ZAP：End-to-End テストのリクエストとレスポンスの確認と攻撃（最大 {scanMinutes} 分）"
 }

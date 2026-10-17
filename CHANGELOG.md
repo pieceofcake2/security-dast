@@ -8,3 +8,8 @@
   pieceofcake2/report. `--fail-on` sets the lowest risk that fails (default `high`), `--ignore` leaves alerts
   out, and the settings file `config/security.php` keeps the settings. The documentation tells how to fix each
   alert in a CakePHP 2 application
+- `--scan=full` attacks the pages and forms too (the active scan of ZAP), for XSS, SQL injections and the like
+- `--login-url`, `--username` and `--password` make ZAP log in with a browser and scan as the user; a failed
+  login is an error
+- `--end-to-end` runs the End-to-End tests of pieceofcake2/panther through ZAP, and scans what they did
+  instead of crawling

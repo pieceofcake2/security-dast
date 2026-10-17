@@ -30,6 +30,7 @@ final class Config
      * @param string $docker Docker command
      * @param int $minutes Minutes to crawl the site
      * @param bool $ajaxSpider Whether to crawl with a browser too
+     * @param string|null $endToEnd Command of the End-to-End tests to scan as the scenario, instead of the crawl
      * @param string $scan `baseline` (crawl and passive scan) or `full` (with the active scan)
      * @param int $scanMinutes Most minutes of the active scan
      * @param string|null $loginUrl Login page, a path of the application or a URL
@@ -55,6 +56,7 @@ final class Config
         public string $docker = 'docker',
         public int $minutes = 1,
         public bool $ajaxSpider = false,
+        public ?string $endToEnd = null,
         public string $scan = 'baseline',
         public int $scanMinutes = 10,
         public ?string $loginUrl = null,

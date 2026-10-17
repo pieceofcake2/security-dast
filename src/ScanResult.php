@@ -16,6 +16,7 @@ final class ScanResult
      * @param string|null $version Version of ZAP
      * @param array<string> $ignored Alert IDs left out of the report
      * @param string|null $user User that ZAP logged in as
+     * @param int|null $endToEndExitCode Exit code of the End-to-End tests of the scenario
      */
     public function __construct(
         public array $alerts = [],
@@ -23,6 +24,7 @@ final class ScanResult
         public ?string $version = null,
         public array $ignored = [],
         public ?string $user = null,
+        public ?int $endToEndExitCode = null,
     ) {
     }
 

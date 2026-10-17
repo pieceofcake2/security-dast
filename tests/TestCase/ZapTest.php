@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use PieceOfCake2\SecurityDast\Login;
 use PieceOfCake2\SecurityDast\WebServer;
 use PieceOfCake2\SecurityDast\Zap;
+use PieceOfCake2\SecurityDast\ZapDaemon;
 use RuntimeException;
 
 class ZapTest extends TestCase
@@ -50,7 +51,13 @@ class ZapTest extends TestCase
 
         $this->assertSame([
             'podman', 'run', '--rm', '-v', '/tmp/zap:/zap/wrk:rw', 'ghcr.io/zaproxy/zaproxy:2.17.0', 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml',
+            '-config', 'anticsrf.partialMatchingEnabled=false',
             '-config', 'anticsrf.tokens.token(100).name=data[_Token][key]', '-config', 'anticsrf.tokens.token(100).enabled=true',
+            '-config', 'scanner.excludeAntiCsrfTokens=true',
+            '-config', 'scanner.excludedParameters(0).name=_method', '-config', 'scanner.excludedParameters(0).type=-1',
+            '-config', 'scanner.excludedParameters(1).name=data[_Token][fields]', '-config', 'scanner.excludedParameters(1).type=-1',
+            '-config', 'scanner.excludedParameters(2).name=data[_Token][unlocked]', '-config', 'scanner.excludedParameters(2).type=-1',
+            '-config', 'scanner.excludedParameters(3).name=data[_Token][debug]', '-config', 'scanner.excludedParameters(3).type=-1',
             '-config', 'view.locale=ja_JP',
             '-config', 'spider.maxDepth=3',
         ], $command);
@@ -88,9 +95,56 @@ class ZapTest extends TestCase
         $this->assertSame('browser', $context['authentication']['method']);
         $this->assertSame(self::TARGET . '/users/login', $context['authentication']['parameters']['loginPageUrl']);
         $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => 'secret']]], $context['users']);
-        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'report', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
         $this->assertSame(['context' => 'app', 'user' => 'user', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
-        $this->assertSame('auth-report-json', $plan['jobs'][5]['parameters']['template']);
+        $this->assertSame('auth-report-json', $plan['jobs'][6]['parameters']['template']);
+
+        // Without the crawl, for a scenario
+        $this->assertSame(['passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($zap->plan(self::TARGET, false)['jobs'], 'type'));
+    }
+
+    public function testScanScenario(): void
+    {
+        $calls = [];
+        $daemon = static function (string $dir, array $options) use (&$calls): ZapDaemon {
+            $calls[] = 'options ' . implode(' ', $options);
+
+            return new ZapDaemon($dir, $options, port: 8090, run: static function (array $command, string $cwd) use (&$calls): array {
+                $calls[] = implode(' ', array_slice($command, 0, 3));
+                if ($command[1] === 'run') {
+                    return [0, "container-id\n", ''];
+                }
+
+                return [0, '', ''];
+            }, get: static function (string $url) use (&$calls, $dir): string {
+                if (str_contains($url, 'core/view/version')) {
+                    return '{"version":"2.17.0"}';
+                }
+                if (str_contains($url, 'automation/action/runPlan')) {
+                    $calls[] = 'plan ' . implode(',', array_column(json_decode((string)file_get_contents($dir . DS . 'plan.yaml'), true)['jobs'], 'type'));
+                    copy(self::FIXTURES . DS . 'zap-en.json', $dir . DS . 'zap.json');
+
+                    return '{"planId":"0"}';
+                }
+
+                return '{"finished":"2026-10-17T10:00:00Z","error":[]}';
+            });
+        };
+        $zap = new Zap(os: 'Darwin', scan: 'full');
+
+        $result = $zap->scanScenario(self::URL, static function (string $proxy, string $site) use (&$calls): void {
+            $calls[] = 'scenario ' . $proxy . ' ' . $site;
+        }, 'ja', $daemon);
+
+        $this->assertSame([
+            'options ' . implode(' ', $zap->zapOptions('ja')),
+            'docker run -d',
+            'scenario http://127.0.0.1:8090 ' . self::TARGET,
+            'plan passiveScan-wait,activeScan,passiveScan-wait,report',
+            'docker rm -f',
+        ], $calls);
+        $this->assertCount(17, $result->alerts);
+        $this->assertSame(self::URL . '/login', $result->alerts[0]->instances[0]['uri']);
     }
 
     public function testLogin(): void

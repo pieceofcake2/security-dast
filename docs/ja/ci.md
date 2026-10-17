@@ -26,7 +26,28 @@
 - 既存のアプリケーションでは、まず `--fail-on=none` でジョブを失敗させずにアラートを確かめ、ヘッダーを直してから基準を
   上げてください ([アラート](alerts.md))。
 
-デプロイのあとにステージングのサーバーをスキャンするときは、その URL を指定します。
+### End-to-End テストでフルスキャン
+
+フルスキャンはアプリケーションを攻撃するので、ジョブの組み込みウェブサーバーと、ジョブのテストのデータベースで
+実行します。pieceofcake2/panther の End-to-End テストをシナリオにし、テストのユーザーでログインする例です。
+
+```yaml
+- name: Scan the End-to-End tests with attacks
+  env:
+    SECURITY_DAST_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+  run: >-
+    vendor/bin/security-dast --scan=full --scan-minutes=20
+    --end-to-end="vendor/bin/phpunit --testsuite EndToEnd"
+    --login-url=/users/login --username=test@example.com
+    --pdf=tmp/security-dast.pdf --fail-on=high --language=ja
+```
+
+ジョブには、End-to-End テストそのものと同じく、テストのための Chrome と chromedriver が要ります
+(`vendor/bin/bdi detect drivers`)。フルスキャンは時間がかかるので、毎晩 (`schedule`) やメインのブランチへの pull
+request で実行し、push のたびにはベースラインスキャンを実行するとよいでしょう。
+
+デプロイのあとにステージングのサーバーをスキャンするときは、その URL を指定します (何も変えないベースライン
+スキャンで)。
 
 ```yaml
 - run: vendor/bin/security-dast --url=https://staging.example.com --pdf=tmp/security-dast.pdf

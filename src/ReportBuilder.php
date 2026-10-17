@@ -77,11 +77,15 @@ final class ReportBuilder
         $target[] = new Row($this->t('field.server'), $config->url === null
             ? $this->t('server.builtin', ['env' => $config->appEnv])
             : $this->t('server.url'));
-        $scan = $this->t($config->scan === 'full' ? 'scan.full' : 'scan.baseline', ['minutes' => $config->minutes, 'scanMinutes' => $config->scanMinutes]);
-        if ($config->ajaxSpider) {
+        $scan = $this->t(($config->endToEnd !== null ? 'scan.endToEnd.' : 'scan.') . ($config->scan === 'full' ? 'full' : 'baseline'), ['minutes' => $config->minutes, 'scanMinutes' => $config->scanMinutes]);
+        if ($config->ajaxSpider && $config->endToEnd === null) {
             $scan .= $this->t('scan.ajax');
         }
         $target[] = new Row($this->t('field.scan'), $scan);
+        if ($config->endToEnd !== null) {
+            $failed = $result->endToEndExitCode !== null && $result->endToEndExitCode !== 0;
+            $target[] = new Row($this->t('field.endToEnd'), $config->endToEnd, warning: $failed ? $this->t('endToEnd.failed', ['code' => (int)$result->endToEndExitCode]) : null, monoValue: true);
+        }
         $login = $config->login();
         $target[] = new Row($this->t('field.login'), $login === null
             ? $this->t('login.none')
