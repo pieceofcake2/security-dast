@@ -43,6 +43,21 @@ class CommandTest extends TestCase
         $this->assertFalse($config->ajaxSpider);
     }
 
+    public function testLogin(): void
+    {
+        $config = Command::config(['--scan=FULL', '--scan-minutes=20', '--login-url=/users/login', '--username=test@example.com', '--exclude=.*/users/logout.*, .*/admin/.*'], ['SECURITY_DAST_PASSWORD' => 'secret']);
+
+        $this->assertNotNull($config);
+        $this->assertSame('full', $config->scan);
+        $this->assertSame(20, $config->scanMinutes);
+        $this->assertSame(['.*/users/logout.*', '.*/admin/.*'], $config->exclude);
+        $login = $config->login();
+        $this->assertNotNull($login);
+        $this->assertSame('secret', $login->password);
+        $this->assertSame('http://127.0.0.1:8080/users/login', $login->urlOn('http://127.0.0.1:8080/'));
+        $this->assertNull(Command::config([])?->login());
+    }
+
     public function testSettingsFile(): void
     {
         $project = ZapTest::FIXTURES . DS . 'project';
@@ -63,7 +78,7 @@ class CommandTest extends TestCase
     {
         $this->assertNull(Command::config(['--help']));
 
-        foreach (['--fail-on=critical', '--minutes=0', '--url=127.0.0.1:8080', '--verbose'] as $option) {
+        foreach (['--fail-on=critical', '--minutes=0', '--scan-minutes=x', '--scan=quick', '--url=127.0.0.1:8080', '--login-url=/login', '--verbose'] as $option) {
             try {
                 Command::config([$option]);
                 $this->fail('No exception for ' . $option);

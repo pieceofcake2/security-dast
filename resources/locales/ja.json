@@ -1,5 +1,5 @@
 {
-    "title": "動的アプリケーションセキュリティテスト​報告書",
+    "title": "動的アプリケーションセキュリティテスト\u200b報告書",
     "count.alerts": "アラート",
     "severity.high": "高",
     "severity.medium": "中",
@@ -35,10 +35,15 @@
     "instances.more": "ほか {count} 件のリクエスト",
     "server.builtin": "PHP の組み込みウェブサーバー（APP_ENV={env}）",
     "server.url": "起動済みのアプリケーション",
-    "scan.baseline": "OWASP ZAP のベースラインスキャン（クロール {minutes} 分）",
-    "scan.ajax": "OWASP ZAP のベースラインスキャン（クロール {minutes} 分、AJAX スパイダー付き）",
+    "scan.baseline": "OWASP ZAP のベースラインスキャン：クロール（{minutes} 分）とレスポンスの確認",
+    "scan.ajax": "、AJAX スパイダー付き",
     "threshold.value": "{severity}以上",
     "threshold.none": "なし（報告のみ）",
     "note.none": "クロールしたページで、アラートは出ませんでした。",
-    "note.passive": "ベースラインスキャンは、サイトをクロールしてリクエストとレスポンスを確かめます。攻撃は送らないため、すべての脆弱性を見つけるものではありません。"
+    "note.passive": "ベースラインスキャンは、サイトをクロールしてリクエストとレスポンスを確かめます。攻撃は送らないため、すべての脆弱性を見つけるものではありません。",
+    "field.login": "ログイン",
+    "scan.full": "OWASP ZAP のフルスキャン：クロール（{minutes} 分）、レスポンスの確認と攻撃（最大 {scanMinutes} 分）",
+    "login.none": "なし（訪問者として）",
+    "login.user": "{url} で {user} としてログイン",
+    "note.active": "フルスキャンは、攻撃者と同じようにスクリプトや SQL などでページとパラメーターを攻撃します。多くの脆弱性を見つけますが、クロールできなかったページのものなど、すべてではありません。"
 }

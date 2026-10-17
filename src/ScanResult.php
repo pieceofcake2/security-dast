@@ -15,12 +15,14 @@ final class ScanResult
      * @param string $target URL of the scanned site
      * @param string|null $version Version of ZAP
      * @param array<string> $ignored Alert IDs left out of the report
+     * @param string|null $user User that ZAP logged in as
      */
     public function __construct(
         public array $alerts = [],
         public string $target = '',
         public ?string $version = null,
         public array $ignored = [],
+        public ?string $user = null,
     ) {
     }
 

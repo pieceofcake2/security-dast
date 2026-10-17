@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PieceOfCake2\SecurityDast\Test;
 
 use PHPUnit\Framework\TestCase;
+use PieceOfCake2\SecurityDast\Login;
 use PieceOfCake2\SecurityDast\WebServer;
 use PieceOfCake2\SecurityDast\Zap;
 use RuntimeException;
@@ -24,41 +25,93 @@ class ZapTest extends TestCase
      * @param string $language Language of the fixture report
      * @param array<array<string>> $commands Receives the commands
      * @param string $os Operating system family
+     * @param \PieceOfCake2\SecurityDast\Login|null $login User to log in as
+     * @param string $auth Fixture of the authentication report: `zap-auth.json` or `zap-auth-failed.json`
+     * @param array<string> $plans Receives the plans
      * @return \PieceOfCake2\SecurityDast\Zap
      */
-    public static function zap(string $language = 'en', array &$commands = [], string $os = 'Darwin'): Zap
+    public static function zap(string $language = 'en', array &$commands = [], string $os = 'Darwin', ?Login $login = null, string $auth = 'zap-auth.json', array &$plans = []): Zap
     {
-        return new Zap(run: static function (array $command, string $dir) use ($language, &$commands): array {
+        return new Zap(run: static function (array $command, string $dir) use ($language, &$commands, $auth, &$plans): array {
             $commands[] = $command;
+            $plans[] = (string)file_get_contents($dir . DS . 'plan.yaml');
             copy(self::FIXTURES . DS . 'zap-' . $language . '.json', $dir . DS . 'zap.json');
+            copy(self::FIXTURES . DS . $auth, $dir . DS . 'auth.json');
 
-            return [2, 'WARN-NEW: 13', ''];
-        }, os: $os);
+            return [0, 'Automation plan succeeded!', ''];
+        }, os: $os, login: $login);
     }
 
     public function testCommand(): void
     {
-        $dir = TMP . 'zap-command';
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-        $zap = new Zap('ghcr.io/zaproxy/zaproxy:2.17.0', 'podman', 3, true, '-config spider.maxDepth=3', os: 'Darwin');
+        $zap = new Zap('ghcr.io/zaproxy/zaproxy:2.17.0', 'podman', options: '-config spider.maxDepth=3', os: 'Darwin');
 
-        $command = $zap->command($dir, self::TARGET, 'ja');
+        $command = $zap->command('/tmp/zap', 'ja');
 
-        $this->assertSame(['podman', 'run', '--rm', '-v', $dir . ':/zap/wrk:rw', 'ghcr.io/zaproxy/zaproxy:2.17.0', 'zap-baseline.py', '-t', self::TARGET, '-J', 'zap.json', '-I', '-m', '3', '-j', '-z'], array_slice($command, 0, -1));
-        $options = (string)end($command);
-        $this->assertStringContainsString('-config anticsrf.tokens.token(100).name=data[_Token][key] -config anticsrf.tokens.token(100).enabled=true', $options);
-        $this->assertStringContainsString('-config view.locale=ja_JP', $options);
-        $this->assertStringEndsWith('-config spider.maxDepth=3', $options);
+        $this->assertSame([
+            'podman', 'run', '--rm', '-v', '/tmp/zap:/zap/wrk:rw', 'ghcr.io/zaproxy/zaproxy:2.17.0', 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml',
+            '-config', 'anticsrf.tokens.token(100).name=data[_Token][key]', '-config', 'anticsrf.tokens.token(100).enabled=true',
+            '-config', 'view.locale=ja_JP',
+            '-config', 'spider.maxDepth=3',
+        ], $command);
     }
 
     public function testCommandOnLinux(): void
     {
-        $command = (new Zap(os: 'Linux'))->command('/tmp/zap', self::URL);
+        $command = (new Zap(os: 'Linux'))->command('/tmp/zap');
 
         $this->assertSame(['docker', 'run', '--rm', '--network', 'host', '-v', '/tmp/zap:/zap/wrk:rw'], array_slice($command, 0, 7));
-        $this->assertStringNotContainsString('view.locale', (string)end($command));
+        $this->assertNotContains('view.locale=ja_JP', $command);
+    }
+
+    public function testPlanOfBaseline(): void
+    {
+        $plan = (new Zap(minutes: 2))->plan(self::TARGET . '/');
+
+        $context = $plan['env']['contexts'][0];
+        $this->assertSame([self::TARGET], $context['urls']);
+        $this->assertSame(['\\Q' . self::TARGET . '\\E.*'], $context['includePaths']);
+        $this->assertSame(['.*logout.*'], $context['excludePaths']);
+        $this->assertArrayNotHasKey('authentication', $context);
+        $this->assertSame(['spider', 'passiveScan-wait', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['context' => 'app', 'maxDuration' => 2], $plan['jobs'][0]['parameters']);
+        $this->assertSame('traditional-json', $plan['jobs'][2]['parameters']['template']);
+    }
+
+    public function testPlanOfFullScanWithLogin(): void
+    {
+        $zap = new Zap(ajaxSpider: true, scan: 'full', scanMinutes: 20, login: new Login('/users/login', 'test@example.com', 'secret'), exclude: ['.*/users/logout.*', '.*/admin/.*']);
+        $plan = $zap->plan(self::TARGET);
+
+        $context = $plan['env']['contexts'][0];
+        $this->assertSame(['.*/users/logout.*', '.*/admin/.*'], $context['excludePaths']);
+        $this->assertSame('browser', $context['authentication']['method']);
+        $this->assertSame(self::TARGET . '/users/login', $context['authentication']['parameters']['loginPageUrl']);
+        $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => 'secret']]], $context['users']);
+        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'report', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['context' => 'app', 'user' => 'user', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
+        $this->assertSame('auth-report-json', $plan['jobs'][5]['parameters']['template']);
+    }
+
+    public function testLogin(): void
+    {
+        $plans = [];
+        $commands = [];
+        $result = self::zap('en', $commands, 'Darwin', new Login('/users/login', 'test@example.com', 'secret'), 'zap-auth.json', $plans)->scan(self::URL);
+
+        $this->assertSame('test@example.com', $result->user);
+        // The plan is JSON, which is YAML too
+        $this->assertSame(self::TARGET . '/users/login', json_decode($plans[0], true)['env']['contexts'][0]['authentication']['parameters']['loginPageUrl']);
+    }
+
+    public function testLoginFailed(): void
+    {
+        $commands = [];
+        $zap = self::zap('en', $commands, 'Darwin', new Login('http://127.0.0.1:56557/users/login', 'test@example.com', 'wrong'), 'zap-auth-failed.json');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('ZAP could not log in as test@example.com on http://127.0.0.1:56557/users/login');
+        $zap->scan(self::URL);
     }
 
     public function testTargetFromContainer(): void
@@ -77,7 +130,8 @@ class ZapTest extends TestCase
         $commands = [];
         $result = self::zap('en', $commands)->scan(self::URL, 'en');
 
-        $this->assertSame(self::TARGET, $commands[0][array_search('-t', $commands[0], true) + 1]);
+        $this->assertContains('/zap/wrk/plan.yaml', $commands[0]);
+        $this->assertNull($result->user);
         $this->assertCount(17, $result->alerts);
         $this->assertSame(self::URL, $result->target);
         $this->assertSame('2.17.0', $result->version);
@@ -164,5 +218,16 @@ class ZapTest extends TestCase
         $this->assertContains('10202', $ids);
         $this->assertContains('10038-1', $ids);
         $this->assertContains('10037', $ids);
+
+        // As a user: the pages behind the login are crawled
+        $server = new WebServer(self::FIXTURES . DS . 'login' . DS . 'webroot', self::FIXTURES . DS . 'login');
+        try {
+            $result = (new Zap(login: new Login('/users/login', 'test@example.com', 'secret')))->scan($server->start());
+        } finally {
+            $server->stop();
+        }
+        $this->assertSame('test@example.com', $result->user);
+        $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
+        $this->assertNotEmpty(preg_grep('#/account#', $uris));
     }
 }
