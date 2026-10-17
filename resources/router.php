@@ -10,9 +10,10 @@ if (is_string($workingDir) && $workingDir !== '' && is_dir($workingDir)) {
     chdir($workingDir);
 }
 
-$path = (string)parse_url((string)$_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// The path as a file name: decoded (/css/my%20site.css), and only in the document root
+$path = rawurldecode((string)parse_url((string)$_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $file = $_SERVER['DOCUMENT_ROOT'] . $path;
-if ($path !== '/' && is_file($file) && !str_ends_with($file, '.php')) {
+if ($path !== '/' && !str_contains($path, "\0") && !preg_match('#(?:\A|[/\\\\])\.\.(?:[/\\\\]|\z)#', $path) && is_file($file) && !str_ends_with(strtolower($file), '.php')) {
     return false;
 }
 

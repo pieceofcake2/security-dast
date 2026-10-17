@@ -87,4 +87,5 @@ vendor/bin/security-dast --login-url=/users/login --username=test@example.com \
 ],
 ```
 
-パスワードは報告書には書きません。パスワードの入った ZAP の plan は、スキャンのあとに消します。
+パスワードは、報告書にも ZAP の plan にも書きません。ZAP にはコンテナの環境変数で、名前だけを指定して渡すので、
+コマンドラインにも出ません。`--end-to-end` のテストとアプリケーションには、`SECURITY_DAST_PASSWORD` を渡しません。

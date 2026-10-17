@@ -67,6 +67,7 @@ final class Command
         }
 
         $server = null;
+        $signals = self::handleSignals();
         try {
             $timezone = new DateTimeZone(date_default_timezone_get());
             $startedAt = new DateTimeImmutable('now', $timezone);
@@ -101,6 +102,8 @@ final class Command
             fwrite($this->stderr, 'security-dast: ' . $e->getMessage() . "\n");
 
             return self::ERROR;
+        } finally {
+            self::restoreSignals($signals);
         }
 
         $summary = [];
@@ -120,7 +123,51 @@ final class Command
             $config->pdf,
         ));
 
+        // The scenario did not run to its end: the pages after the failure may not be scanned
+        if ($result->endToEndExitCode !== null && $result->endToEndExitCode !== 0) {
+            fwrite($this->stderr, sprintf("security-dast: the End-to-End tests failed (exit code %d), so the pages after the failure may not be scanned: fix the tests, then scan again.\n", $result->endToEndExitCode));
+
+            return self::ERROR;
+        }
+
         return $result->fails($config->failOn) ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Ends the process on Ctrl+C and SIGTERM with an exit, so that its shutdown functions stop ZAP and remove the
+     * directory of the scan (with the pcntl extension)
+     *
+     * @return array<int, mixed> The handlers before, by signal
+     */
+    private static function handleSignals(): array
+    {
+        if (!function_exists('pcntl_signal') || !function_exists('pcntl_async_signals')) {
+            return [];
+        }
+        $before = [];
+        pcntl_async_signals(true);
+        foreach ([SIGINT, SIGTERM] as $signal) {
+            $before[$signal] = pcntl_signal_get_handler($signal);
+            // Without restarting the system calls, so that it also ends while it waits for the output of the tests
+            pcntl_signal($signal, static function (int $signal): void {
+                exit(128 + $signal);
+            }, false);
+        }
+
+        return $before;
+    }
+
+    /**
+     * Restores the handlers of `handleSignals()`
+     *
+     * @param array<int, mixed> $handlers The handlers before, by signal
+     * @return void
+     */
+    private static function restoreSignals(array $handlers): void
+    {
+        foreach ($handlers as $signal => $handler) {
+            pcntl_signal($signal, $handler);
+        }
     }
 
     /**

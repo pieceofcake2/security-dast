@@ -40,6 +40,7 @@
     "threshold.value": "{severity} or higher",
     "threshold.none": "None (the report only)",
     "note.none": "No alert was raised on the crawled pages.",
+    "note.noneEndToEnd": "No alert was raised on the pages of the End-to-End tests.",
     "note.passive": "The baseline scan crawls the site and checks its requests and responses; it sends no attacks, so it does not find every vulnerability.",
     "field.login": "Login",
     "scan.full": "OWASP ZAP full scan: crawl ({minutes} min), check the responses and attack (up to {scanMinutes} min)",

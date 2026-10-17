@@ -102,7 +102,7 @@ final class ReportBuilder
 
         $notes = [];
         if ($result->alerts === []) {
-            $notes[] = $this->t('note.none');
+            $notes[] = $this->t($config->endToEnd !== null ? 'note.noneEndToEnd' : 'note.none');
         }
         $notes[] = $this->t($config->scan === 'full' ? 'note.active' : 'note.passive');
         if ($config->note !== null) {

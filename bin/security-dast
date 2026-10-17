@@ -11,4 +11,4 @@ foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php
     }
 }
 
-exit((new Command())->run(array_slice($argv, 1), $_SERVER));
+exit((new Command())->run(array_slice($_SERVER['argv'] ?? [], 1), $_SERVER));

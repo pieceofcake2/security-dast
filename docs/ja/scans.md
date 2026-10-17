@@ -47,7 +47,8 @@ ZAP は、CakePHP 2 のアプリケーションに合わせて設定してあり
 - `SecurityComponent` のフォームの CSRF トークン (`data[_Token][key]`) を知っています。そうしたフォームをトークンの
   ないフォームとして指摘せず、フルスキャンでは、攻撃ごとにフォームのページから、スキャンのセッションの中で新しい
   トークンを取り直すので、`SecurityComponent` に弾かれません。
-- `SecurityComponent` が固定する欄 (`_method`、`data[_Token][fields]`、`data[_Token][unlocked]`) は攻撃しません。
+- `SecurityComponent` が固定する欄 (`_method`、`data[_Token][fields]`、`data[_Token][unlocked]`、
+  `data[_Token][debug]`) は攻撃しません。
   これらを変えると必ず弾かれるので、攻撃しても時間がかかるだけです。
 - CakePHP のセッションの Cookie (`CAKEPHP`) を知っています。
 - ユーザーとしてのスキャンがログインしたままでいられるよう、ログアウトの URL (`.*logout.*`、`--exclude` を参照) は

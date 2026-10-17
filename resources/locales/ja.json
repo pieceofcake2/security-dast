@@ -1,5 +1,5 @@
 {
-    "title": "動的アプリケーションセキュリティテスト\u200b報告書",
+    "title": "動的アプリケーションセキュリティテスト​報告書",
     "count.alerts": "アラート",
     "severity.high": "高",
     "severity.medium": "中",
@@ -40,6 +40,7 @@
     "threshold.value": "{severity}以上",
     "threshold.none": "なし（報告のみ）",
     "note.none": "クロールしたページで、アラートは出ませんでした。",
+    "note.noneEndToEnd": "End-to-End テストのページで、アラートは出ませんでした。",
     "note.passive": "ベースラインスキャンは、サイトをクロールしてリクエストとレスポンスを確かめます。攻撃は送らないため、すべての脆弱性を見つけるものではありません。",
     "field.login": "ログイン",
     "scan.full": "OWASP ZAP のフルスキャン：クロール（{minutes} 分）、レスポンスの確認と攻撃（最大 {scanMinutes} 分）",

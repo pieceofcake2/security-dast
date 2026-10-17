@@ -13,6 +13,11 @@ use RuntimeException;
 final class EndToEndTests
 {
     /**
+     * @var resource|null The process of the tests while they run
+     */
+    private $process = null;
+
+    /**
      * Constructor
      *
      * @param string $command Command of the tests, e.g. `vendor/bin/phpunit --testsuite EndToEnd`
@@ -54,20 +59,81 @@ final class EndToEndTests
      */
     public function run(string $proxy, string $site, $output): int
     {
-        $env = array_merge(getenv(), $this->env, $this->env($proxy, $site));
-        $process = proc_open($this->command . ' 2>&1', [0 => ['file', '/dev/null', 'r'], 1 => ['pipe', 'w']], $pipes, $this->workingDir, $env);
+        $env = array_merge(self::inherited(), $this->env, $this->env($proxy, $site));
+        $process = proc_open($this->command . ' 2>&1', [0 => ['file', self::nullDevice(), 'r'], 1 => ['pipe', 'w']], $pipes, $this->workingDir, $env);
         if (!is_resource($process)) {
             throw new RuntimeException(sprintf('Cannot run the End-to-End tests: %s', $this->command));
         }
-        while (!feof($pipes[1])) {
-            $chunk = fread($pipes[1], 8192);
-            if ($chunk !== false && $chunk !== '') {
-                fwrite($output, $chunk);
+        // Stopped at the end of the process also when it is stopped, e.g. with Ctrl+C
+        $this->process = $process;
+        register_shutdown_function([$this, 'stop']);
+        // A wait of a second at most, so that a signal is handled while the tests run
+        stream_set_blocking($pipes[1], false);
+        // stream_select() warns when a signal interrupts it
+        set_error_handler(static fn(): bool => true);
+        try {
+            while (!feof($pipes[1])) {
+                $read = [$pipes[1]];
+                $write = $except = null;
+                if (stream_select($read, $write, $except, 1) > 0) {
+                    $chunk = fread($pipes[1], 8192);
+                    if ($chunk !== false && $chunk !== '') {
+                        fwrite($output, $chunk);
+                    }
+                }
             }
+        } finally {
+            restore_error_handler();
         }
         fclose($pipes[1]);
+        $this->process = null;
 
-        return proc_close($process);
+        return Process::wait($process);
+    }
+
+    /**
+     * Stops the tests when they run
+     *
+     * @return void
+     */
+    public function stop(): void
+    {
+        if (!is_resource($this->process)) {
+            return;
+        }
+        $status = proc_get_status($this->process);
+        if ($status['running']) {
+            // The command runs in a shell: its children first, e.g. PHPUnit
+            if (PHP_OS_FAMILY !== 'Windows') {
+                exec('pkill -TERM -P ' . $status['pid'] . ' 2>/dev/null');
+            }
+            proc_terminate($this->process);
+        }
+        $this->process = null;
+    }
+
+    /**
+     * The environment variables of this process for a command of the project: without the password of the login,
+     * which the tests and the application do not need
+     *
+     * @return array<string, string>
+     */
+    public static function inherited(): array
+    {
+        $env = getenv();
+        unset($env['SECURITY_DAST_PASSWORD'], $env[Zap::PASSWORD_ENV]);
+
+        return $env;
+    }
+
+    /**
+     * The null device of the system
+     *
+     * @return string
+     */
+    public static function nullDevice(): string
+    {
+        return PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
     }
 
     /**

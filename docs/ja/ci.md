@@ -4,7 +4,7 @@
 
 | ワークフロー | いつ | スキャン |
 | --- | --- | --- |
-| [docs/examples/security-dast.yml](../examples/security-dast.yml) | push と pull request のたびと、毎週 | ジョブのテストのデータベースでの、アプリケーションのベースラインスキャン |
+| [docs/examples/security-dast.yml](../examples/security-dast.yml) | `main` への push と pull request のたびと、毎週 | ジョブのテストのデータベースでの、アプリケーションのベースラインスキャン |
 | [docs/examples/security-dast-full.yml](../examples/security-dast-full.yml) | 毎晩と、手動で | テストのユーザーでの、End-to-End テストのフルスキャン |
 
 どちらも、報告書を PDF のまま (zip にせずに) アップロードします。Ubuntu のランナーには Docker と Google Chrome が
@@ -80,5 +80,5 @@ vendor/bin/security-dast --image=ghcr.io/zaproxy/zaproxy:2.17.0
 コマンドのまとめは、ジョブのログに出ます。
 
 ```text
-11 alerts (2 medium, 7 low, 2 info) on 14 URLs of http://127.0.0.1:49855 (ZAP 2.17.0). Report: tmp/security-dast.pdf
+11 alerts (2 medium, 7 low, 2 info) on 14 URLs of https://staging.example.com (ZAP 2.17.0). Report: tmp/security-dast-staging.pdf
 ```

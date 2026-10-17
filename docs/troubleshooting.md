@@ -51,6 +51,9 @@ of the password, without another step (a CAPTCHA or a second factor, which a tes
 
 ## End-to-End Tests
 
+**`the End-to-End tests failed (exit code 1)`**: the report is written, but the command exits with `2`: fix the
+tests (their output is above the message), then scan again.
+
 **The tests fail only in the scan**: they must use relative URLs, so that they follow
 `PANTHER_EXTERNAL_BASE_URI`. Their output is in the error output of the command.
 

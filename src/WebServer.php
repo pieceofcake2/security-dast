@@ -53,13 +53,15 @@ final class WebServer
         }
         $this->port ??= self::freePort();
         $this->log = (string)tempnam(sys_get_temp_dir(), 'security-dast-server-');
-        $env = array_merge(getenv(), $this->env, ['SECURITY_DAST_WORKING_DIR' => (string)realpath($this->workingDir)]);
+        $env = array_merge(EndToEndTests::inherited(), $this->env, ['SECURITY_DAST_WORKING_DIR' => (string)realpath($this->workingDir)]);
         $command = [PHP_BINARY, '-S', '127.0.0.1:' . $this->port, '-t', (string)realpath($this->webroot), (string)realpath(self::ROUTER)];
-        $process = proc_open($command, [0 => ['file', '/dev/null', 'r'], 1 => ['file', $this->log, 'a'], 2 => ['file', $this->log, 'a']], $pipes, $this->workingDir, $env);
+        $process = proc_open($command, [0 => ['file', EndToEndTests::nullDevice(), 'r'], 1 => ['file', $this->log, 'a'], 2 => ['file', $this->log, 'a']], $pipes, $this->workingDir, $env);
         if (!is_resource($process)) {
             throw new RuntimeException('Cannot start PHP\'s built-in web server.');
         }
         $this->process = $process;
+        // Stopped at the end of the process also when it is stopped, e.g. with Ctrl+C
+        register_shutdown_function([$this, 'stop']);
 
         $deadline = microtime(true) + $timeout;
         while (microtime(true) < $deadline) {

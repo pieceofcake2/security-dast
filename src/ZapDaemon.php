@@ -12,12 +12,14 @@ use RuntimeException;
  * goes through it, so that ZAP records their requests, and the plan of the scan then runs on what it recorded.
  *
  * The proxy and the API listen on 127.0.0.1 only, on the same port in and out of the container (ZAP takes a
- * request to another port for one to proxy), and the API needs a random key.
+ * request to another port for one to proxy), and the API needs a random key. The key is given in a file of a random
+ * name in the directory, removed once ZAP has started, so that it is not on the command line, which the other users
+ * of the host can see.
  */
 final class ZapDaemon
 {
     /**
-     * @var \Closure(array<string>, string): array{0: int, 1: string, 2: string}
+     * @var \Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string}
      */
     private Closure $run;
 
@@ -31,6 +33,11 @@ final class ZapDaemon
     private string $key;
 
     /**
+     * The name of the file of the key in the directory
+     */
+    private string $keyFile;
+
+    /**
      * Constructor
      *
      * @param string $dir Directory mounted at /zap/wrk, for the plan and the reports
@@ -39,8 +46,10 @@ final class ZapDaemon
      * @param string $docker Docker command
      * @param string $os Operating system family, `PHP_OS_FAMILY`
      * @param int|null $port Port of the proxy, default: a free one
-     * @param (\Closure(array<string>, string): array{0: int, 1: string, 2: string})|null $run Runs a command
+     * @param (\Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string})|null $run Runs a
+     *  command, with environment variables
      * @param (\Closure(string): (string|false))|null $get Gets a URL of the API
+     * @param array<string, string> $env Environment variables of ZAP, e.g. the password of the login
      */
     public function __construct(
         private string $dir,
@@ -51,6 +60,7 @@ final class ZapDaemon
         private ?int $port = null,
         ?Closure $run = null,
         ?Closure $get = null,
+        private array $env = [],
     ) {
         $this->run = $run ?? Closure::fromCallable([Process::class, 'run']);
         $this->get = $get ?? static function (string $url): string|false {
@@ -62,6 +72,7 @@ final class ZapDaemon
             }
         };
         $this->key = bin2hex(random_bytes(16));
+        $this->keyFile = 'key-' . bin2hex(random_bytes(8)) . '.properties';
     }
 
     /**
@@ -74,25 +85,53 @@ final class ZapDaemon
     public function start(int $timeout = 180): string
     {
         $this->port ??= WebServer::freePort();
-        [$code, $output, $error] = ($this->run)($this->command(), $this->dir);
-        if ($code !== 0) {
-            throw new RuntimeException(sprintf('ZAP did not start (exit code %d): %s', $code, trim($error !== '' ? $error : $output)));
-        }
-        $this->container = trim($output);
-
-        $deadline = microtime(true) + $timeout;
-        while (microtime(true) < $deadline) {
-            if (str_contains((string)($this->get)($this->api('core/view/version')), '"version"')) {
-                foreach (Zap::SESSION_COOKIES as $name) {
-                    $this->call('httpSessions/action/addDefaultSessionToken', ['sessionToken' => $name]);
-                }
-
-                return $this->proxy();
+        $keyFile = $this->dir . DIRECTORY_SEPARATOR . $this->keyFile;
+        file_put_contents($keyFile, 'api.key=' . $this->key . "\n");
+        // ZAP, another user on Linux, reads it; the other users of the host cannot list the directory
+        chmod($keyFile, 0644);
+        try {
+            [$code, $output, $error] = ($this->run)($this->command(), $this->dir, $this->env);
+            if ($code !== 0) {
+                throw new RuntimeException(sprintf('ZAP did not start (exit code %d): %s', $code, trim($error !== '' ? $error : $output)));
             }
-            usleep(500000);
+            $this->container = trim($output);
+            // Stopped at the end of the process also when it is stopped, e.g. with Ctrl+C
+            register_shutdown_function([$this, 'stop']);
+
+            $answered = $this->waitForApi($timeout);
+        } finally {
+            if (is_file($keyFile)) {
+                unlink($keyFile);
+            }
+        }
+        if ($answered) {
+            foreach (Zap::SESSION_COOKIES as $name) {
+                $this->call('httpSessions/action/addDefaultSessionToken', ['sessionToken' => $name]);
+            }
+
+            return $this->proxy();
         }
         $this->stop();
         throw new RuntimeException(sprintf('ZAP did not answer on port %d in %d seconds.', $this->port, $timeout));
+    }
+
+    /**
+     * Waits until the API of ZAP answers
+     *
+     * @param int $timeout Seconds to wait
+     * @return bool Whether it answered
+     */
+    private function waitForApi(int $timeout): bool
+    {
+        $deadline = microtime(true) + $timeout;
+        while (microtime(true) < $deadline) {
+            if (str_contains((string)($this->get)($this->api('core/view/version')), '"version"')) {
+                return true;
+            }
+            usleep(500000);
+        }
+
+        return false;
     }
 
     /**
@@ -110,6 +149,10 @@ final class ZapDaemon
             array_push($command, '-p', sprintf('127.0.0.1:%d:%d', $this->port, $this->port));
             $host = '0.0.0.0';
         }
+        // The names only: the values come from the environment of the command
+        foreach (array_keys($this->env) as $name) {
+            array_push($command, '-e', $name);
+        }
         array_push(
             $command,
             '-v',
@@ -121,8 +164,8 @@ final class ZapDaemon
             $host,
             '-port',
             (string)$this->port,
-            '-config',
-            'api.key=' . $this->key,
+            '-configfile',
+            '/zap/wrk/' . $this->keyFile,
             '-config',
             'api.addrs.addr.name=.*',
             '-config',
@@ -204,7 +247,8 @@ final class ZapDaemon
     public function stop(): void
     {
         if ($this->container !== null) {
-            ($this->run)([$this->docker, 'rm', '-f', $this->container], $this->dir);
+            // Not in the directory, which may be removed already at the end of the process
+            ($this->run)([$this->docker, 'rm', '-f', $this->container], sys_get_temp_dir(), []);
         }
         $this->container = null;
     }

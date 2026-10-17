@@ -4,16 +4,16 @@
 
 **The baseline scan** of a page without the security headers, with a form without a token and an error page:
 
-- [Sample report of the baseline scan (English, PDF)](/report-sample.pdf)
-- [Sample report of the baseline scan (Japanese, PDF)](/report-sample-ja.pdf)
+- [Sample report of the baseline scan (English, PDF)](https://pieceofcake2.github.io/security-dast/report-sample.pdf)
+- [Sample report of the baseline scan (Japanese, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-ja.pdf)
 
 ![The cover, the alerts by risk, the page of an alert and its requests](img/report-sample.png)
 
 **The full scan** of a CakePHP 2 application, with an End-to-End test as the scenario: a form of
 `SecurityComponent` that prints its value without `h()`, found as a reflected XSS:
 
-- [Sample report of the full scan (English, PDF)](/report-sample-full.pdf)
-- [Sample report of the full scan (Japanese, PDF)](/report-sample-full-ja.pdf)
+- [Sample report of the full scan (English, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full.pdf)
+- [Sample report of the full scan (Japanese, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full-ja.pdf)
 
 ![The cover of a full scan with the End-to-End tests, the alerts by risk, and the page of the XSS with its attack](img/report-sample-full.png)
 

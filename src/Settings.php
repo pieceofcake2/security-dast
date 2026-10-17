@@ -66,6 +66,7 @@ final class Settings
         $options = [];
         $report = is_array($settings['report'] ?? null) ? $settings['report'] : [];
         foreach (self::REPORT as $key => $option) {
+            // A null value is not set, e.g. getenv('...') ?: null
             if (isset($report[$key])) {
                 $options[$option] = self::value($report[$key]);
             }
@@ -74,6 +75,10 @@ final class Settings
             $options['pdf'] = rtrim($report['dir'], '/\\') . '/' . $pdf;
         }
         foreach (is_array($settings[$section] ?? null) ? $settings[$section] : [] as $key => $value) {
+            // A null value is not set, e.g. getenv('...') ?: null
+            if ($value === null) {
+                continue;
+            }
             $options[strtolower((string)preg_replace('/(?<!^)[A-Z]/', '-$0', (string)$key))] = self::value($value);
         }
 
