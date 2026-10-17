@@ -19,7 +19,7 @@ class WebServerTest extends TestCase
     {
         $body = (string)file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
         // $http_response_header is set in this scope before PHP 8.4, and deprecated since
-        $headers = function_exists('http_get_last_response_headers') ? (array)http_get_last_response_headers() : $http_response_header ?? [];
+        $headers = function_exists('http_get_last_response_headers') ? (array)http_get_last_response_headers() : $http_response_header;
 
         return [(string)($headers[0] ?? ''), $body];
     }
