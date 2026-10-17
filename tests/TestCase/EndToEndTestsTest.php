@@ -18,6 +18,11 @@ class EndToEndTestsTest extends TestCase
         ], $tests->env('http://127.0.0.1:8090', 'http://host.docker.internal:8123/'));
     }
 
+    public function testCommand(): void
+    {
+        $this->assertSame('vendor/bin/phpunit --testsuite EndToEnd', (new EndToEndTests('vendor/bin/phpunit --testsuite EndToEnd', '.'))->command());
+    }
+
     public function testRun(): void
     {
         $command = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg('echo getenv("PANTHER_EXTERNAL_BASE_URI"), " ", getenv("APP_ENV"); fwrite(STDERR, " failed"); exit(1);');
