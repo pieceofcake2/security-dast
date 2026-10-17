@@ -79,7 +79,7 @@ final class Zap
             [$code, $output, $error] = ($this->run)($command, $dir);
             $report = $dir . DIRECTORY_SEPARATOR . 'zap.json';
             if (!is_file($report)) {
-                throw new RuntimeException(sprintf('ZAP failed (exit code %d): %s', $code, self::tail($error !== '' ? $error : $output)));
+                throw new RuntimeException(sprintf('ZAP failed (exit code %d): %s', $code, self::tail($output . "\n" . $error)));
             }
             try {
                 $data = json_decode((string)file_get_contents($report), true, 512, JSON_THROW_ON_ERROR);

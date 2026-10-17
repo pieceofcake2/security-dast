@@ -138,12 +138,16 @@ class ZapTest extends TestCase
     }
 
     /**
-     * Runs ZAP in Docker against the fixture application, when Docker is available (as on GitHub Actions)
+     * Runs ZAP in Docker against the fixture application, with `SECURITY_DAST_TEST_DOCKER=1` (one job of CI) and
+     * Docker
      *
      * @return void
      */
     public function testScanWithDocker(): void
     {
+        if (empty($_SERVER['SECURITY_DAST_TEST_DOCKER'])) {
+            $this->markTestSkipped('Set SECURITY_DAST_TEST_DOCKER=1 to run ZAP in Docker.');
+        }
         exec('docker info > /dev/null 2>&1', $output, $code);
         if ($code !== 0) {
             $this->markTestSkipped('Docker is not available.');

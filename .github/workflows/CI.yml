@@ -70,10 +70,12 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      # Chrome of the runner image prints the PDF of CommandTest
+      # Chrome of the runner image prints the PDF of CommandTest; ZAP runs in Docker in one job only, as its
+      # image is large
       - name: Run tests
         env:
           REPORT_NO_SANDBOX: 1
+          SECURITY_DAST_TEST_DOCKER: ${{ matrix.php-version == '8.4' && '1' || '' }}
         run: ./vendor/bin/phpunit --coverage-clover coverage.xml --log-junit junit.xml --colors=always
 
       - name: Test summary
