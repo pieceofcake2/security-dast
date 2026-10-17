@@ -47,6 +47,35 @@ class ZapDaemonTest extends TestCase
         $daemon->runPlan(['jobs' => []]);
     }
 
+    public function testNoAnswer(): void
+    {
+        $commands = [];
+        $daemon = new ZapDaemon(TMP, port: 8090, run: static function (array $command, string $cwd) use (&$commands): array {
+            $commands[] = implode(' ', array_slice($command, 0, 3));
+
+            return [0, "id\n", ''];
+        }, get: static fn(string $url): string|false => false);
+
+        try {
+            $daemon->start(0);
+            $this->fail('No exception');
+        } catch (RuntimeException $e) {
+            $this->assertSame('ZAP did not answer on port 8090 in 0 seconds.', $e->getMessage());
+        }
+        // The container is removed
+        $this->assertSame(['docker run -d', 'docker rm -f'], $commands);
+    }
+
+    public function testRunPlanWithoutId(): void
+    {
+        $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static fn(string $url): string => str_contains($url, 'version') ? '{"version":"2.17.0"}' : 'Internal error');
+        $daemon->start();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('ZAP did not answer automation/action/runPlan: Internal error');
+        $daemon->runPlan(['jobs' => []]);
+    }
+
     public function testStartFailed(): void
     {
         $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [125, '', 'Cannot connect to the Docker daemon']);

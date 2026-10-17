@@ -9,6 +9,7 @@ use PieceOfCake2\Report\Environment;
 use PieceOfCake2\Report\PdfPrinter;
 use PieceOfCake2\Report\ReportWriter;
 use PieceOfCake2\SecurityDast\Command;
+use PieceOfCake2\SecurityDast\Login;
 use PieceOfCake2\SecurityDast\Zap;
 use PieceOfCake2\SecurityDast\ZapDaemon;
 
@@ -57,6 +58,7 @@ class CommandTest extends TestCase
         $this->assertSame('secret', $login->password);
         $this->assertSame('http://127.0.0.1:8080/users/login', $login->urlOn('http://127.0.0.1:8080/'));
         $this->assertNull(Command::config([])?->login());
+        $this->assertSame('https://example.com/login', (new Login('https://example.com/login', 'a', 'b'))->urlOn('http://127.0.0.1:8080'));
     }
 
     public function testSettingsFile(): void
