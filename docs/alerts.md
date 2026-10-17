@@ -1,11 +1,28 @@
 # Alerts
 
-The alerts that the baseline scan of ZAP raises most often on a CakePHP 2 application, what they mean, and how
-to fix them. Each page of the report also has the description and the solution of ZAP, and a link to the page
+The alerts that ZAP raises most often on a CakePHP 2 application, by the baseline and by the full scan, what
+they mean, and how to fix them. Each page of the report also has the description and the solution of ZAP, and a link to the page
 of the alert on [zaproxy.org](https://www.zaproxy.org/docs/alerts/).
 
 Most alerts are fixed once for the whole application: the security headers in `AppController` and the web
-server, the cookies in `config/core.php`, and the error pages with the debug level.
+server, the cookies in `config/core.php`, and the error pages with the debug level. The alerts of the full scan
+(XSS, SQL injection, ...) are fixed in the code of the page: the same places are found by the rules of
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/rules), which give more patterns of
+the fix.
+
+## Checking a Fix
+
+1. Look at the response yourself, e.g. the headers and the cookies of a page:
+
+   ```bash
+   curl -sI https://staging.example.com/ | grep -iE 'content-security|x-frame|x-content-type|set-cookie|x-powered'
+   ```
+
+   The developer tools of the browser (Network, then the headers of a request, and Application, then the
+   cookies) show the same.
+2. Run the scan again: the alert is no longer in the report.
+3. Check production too, with a baseline scan of `--url` on staging or production: the web server, the proxy and
+   PHP of production are not those of the scan.
 
 | Alert ID | Alert | Risk | Fix |
 | --- | --- | --- | --- |
@@ -137,8 +154,12 @@ server sets a header for all the responses, it can be left out of `AppController
 - **CSP**: `default-src 'self'` allows the scripts, styles and images of the application only. A page with
   inline scripts (`<script>...</script>`, `$this->Html->scriptBlock()`, `onclick="..."`) or files of other
   sites needs more: move the scripts to files of `webroot/js/`, or add the sites to the policy, e.g.
-  `script-src 'self' https://cdn.example.com`. Try a policy first with `Content-Security-Policy-Report-Only`,
-  which reports in the console of the browser and blocks nothing.
+  `script-src 'self' https://cdn.example.com`. Introduce a policy step by step:
+  1. Send it as `Content-Security-Policy-Report-Only`: it blocks nothing, and the console of the browser lists
+     what it would block.
+  2. Go through the pages (the End-to-End tests do), and move the inline scripts and styles to files, or add the
+     sites that the pages need.
+  3. Send it as `Content-Security-Policy` once the console is clean.
 - **Cross-Origin-Embedder-Policy** (`require-corp`) blocks the images and scripts of other sites that do not
   allow it. Set it only when the pages use no such resources; the alert of it is low.
 - **Strict-Transport-Security** only on HTTPS: a browser keeps it for `max-age` seconds, so make sure every
@@ -180,7 +201,8 @@ pieceofcake2/security-sast.
   `Header always edit Set-Cookie "^((?!.*;\s*SameSite=).*)$" "$1; SameSite=Lax"`.
 
 Do not set `session.cookie_httponly` or `session.cookie_secure` to false; pieceofcake2/security-sast checks
-this in the configuration (`cakephp2-config-session-cookie`).
+this in the configuration (`cakephp2-config-session-cookie`). Check the cookies with `curl -sI` or in the
+developer tools: each `Set-Cookie` of the session shows `HttpOnly`, `Secure` (on HTTPS) and `SameSite=Lax`.
 
 ## Error Pages
 
