@@ -1,9 +1,10 @@
 # Security DAST Documentation
 
-Dynamic application security testing (DAST) of a CakePHP 2 application: the application is run, crawled and
-checked by the baseline scan of [OWASP ZAP](https://www.zaproxy.org/), for the issues that its responses show,
-such as missing security headers, cookies without flags, forms without a CSRF token or error pages with debug
-information. The alerts are written as an A4 PDF report by risk, in the design of the reports of
+Dynamic application security testing (DAST) of a CakePHP 2 application: the application is run and scanned by
+[OWASP ZAP](https://www.zaproxy.org/). The baseline scan checks what its responses show, such as missing
+security headers, cookies without flags, forms without a CSRF token or error pages with debug information; the
+full scan also attacks its pages and forms, for XSS, SQL injections and the like. ZAP can log in as a user, and
+can follow the End-to-End tests of the project instead of crawling. The alerts are written as an A4 PDF report by risk, in the design of the reports of
 [pieceofcake2/report](https://pieceofcake2.github.io/report/). The exit code fails CI when an alert reaches a
 risk.
 
@@ -21,17 +22,15 @@ code); pieceofcake2/security-check runs them all.
    `APP_ENV=test`, so that it loads `config/.env.test` and uses the database of the tests. The document root
    comes from the application (`WWW_ROOT` of `config/define.php`, or `webroot/` or `app/webroot/` of the
    legacy layout), and a router script sends the requests to `index.php` as `webroot/.htaccess` does.
-2. ZAP runs in Docker (`ghcr.io/zaproxy/zaproxy:stable`) with `zap-baseline.py`: it crawls the site for a
-   minute (`--minutes`), and checks each request and response (passive scan).
+2. ZAP runs in Docker (`ghcr.io/zaproxy/zaproxy:stable`) with a plan of its Automation Framework: it crawls
+   the site for a minute (`--minutes`), and checks each request and response (passive scan). The full scan
+   then attacks each page and parameter that it found (active scan). With a login, ZAP logs in with a browser
+   first, and crawls and attacks as the user.
 3. The alerts are read from the JSON report of ZAP and written as a PDF, in the language of the report: ZAP
    writes its alerts in Japanese for `--language=ja`.
 
-The baseline scan sends no attacks: it reads the pages as a browser does, so it is safe to run on any
-environment. It does not find the vulnerabilities that only an attack shows, such as an SQL injection; see
-[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) for those in the code.
-
-ZAP knows the CSRF token of the forms of CakePHP 2 (`data[_Token][key]` of `SecurityComponent`), so these
-forms are not reported as forms without a token.
+ZAP knows the CSRF token of the forms of CakePHP 2 (`data[_Token][key]` of `SecurityComponent`): these forms
+are not reported as forms without a token, and the full scan sends its attacks with a new token.
 
 ## Requirements
 
@@ -82,6 +81,13 @@ Scan only the applications that you are allowed to: even a baseline scan sends m
 | `--webroot=DIR` | `SECURITY_DAST_WEBROOT` | `WWW_ROOT` of the application | The document root of the built-in web server |
 | `--app-env=ENV` | `SECURITY_DAST_APP_ENV` | `test` | `APP_ENV` of the built-in web server |
 | `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | Alert IDs to leave out of the report, comma separated (see [Ignoring an Alert](#ignoring-an-alert)) |
+| `--scan=SCAN` | `SECURITY_DAST_SCAN` | `baseline` | `baseline`, or `full` to attack the pages too (see [Scans](#scans)) |
+| `--scan-minutes=N` | `SECURITY_DAST_SCAN_MINUTES` | `10` | The most minutes of the attacks of the full scan |
+| `--login-url=PATH` | `SECURITY_DAST_LOGIN_URL` | | The login page, a path (`/users/login`) or a URL, to scan as a user (see [Scanning as a Logged-in User](#scanning-as-a-logged-in-user)) |
+| `--username=NAME` | `SECURITY_DAST_USERNAME` | | The user to log in as |
+| `--password=PASSWORD` | `SECURITY_DAST_PASSWORD` | | Its password; prefer the environment variable |
+| `--exclude=LIST` | `SECURITY_DAST_EXCLUDE` | `.*logout.*` | Regular expressions (of Java) of the URLs to leave out, comma separated |
+| `--end-to-end=COMMAND` | `SECURITY_DAST_END_TO_END` | | The command of the End-to-End tests to scan, instead of the crawl (see [End-to-End Tests as the Scenario](#end-to-end-tests-as-the-scenario)) |
 | `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | Minutes to crawl the site |
 | `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | Crawl with a browser too, for the links that JavaScript builds |
 | `--zap-options=OPTIONS` | `SECURITY_DAST_ZAP_OPTIONS` | | More options of ZAP (`-config key=value ...`) |
@@ -108,8 +114,12 @@ return [
         'dir' => 'tmp/security',
     ],
     'dast' => [
+        'scan' => 'full',
         'failOn' => 'medium',
-        'minutes' => 3,
+        'endToEnd' => 'vendor/bin/phpunit --testsuite EndToEnd',
+        'loginUrl' => '/users/login',
+        'username' => 'test@example.com',
+        'password' => getenv('SECURITY_DAST_PASSWORD') ?: null,
         'ignore' => ['10049'],
     ],
 ];
@@ -120,6 +130,80 @@ lists. The `report` section has `language`, `localeDir`, `project` (the project 
 directory of the reports (this one is written to `tmp/security/security-dast.pdf`). An unknown key of the
 `dast` section is an error. The options win over the environment variables, and the environment variables
 over the file.
+
+## Scans
+
+| | Baseline (`--scan=baseline`, default) | Full (`--scan=full`) |
+| --- | --- | --- |
+| What | Crawls and checks the requests and responses | The same, then attacks each page and parameter |
+| Finds | Security headers, cookies, forms without a token, error pages, versions in the headers, ... | The same, and XSS (reflected, persistent, DOM), SQL injections, path traversal, command injections, ... |
+| Changes data | No: it only reads the pages | Yes: it sends forms with attacks, so it adds and changes records |
+| Where | Any environment | A test environment only, with a test database |
+| Time | About 1 to 2 minutes | Several minutes or more, up to `--scan-minutes` (default 10) for the attacks |
+
+The full scan sends what an attacker would: run it only on the built-in web server of the scan (the default,
+with the test database), or on a server of your own that can lose its data. Never run it on production.
+
+The attacks of a full scan are found by their effects in the responses, so a scan does not find every
+vulnerability, and a finding is to check in the code: see
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) for the code.
+
+## Scanning as a Logged-in User
+
+A crawl as a visitor stops at the login page, where most of the forms of an application are. Give a user of
+the test database, and ZAP logs in with a browser (Firefox of its image) on the login page, then crawls and
+attacks as the user:
+
+```bash
+export SECURITY_DAST_PASSWORD=secret
+vendor/bin/security-dast --scan=full --login-url=/users/login --username=test@example.com
+```
+
+- ZAP fills the user name and the password fields of the page, as a person would, so the forms of
+  `FormHelper` with the token of `SecurityComponent` work.
+- It finds by itself how the login is kept (the session cookie) and how to check that it is (a page that
+  changes after the login), and logs in again when it finds that it is logged out.
+- When it cannot log in, the command fails with an error (exit code `2`), instead of scanning as a visitor
+  unnoticed. The cover of the report shows the user.
+- The URLs that match `.*logout.*` are left out, so that the scan does not log out. Give other patterns with
+  `--exclude`, e.g. `--exclude=.*/users/logout.*,.*/admin/.*`.
+- Give the password with `SECURITY_DAST_PASSWORD` (a secret of CI) rather than with the option, which is seen
+  in the list of processes. It is not written to the report.
+
+The user must be in the test database when the scan runs, e.g. created by the fixtures or a seed of the test
+environment.
+
+## End-to-End Tests as the Scenario
+
+A crawl follows the links of the pages: it can miss the pages that only a series of actions reaches, such as
+the confirmation of an order, and it does not fill forms with valid values. The End-to-End tests of the project
+know these scenarios: with `--end-to-end`, ZAP records the requests of the tests and scans them, instead of
+crawling.
+
+```bash
+vendor/bin/security-dast --end-to-end="vendor/bin/phpunit --testsuite EndToEnd" --scan=full
+```
+
+1. ZAP starts as a proxy (`zap.sh -daemon` in Docker), on `127.0.0.1` only, with a random key for its API.
+2. The command of the tests runs with:
+   - `PANTHER_CHROME_ARGUMENTS`: the proxy of ZAP for the Chrome of the tests (`--proxy-server=...`), added to
+     the arguments that are already set
+   - `PANTHER_EXTERNAL_BASE_URI`: the application of the scan, so that the tests do not start a web server of
+     their own
+   - `APP_ENV`: the one of the scan (`test`)
+3. When the tests have finished, ZAP checks the requests and responses that it recorded, and, for the full
+   scan, attacks them, with the session cookies of the tests.
+
+The tests are those of [pieceofcake2/panther](https://pieceofcake2.github.io/panther/) (or of Symfony Panther):
+use relative URLs in them (`$client->request('GET', '/contacts/add')`), so that they follow the base URI. Their
+output goes to the error output of the command. When they fail, the scan goes on with the requests made until
+then, and the cover of the report says so. With `--login-url`, the attacks of the full scan run as that user.
+
+On the forms of `SecurityComponent`, ZAP gets a new token for each of its attacks, in the session of the tests,
+so that the attacks are not rejected. Still, the active scan is bounded by `--scan-minutes` and does not reach
+every parameter in a long scenario, so a full scan finds many vulnerabilities, not all: check the views with
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) too.
+
 
 ## The Report
 
@@ -155,13 +239,6 @@ An ID leaves out its variants too: `10038` leaves out `10038-1`. The IDs are tho
 and of [the alerts of ZAP](https://www.zaproxy.org/docs/alerts/). The cover of the report lists the ignored
 alerts.
 
-## Pages Behind a Login
-
-The baseline scan crawls as a visitor who is not logged in: the pages behind a login are not scanned. Their
-security headers and cookies are mostly the same as those of the other pages, so the fixes of the alerts
-apply to them too; check their code with
-[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/).
-
 ## Troubleshooting
 
 **`ZAP failed (exit code 125): Cannot connect to the Docker daemon`**: Docker is not running, or the user
@@ -177,9 +254,16 @@ free, so it is often PHP itself, e.g. a missing extension.
 no tables. Run the scan after the schema is loaded (as the tests do), or use another `--app-env`. The alert
 "Application Error Disclosure" shows these pages.
 
-**ZAP found only a few URLs**: the crawl follows the links of the pages. Raise `--minutes`, add
-`--ajax-spider=1` for the links that JavaScript builds, or link the pages from the top page of the test
-environment.
+**ZAP found only a few URLs**: the crawl follows the links of the pages, and finds a few more or less from a
+run to another. Raise `--minutes`, add `--ajax-spider=1` for the links that JavaScript builds, or scan the
+End-to-End tests with `--end-to-end`.
+
+**`ZAP could not log in as ...`**: check the user name and the password, that the user is in the test
+database, and that the login page has the fields of the user name and the password without another step
+(e.g. a CAPTCHA or a second factor, which a test user should not have).
+
+**The End-to-End tests fail only in the scan**: they must use relative URLs, so that they follow
+`PANTHER_EXTERNAL_BASE_URI`. Check their output in the error output of the command.
 
 **`Chrome is needed to print the report`**: install Chrome or Chromium, or set `REPORT_CHROME_BINARY` (see
 [pieceofcake2/report](https://pieceofcake2.github.io/report/)).

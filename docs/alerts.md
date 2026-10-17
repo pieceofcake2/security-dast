@@ -9,6 +9,11 @@ server, the cookies in `config/core.php`, and the error pages with the debug lev
 
 | Alert ID | Alert | Risk | Fix |
 | --- | --- | --- | --- |
+| 40012, 40014, 40026 | Cross Site Scripting (Reflected, Persistent, DOM Based) | High | [XSS](#xss) (full scan) |
+| 40018, 40019, 40020, 40021, 40022, 40024 | SQL Injection | High | [SQL injection](#sql-injection) (full scan) |
+| 6, 7 | Path Traversal, Remote File Inclusion | High | [Paths and files of the request](#paths-and-files-of-the-request) (full scan) |
+| 90020 | Remote OS Command Injection | High | [Commands](#commands) (full scan) |
+| 20019 | External Redirect | High | [Redirects](#redirects) (full scan) |
 | 10038 | Content Security Policy (CSP) Header Not Set | Medium | [Security headers](#security-headers) |
 | 10020 | Missing Anti-clickjacking Header | Medium | [Security headers](#security-headers) |
 | 10202 | Absence of Anti-CSRF Tokens | Medium | [Forms without a CSRF token](#forms-without-a-csrf-token) |
@@ -27,6 +32,65 @@ server, the cookies in `config/core.php`, and the error pages with the debug lev
 | 10017 | Cross-Domain JavaScript Source File Inclusion | Low | [Scripts of other sites](#scripts-of-other-sites) |
 | 10049 | Storable and Cacheable Content, Non-Storable Content | Informational | [Cache](#cache) |
 | 10109, 10111, 10027, 10096 | Modern Web Application, Authentication Request Identified, Information Disclosure - Suspicious Comments, Timestamp Disclosure | Informational | [Information](#information) |
+
+## XSS
+
+A value of the request (a parameter, a field of a form) is printed in a page without escaping: a script in it
+runs in the browser of the user who opens the page, with their session. Reflected: in the response of the
+request; persistent: saved, then printed in another page; DOM based: by JavaScript of the page.
+
+Escape every value in the views with `h()`, and build the forms and links with the helpers, which escape:
+
+```php
+<!-- Found -->
+<p>Sent: <?php echo $message; ?></p>
+
+<!-- Fixed -->
+<p>Sent: <?= h($message) ?></p>
+```
+
+The rule `cakephp2-view-unescaped-output` of
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/rules#cakephp2-view-unescaped-output)
+finds these places in the code. For the DOM based XSS, do not put values in the page with `innerHTML` or
+`document.write()` in JavaScript: use `textContent`. A Content Security Policy without `'unsafe-inline'`
+([Security headers](#security-headers)) also blocks most of these scripts.
+
+## SQL Injection
+
+A value of the request goes into SQL as it is: the attacker can read or change the database. Use the
+conditions arrays of `find()`, which escape the values, or the values of `query()`:
+
+```php
+// Found
+$this->Post->query("SELECT * FROM posts WHERE title LIKE '%" . $q . "%'");
+
+// Fixed
+$this->Post->find('all', ['conditions' => ['Post.title LIKE' => '%' . $q . '%']]);
+$this->Post->query('SELECT * FROM posts WHERE title LIKE ?', ['%' . $q . '%']);
+```
+
+pieceofcake2/security-sast finds these places with the rules
+[cakephp2-query-concatenation](https://pieceofcake2.github.io/security-sast/rules#cakephp2-query-concatenation)
+and [cakephp2-conditions-string](https://pieceofcake2.github.io/security-sast/rules#cakephp2-conditions-string).
+
+## Paths and Files of the Request
+
+A value of the request names a file to read or include, or a view to render: `../` in it reaches other files.
+Map the value to a list of allowed names instead of using it as a path, and check uploaded file names with
+`basename()`. See the rule
+[cakephp2-render-request](https://pieceofcake2.github.io/security-sast/rules#cakephp2-render-request).
+
+## Commands
+
+A value of the request goes into a command of the system (`exec()`, `shell_exec()`, `system()`, backticks):
+the attacker runs commands on the server. Avoid the command, or pass each value with `escapeshellarg()`.
+
+## Redirects
+
+A value of the request is the URL of a redirect: a link of the site can send its users to another site, e.g. a
+copy of the login page. Redirect only to paths of the application, e.g. with a route array, or check the URL
+against a list. See the rule
+[cakephp2-redirect-request](https://pieceofcake2.github.io/security-sast/rules#cakephp2-redirect-request).
 
 ## Security Headers
 

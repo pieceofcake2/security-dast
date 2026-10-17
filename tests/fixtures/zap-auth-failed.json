@@ -1,0 +1,29 @@
+{
+ "summaryItems": [
+  {
+   "description": "Authentication failed",
+   "passed": false,
+   "key": "auth.summary.auth"
+  },
+  {
+   "description": "Username field identified",
+   "passed": true,
+   "key": "auth.summary.username"
+  },
+  {
+   "description": "Password field identified",
+   "passed": true,
+   "key": "auth.summary.password"
+  },
+  {
+   "description": "Session Handling identified",
+   "passed": true,
+   "key": "auth.summary.session"
+  },
+  {
+   "description": "Verification URL not identified",
+   "passed": false,
+   "key": "auth.summary.verif"
+  }
+ ]
+}

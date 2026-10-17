@@ -9,7 +9,9 @@ use PieceOfCake2\Report\Environment;
 use PieceOfCake2\Report\PdfPrinter;
 use PieceOfCake2\Report\ReportWriter;
 use PieceOfCake2\SecurityDast\Command;
+use PieceOfCake2\SecurityDast\Login;
 use PieceOfCake2\SecurityDast\Zap;
+use PieceOfCake2\SecurityDast\ZapDaemon;
 
 class CommandTest extends TestCase
 {
@@ -43,6 +45,22 @@ class CommandTest extends TestCase
         $this->assertFalse($config->ajaxSpider);
     }
 
+    public function testLogin(): void
+    {
+        $config = Command::config(['--scan=FULL', '--scan-minutes=20', '--login-url=/users/login', '--username=test@example.com', '--exclude=.*/users/logout.*, .*/admin/.*'], ['SECURITY_DAST_PASSWORD' => 'secret']);
+
+        $this->assertNotNull($config);
+        $this->assertSame('full', $config->scan);
+        $this->assertSame(20, $config->scanMinutes);
+        $this->assertSame(['.*/users/logout.*', '.*/admin/.*'], $config->exclude);
+        $login = $config->login();
+        $this->assertNotNull($login);
+        $this->assertSame('secret', $login->password);
+        $this->assertSame('http://127.0.0.1:8080/users/login', $login->urlOn('http://127.0.0.1:8080/'));
+        $this->assertNull(Command::config([])?->login());
+        $this->assertSame('https://example.com/login', (new Login('https://example.com/login', 'a', 'b'))->urlOn('http://127.0.0.1:8080'));
+    }
+
     public function testSettingsFile(): void
     {
         $project = ZapTest::FIXTURES . DS . 'project';
@@ -63,7 +81,7 @@ class CommandTest extends TestCase
     {
         $this->assertNull(Command::config(['--help']));
 
-        foreach (['--fail-on=critical', '--minutes=0', '--url=127.0.0.1:8080', '--verbose'] as $option) {
+        foreach (['--fail-on=critical', '--minutes=0', '--scan-minutes=x', '--scan=quick', '--url=127.0.0.1:8080', '--login-url=/login', '--verbose'] as $option) {
             try {
                 Command::config([$option]);
                 $this->fail('No exception for ' . $option);
@@ -110,6 +128,34 @@ class CommandTest extends TestCase
         $this->assertStringStartsWith('%PDF-', (string)file_get_contents($pdf));
 
         $this->assertSame(Command::SUCCESS, self::runCommand(['--pdf=' . $pdf, '--url=http://127.0.0.1:8080']));
+    }
+
+    public function testRunEndToEndTests(): void
+    {
+        if (PdfPrinter::findChrome() === null && empty($_SERVER['REPORT_CHROME_BINARY'])) {
+            $this->markTestSkipped('Chrome is not installed.');
+        }
+        $env = TMP . 'end-to-end.txt';
+        $daemon = static fn(string $dir, array $options): ZapDaemon => new ZapDaemon($dir, $options, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url) use ($dir): string {
+            if (str_contains($url, 'runPlan')) {
+                copy(ZapTest::FIXTURES . DS . 'zap-en.json', $dir . DS . 'zap.json');
+
+                return '{"planId":"0"}';
+            }
+
+            return str_contains($url, 'version') ? '{"version":"2.17.0"}' : '{"finished":"2026-10-17T10:00:00Z","error":[]}';
+        });
+        // The tests write their environment and fail
+        $tests = escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg('file_put_contents(' . var_export($env, true) . ', getenv("PANTHER_EXTERNAL_BASE_URI") . " " . getenv("PANTHER_CHROME_ARGUMENTS") . " " . getenv("APP_ENV")); exit(1);');
+        $stdout = fopen('php://memory', 'w+');
+        $stderr = fopen('php://memory', 'w+');
+        $command = new Command($stdout, $stderr, new Zap(os: 'Darwin'), new ReportWriter(PdfPrinter::fromEnv($_SERVER)), new Environment(), $daemon);
+
+        $code = $command->run(['--project=' . ZapTest::FIXTURES . DS . 'app', '--pdf=' . TMP . 'dast' . DS . 'end-to-end.pdf', '--end-to-end=' . $tests]);
+
+        rewind($stdout);
+        $this->assertSame(Command::SUCCESS, $code, (string)stream_get_contents($stdout));
+        $this->assertMatchesRegularExpression('#\Ahttp://host\.docker\.internal:\d+ --proxy-server=http://127\.0\.0\.1:8090 --proxy-bypass-list=<-loopback> --ignore-certificate-errors test\z#', (string)file_get_contents($env));
     }
 
     public function testRunFailsWithoutIndex(): void

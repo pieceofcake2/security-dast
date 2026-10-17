@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PieceOfCake2\SecurityDast;
 
+use Closure;
 use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
@@ -30,6 +31,8 @@ final class Command
      * @param \PieceOfCake2\SecurityDast\Zap|null $zap ZAP, default: with the settings
      * @param \PieceOfCake2\Report\ReportWriter|null $writer Writer of the PDF
      * @param \PieceOfCake2\Report\Environment|null $environment Environment, default: detected
+     * @param (\Closure(string, array<string>): \PieceOfCake2\SecurityDast\ZapDaemon)|null $daemon Creates the ZAP of
+     *  the End-to-End tests
      */
     public function __construct(
         private $stdout = STDOUT,
@@ -37,6 +40,7 @@ final class Command
         private ?Zap $zap = null,
         private ?ReportWriter $writer = null,
         private ?Environment $environment = null,
+        private ?Closure $daemon = null,
     ) {
     }
 
@@ -71,7 +75,19 @@ final class Command
                 $server = new WebServer($config->webroot(), $config->project, ['APP_ENV' => $config->appEnv]);
                 $url = $server->start();
             }
-            $result = ($this->zap ?? $config->zap())->scan($url, $config->language);
+            $zap = $this->zap ?? $config->zap();
+            if ($config->endToEnd !== null) {
+                // The output of the tests goes to the error output, so that the output stays the summary
+                $tests = new EndToEndTests($config->endToEnd, $config->project, ['APP_ENV' => $config->appEnv]);
+                $exitCode = null;
+                $stderr = $this->stderr;
+                $result = $zap->scanScenario($url, static function (string $proxy, string $site) use ($tests, &$exitCode, $stderr): void {
+                    $exitCode = $tests->run($proxy, $site, $stderr);
+                }, $config->language, $this->daemon);
+                $result->endToEndExitCode = $exitCode;
+            } else {
+                $result = $zap->scan($url, $config->language);
+            }
             $result->ignore($config->ignore);
             $server?->stop();
             $server = null;
@@ -94,11 +110,12 @@ final class Command
             }
         }
         fwrite($this->stdout, sprintf(
-            "%d alerts%s on %d URLs of %s (ZAP %s). Report: %s\n",
+            "%d alerts%s on %d URLs of %s%s (ZAP %s). Report: %s\n",
             count($result->alerts),
             $summary === [] ? '' : ' (' . implode(', ', $summary) . ')',
             $result->urls(),
             $result->target,
+            $result->user !== null ? ' as ' . $result->user : '',
             $result->version ?? '?',
             $config->pdf,
         ));
@@ -132,6 +149,13 @@ final class Command
             'docker' => $value('SECURITY_DAST_DOCKER'),
             'minutes' => $value('SECURITY_DAST_MINUTES'),
             'ajax-spider' => $value('SECURITY_DAST_AJAX_SPIDER'),
+            'end-to-end' => $value('SECURITY_DAST_END_TO_END'),
+            'scan' => $value('SECURITY_DAST_SCAN'),
+            'scan-minutes' => $value('SECURITY_DAST_SCAN_MINUTES'),
+            'login-url' => $value('SECURITY_DAST_LOGIN_URL'),
+            'username' => $value('SECURITY_DAST_USERNAME'),
+            'password' => $value('SECURITY_DAST_PASSWORD'),
+            'exclude' => $value('SECURITY_DAST_EXCLUDE'),
             'ignore' => $value('SECURITY_DAST_IGNORE'),
             'zap-options' => $value('SECURITY_DAST_ZAP_OPTIONS'),
             'language' => $value('SECURITY_REPORT_LANGUAGE'),
@@ -167,32 +191,48 @@ final class Command
             throw new InvalidArgumentException(sprintf('--fail-on must be one of %s.', implode(', ', Config::THRESHOLDS)));
         }
         $minutes = filter_var($options['minutes'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        if ($minutes === false) {
-            throw new InvalidArgumentException('--minutes must be a number of 1 or more.');
+        $scanMinutes = filter_var($options['scan-minutes'] ?? 10, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($minutes === false || $scanMinutes === false) {
+            throw new InvalidArgumentException('--minutes and --scan-minutes must be numbers of 1 or more.');
+        }
+        $scan = strtolower((string)($options['scan'] ?? 'baseline'));
+        if (!in_array($scan, Zap::SCANS, true)) {
+            throw new InvalidArgumentException(sprintf('--scan must be one of %s.', implode(', ', Zap::SCANS)));
         }
         $url = $options['url'];
         if ($url !== null && !preg_match('#\Ahttps?://#i', $url)) {
             throw new InvalidArgumentException('--url must be an http or https URL.');
         }
+        if ($options['login-url'] !== null && ($options['username'] === null || $options['password'] === null)) {
+            throw new InvalidArgumentException('--login-url needs --username and --password (or SECURITY_DAST_PASSWORD).');
+        }
+        $list = static fn(?string $value): array => $value === null ? [] : array_values(array_filter(array_map('trim', explode(',', $value)), static fn(string $item): bool => $item !== ''));
 
         return new Config(
-            (string)($options['pdf'] ?? 'tmp/security-dast.pdf'),
-            $failOn,
-            (string)($options['project'] ?? '.'),
-            $url,
-            $options['webroot'],
-            (string)($options['app-env'] ?? 'test'),
-            (string)($options['image'] ?? Zap::IMAGE),
-            (string)($options['docker'] ?? 'docker'),
-            $minutes,
-            filter_var($options['ajax-spider'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            array_values(array_filter(array_map('trim', explode(',', (string)$options['ignore'])), static fn(string $id): bool => $id !== '')),
-            (string)($options['zap-options'] ?? ''),
-            (string)($options['language'] ?? 'en'),
-            $options['locale-dir'],
-            $options['title'],
-            $options['project-name'],
-            $options['note'],
+            pdf: (string)($options['pdf'] ?? 'tmp/security-dast.pdf'),
+            failOn: $failOn,
+            project: (string)($options['project'] ?? '.'),
+            url: $url,
+            webroot: $options['webroot'],
+            appEnv: (string)($options['app-env'] ?? 'test'),
+            image: (string)($options['image'] ?? Zap::IMAGE),
+            docker: (string)($options['docker'] ?? 'docker'),
+            minutes: $minutes,
+            ajaxSpider: filter_var($options['ajax-spider'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            endToEnd: $options['end-to-end'],
+            scan: $scan,
+            scanMinutes: $scanMinutes,
+            loginUrl: $options['login-url'],
+            username: $options['username'],
+            password: $options['password'],
+            exclude: $options['exclude'] === null ? null : $list($options['exclude']),
+            ignore: $list($options['ignore']),
+            zapOptions: (string)($options['zap-options'] ?? ''),
+            language: (string)($options['language'] ?? 'en'),
+            localeDir: $options['locale-dir'],
+            title: $options['title'],
+            projectName: $options['project-name'],
+            note: $options['note'],
         );
     }
 
@@ -206,8 +246,8 @@ final class Command
         return <<<'TEXT'
 Usage: vendor/bin/security-dast [options]
 
-Runs the application with PHP's built-in web server (or takes the URL of a running one), scans it with the
-baseline scan of OWASP ZAP (Docker), and writes a PDF report of the alerts by risk.
+Runs the application with PHP's built-in web server (or takes the URL of a running one), scans it with OWASP
+ZAP (Docker), as a user when a login is given, and writes a PDF report of the alerts by risk.
 
 Options:
   --pdf=PATH             PDF report (SECURITY_DAST_PDF, default: tmp/security-dast.pdf)
@@ -220,6 +260,17 @@ Options:
   --app-env=ENV          APP_ENV of the built-in web server (SECURITY_DAST_APP_ENV, default: test)
   --image=IMAGE          Docker image of ZAP (SECURITY_DAST_IMAGE, default: ghcr.io/zaproxy/zaproxy:stable)
   --docker=COMMAND       Docker command (SECURITY_DAST_DOCKER, default: docker)
+  --end-to-end=COMMAND   End-to-End tests to scan as the scenario, instead of the crawl, e.g.
+                         "vendor/bin/phpunit --testsuite EndToEnd" (pieceofcake2/panther) (SECURITY_DAST_END_TO_END)
+  --scan=SCAN            baseline (crawl and check the responses) or full (attack the pages too: on a test
+                         environment only) (SECURITY_DAST_SCAN, default: baseline)
+  --scan-minutes=N       Most minutes of the attacks of the full scan (SECURITY_DAST_SCAN_MINUTES, default: 10)
+  --login-url=PATH       Login page, e.g. /users/login: ZAP logs in with a browser and scans as the user
+                         (SECURITY_DAST_LOGIN_URL)
+  --username=NAME        User to log in as (SECURITY_DAST_USERNAME)
+  --password=PASSWORD    Password of the user (SECURITY_DAST_PASSWORD, better than the option)
+  --exclude=LIST         Regular expressions of URLs to leave out, comma separated (SECURITY_DAST_EXCLUDE,
+                         default: .*logout.*)
   --minutes=N            Minutes to crawl the site (SECURITY_DAST_MINUTES, default: 1)
   --ajax-spider=1        Crawl with a browser too, for pages built by JavaScript (SECURITY_DAST_AJAX_SPIDER)
   --ignore=LIST          Alert IDs to leave out of the report, comma separated, e.g. 10038 (SECURITY_DAST_IGNORE)

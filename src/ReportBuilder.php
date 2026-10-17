@@ -77,7 +77,19 @@ final class ReportBuilder
         $target[] = new Row($this->t('field.server'), $config->url === null
             ? $this->t('server.builtin', ['env' => $config->appEnv])
             : $this->t('server.url'));
-        $target[] = new Row($this->t('field.scan'), $this->t($config->ajaxSpider ? 'scan.ajax' : 'scan.baseline', ['minutes' => $config->minutes]));
+        $scan = $this->t(($config->endToEnd !== null ? 'scan.endToEnd.' : 'scan.') . ($config->scan === 'full' ? 'full' : 'baseline'), ['minutes' => $config->minutes, 'scanMinutes' => $config->scanMinutes]);
+        if ($config->ajaxSpider && $config->endToEnd === null) {
+            $scan .= $this->t('scan.ajax');
+        }
+        $target[] = new Row($this->t('field.scan'), $scan);
+        if ($config->endToEnd !== null) {
+            $failed = $result->endToEndExitCode !== null && $result->endToEndExitCode !== 0;
+            $target[] = new Row($this->t('field.endToEnd'), $config->endToEnd, warning: $failed ? $this->t('endToEnd.failed', ['code' => (int)$result->endToEndExitCode]) : null, monoValue: true);
+        }
+        $login = $config->login();
+        $target[] = new Row($this->t('field.login'), $login === null
+            ? $this->t('login.none')
+            : $this->t('login.user', ['user' => $result->user ?? $login->username, 'url' => $login->urlOn($result->target)]));
         $target[] = new Row($this->t('field.urls'), (string)$result->urls());
         if ($result->ignored !== []) {
             $target[] = new Row($this->t('field.ignored'), implode('　', $result->ignored), monoValue: true);
@@ -92,7 +104,7 @@ final class ReportBuilder
         if ($result->alerts === []) {
             $notes[] = $this->t('note.none');
         }
-        $notes[] = $this->t('note.passive');
+        $notes[] = $this->t($config->scan === 'full' ? 'note.active' : 'note.passive');
         if ($config->note !== null) {
             $notes[] = $config->note;
         }

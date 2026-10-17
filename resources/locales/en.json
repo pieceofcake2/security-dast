@@ -35,10 +35,19 @@
     "instances.more": "and {count} more requests",
     "server.builtin": "PHP's built-in web server (APP_ENV={env})",
     "server.url": "A running application",
-    "scan.baseline": "OWASP ZAP baseline scan (crawl {minutes} min)",
-    "scan.ajax": "OWASP ZAP baseline scan (crawl {minutes} min, with the AJAX spider)",
+    "scan.baseline": "OWASP ZAP baseline scan: crawl ({minutes} min) and check the responses",
+    "scan.ajax": ", with the AJAX spider",
     "threshold.value": "{severity} or higher",
     "threshold.none": "None (the report only)",
     "note.none": "No alert was raised on the crawled pages.",
-    "note.passive": "The baseline scan crawls the site and checks its requests and responses; it sends no attacks, so it does not find every vulnerability."
+    "note.passive": "The baseline scan crawls the site and checks its requests and responses; it sends no attacks, so it does not find every vulnerability.",
+    "field.login": "Login",
+    "scan.full": "OWASP ZAP full scan: crawl ({minutes} min), check the responses and attack (up to {scanMinutes} min)",
+    "login.none": "None (as a visitor)",
+    "login.user": "{user} on {url}",
+    "note.active": "The full scan attacks the pages and their parameters, e.g. with scripts and SQL, as an attacker would; it finds many vulnerabilities, but not all, e.g. those of the pages that it did not crawl.",
+    "field.endToEnd": "End-to-End tests",
+    "endToEnd.failed": "The tests failed (exit code {code}): the pages after the failure may not be scanned",
+    "scan.endToEnd.baseline": "OWASP ZAP: check the requests and responses of the End-to-End tests",
+    "scan.endToEnd.full": "OWASP ZAP: check the requests and responses of the End-to-End tests, and attack them (up to {scanMinutes} min)"
 }

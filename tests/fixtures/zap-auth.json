@@ -1,0 +1,29 @@
+{
+ "summaryItems": [
+  {
+   "description": "Authentication appeared to work",
+   "passed": true,
+   "key": "auth.summary.auth"
+  },
+  {
+   "description": "Username field identified",
+   "passed": true,
+   "key": "auth.summary.username"
+  },
+  {
+   "description": "Password field identified",
+   "passed": true,
+   "key": "auth.summary.password"
+  },
+  {
+   "description": "Session Handling identified",
+   "passed": true,
+   "key": "auth.summary.session"
+  },
+  {
+   "description": "Verification URL identified",
+   "passed": true,
+   "key": "auth.summary.verif"
+  }
+ ]
+}

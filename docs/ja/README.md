@@ -1,8 +1,10 @@
 # Security DAST ドキュメント
 
 CakePHP 2 アプリケーションの動的アプリケーションセキュリティテスト (DAST) です。アプリケーションを起動し、
-[OWASP ZAP](https://www.zaproxy.org/) のベースラインスキャンでクロールして、レスポンスからわかる問題を調べます。
-セキュリティヘッダーの不足、フラグのない Cookie、CSRF トークンのないフォーム、デバッグ情報を出すエラーページなどです。
+[OWASP ZAP](https://www.zaproxy.org/) でスキャンします。ベースラインスキャンは、セキュリティヘッダーの不足、フラグのない
+Cookie、CSRF トークンのないフォーム、デバッグ情報を出すエラーページなど、レスポンスからわかる問題を調べます。フル
+スキャンは、さらにページやフォームを攻撃して、XSS や SQL インジェクションなどを調べます。ZAP はユーザーとして
+ログインでき、クロールの代わりにプロジェクトの End-to-End テストをたどることもできます。
 アラートはリスクごとの A4 の PDF の報告書にします。報告書は [pieceofcake2/report](https://pieceofcake2.github.io/report/ja/)
 のデザインです。あるリスク以上のアラートがあれば、終了コードで CI を失敗にします。
 
@@ -19,17 +21,15 @@ pieceofcake2 のセキュリティ診断の 1 つで、ほかに [pieceofcake2/s
    アプリケーションは `config/.env.test` を読み、テストのデータベースを使います。ドキュメントルートはアプリケーションから
    取ります (`config/define.php` の `WWW_ROOT`、または `webroot/`、従来の構成では `app/webroot/`)。ルータースクリプトが、
    `webroot/.htaccess` と同じようにリクエストを `index.php` に渡します。
-2. ZAP を Docker (`ghcr.io/zaproxy/zaproxy:stable`) の `zap-baseline.py` で実行します。サイトを 1 分間 (`--minutes`)
-   クロールし、各リクエストとレスポンスを確かめます (パッシブスキャン)。
+2. ZAP を Docker (`ghcr.io/zaproxy/zaproxy:stable`) で、Automation Framework の plan で実行します。サイトを 1 分間
+   (`--minutes`) クロールし、各リクエストとレスポンスを確かめます (パッシブスキャン)。フルスキャンでは、続けて見つけた
+   ページとパラメーターを攻撃します (アクティブスキャン)。ログインを指定すると、ZAP はまずブラウザでログインし、
+   そのユーザーとしてクロールと攻撃をします。
 3. ZAP の JSON の結果からアラートを読み、報告書の言語で PDF にします。`--language=ja` では、ZAP がアラートを日本語で
    書きます。
 
-ベースラインスキャンは攻撃を送りません。ブラウザと同じようにページを読むだけなので、どの環境でも実行できます。
-その代わり、SQL インジェクションのように攻撃してはじめてわかる脆弱性は見つけません。コードの中のそうした問題は
-[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/) で調べます。
-
-ZAP には CakePHP 2 のフォームの CSRF トークン (`SecurityComponent` の `data[_Token][key]`) を教えてあるので、そうした
-フォームをトークンのないフォームとして指摘しません。
+ZAP には CakePHP 2 のフォームの CSRF トークン (`SecurityComponent` の `data[_Token][key]`) を教えてあります。そうした
+フォームをトークンのないフォームとして指摘せず、フルスキャンでは新しいトークンを付けて攻撃を送ります。
 
 ## 必要なもの
 
@@ -78,6 +78,13 @@ vendor/bin/security-dast --url=https://staging.example.com --pdf=tmp/security-da
 | `--webroot=DIR` | `SECURITY_DAST_WEBROOT` | アプリケーションの `WWW_ROOT` | 組み込みウェブサーバーのドキュメントルート |
 | `--app-env=ENV` | `SECURITY_DAST_APP_ENV` | `test` | 組み込みウェブサーバーの `APP_ENV` |
 | `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | 報告書から除くアラート ID。カンマ区切り ([アラートを除外する](#アラートを除外する)) |
+| `--scan=SCAN` | `SECURITY_DAST_SCAN` | `baseline` | `baseline`、またはページも攻撃する `full` ([スキャンの種類](#スキャンの種類)) |
+| `--scan-minutes=N` | `SECURITY_DAST_SCAN_MINUTES` | `10` | フルスキャンの攻撃の最大の分数 |
+| `--login-url=PATH` | `SECURITY_DAST_LOGIN_URL` | | ユーザーとしてスキャンするときのログインページ。パス (`/users/login`) か URL ([ログインしてスキャンする](#ログインしてスキャンする)) |
+| `--username=NAME` | `SECURITY_DAST_USERNAME` | | ログインするユーザー |
+| `--password=PASSWORD` | `SECURITY_DAST_PASSWORD` | | そのパスワード。環境変数で渡してください |
+| `--exclude=LIST` | `SECURITY_DAST_EXCLUDE` | `.*logout.*` | 除く URL の正規表現 (Java のもの)。カンマ区切り |
+| `--end-to-end=COMMAND` | `SECURITY_DAST_END_TO_END` | | クロールの代わりにスキャンする End-to-End テストのコマンド ([End-to-End テストをシナリオにする](#end-to-end-テストをシナリオにする)) |
 | `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | サイトをクロールする分数 |
 | `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | JavaScript が作るリンクのために、ブラウザでもクロールします |
 | `--zap-options=OPTIONS` | `SECURITY_DAST_ZAP_OPTIONS` | | ZAP のほかのオプション (`-config key=value ...`) |
@@ -103,8 +110,12 @@ return [
         'dir' => 'tmp/security',
     ],
     'dast' => [
+        'scan' => 'full',
         'failOn' => 'medium',
-        'minutes' => 3,
+        'endToEnd' => 'vendor/bin/phpunit --testsuite EndToEnd',
+        'loginUrl' => '/users/login',
+        'username' => 'test@example.com',
+        'password' => getenv('SECURITY_DAST_PASSWORD') ?: null,
         'ignore' => ['10049'],
     ],
 ];
@@ -114,6 +125,78 @@ return [
 `report` セクションには `language`、`localeDir`、`project` (プロジェクト名)、`note` と、報告書のディレクトリ `dir` が
 あります (この例では `tmp/security/security-dast.pdf` に書き出します)。`dast` セクションに知らないキーがあると
 エラーになります。オプションが環境変数より、環境変数が設定ファイルより優先されます。
+
+## スキャンの種類
+
+| | ベースライン (`--scan=baseline`、デフォルト) | フル (`--scan=full`) |
+| --- | --- | --- |
+| すること | クロールして、リクエストとレスポンスを確かめます | 同じことをしてから、各ページとパラメーターを攻撃します |
+| 見つけるもの | セキュリティヘッダー、Cookie、トークンのないフォーム、エラーページ、ヘッダーのバージョンなど | 同じものと、XSS (反射型、持続型、DOM ベース)、SQL インジェクション、パストラバーサル、コマンドインジェクションなど |
+| データの変更 | しません。ページを読むだけです | します。攻撃を入れたフォームを送るので、レコードを追加したり変更したりします |
+| 実行する場所 | どの環境でも | テストのデータベースを使うテスト環境だけ |
+| 時間 | 1、2 分ほど | 数分以上。攻撃は最大 `--scan-minutes` 分 (デフォルト 10) |
+
+フルスキャンは攻撃者と同じものを送ります。スキャンの組み込みウェブサーバー (デフォルト、テストのデータベース) か、
+データが消えてもよい自分のサーバーでだけ実行してください。本番では決して実行しないでください。
+
+フルスキャンの攻撃は、レスポンスに出た影響で見つけます。そのため、すべての脆弱性を見つけるわけではなく、見つかった
+ものもコードで確かめてください。コードは [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/)
+で調べます。
+
+## ログインしてスキャンする
+
+訪問者としてのクロールは、ログインページで止まります。アプリケーションのフォームの多くはその先にあります。テストの
+データベースのユーザーを指定すると、ZAP はログインページでブラウザ (イメージの Firefox) を使ってログインし、その
+ユーザーとしてクロールと攻撃をします。
+
+```bash
+export SECURITY_DAST_PASSWORD=secret
+vendor/bin/security-dast --scan=full --login-url=/users/login --username=test@example.com
+```
+
+- ZAP は人と同じように、ページのユーザー名とパスワードの欄に入力します。そのため、`SecurityComponent` のトークン付きの
+  `FormHelper` のフォームでもログインできます。
+- ログインの保ち方 (セッションの Cookie) と、ログインしているかの確かめ方 (ログインで変わるページ) は、ZAP が自分で
+  見つけます。ログアウトしたとわかると、もう一度ログインします。
+- ログインできなかったときは、気づかないまま訪問者としてスキャンしないよう、エラー (終了コード `2`) になります。
+  報告書の表紙には、ログインしたユーザーが載ります。
+- スキャン中にログアウトしないよう、`.*logout.*` に合う URL は除きます。ほかのパターンは `--exclude` で指定します。
+  例: `--exclude=.*/users/logout.*,.*/admin/.*`
+- パスワードはオプションではなく `SECURITY_DAST_PASSWORD` (CI のシークレット) で渡してください。オプションはプロセスの
+  一覧で見えてしまいます。パスワードは報告書には書きません。
+
+スキャンのときに、そのユーザーがテストのデータベースにいる必要があります。フィクスチャーや、テスト環境のシードで
+作ってください。
+
+## End-to-End テストをシナリオにする
+
+クロールは、ページのリンクをたどります。注文の確認画面のように、操作を順に重ねないとたどり着かないページは見落とす
+ことがあり、フォームに正しい値を入れることもしません。プロジェクトの End-to-End テストは、こうしたシナリオを知って
+います。`--end-to-end` を付けると、ZAP はクロールの代わりに、テストのリクエストを記録してスキャンします。
+
+```bash
+vendor/bin/security-dast --end-to-end="vendor/bin/phpunit --testsuite EndToEnd" --scan=full
+```
+
+1. ZAP をプロキシとして起動します (Docker の `zap.sh -daemon`)。`127.0.0.1` だけで待ち受け、API にはランダムな鍵を
+   付けます。
+2. テストのコマンドを、次の環境変数を付けて実行します。
+   - `PANTHER_CHROME_ARGUMENTS`: テストの Chrome が ZAP のプロキシを使う設定 (`--proxy-server=...`)。すでにある引数に
+     足します
+   - `PANTHER_EXTERNAL_BASE_URI`: スキャンのアプリケーション。テストが自分のウェブサーバーを起動しないようにします
+   - `APP_ENV`: スキャンのもの (`test`)
+3. テストが終わったら、ZAP は記録したリクエストとレスポンスを確かめ、フルスキャンでは、テストのセッションの Cookie の
+   まま攻撃します。
+
+テストは [pieceofcake2/panther](https://pieceofcake2.github.io/panther/ja/) (または Symfony Panther) のものです。テストの
+URL は相対パスで書いてください (`$client->request('GET', '/contacts/add')`)。ベース URI に従うようになります。テストの
+出力は、コマンドのエラー出力に出ます。テストが失敗しても、それまでのリクエストでスキャンを続け、報告書の表紙にその
+ことが載ります。`--login-url` も指定すると、フルスキャンの攻撃はそのユーザーとして行います。
+
+`SecurityComponent` のフォームでは、ZAP が攻撃ごとに、テストのセッションの中で新しいトークンを取り直すので、攻撃が
+弾かれません。ただし、アクティブスキャンは `--scan-minutes` の時間内に限られ、長いシナリオではすべてのパラメーターには
+届きません。フルスキャンは多くの脆弱性を見つけますが、すべてではありません。ビューは
+[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/) でも確かめてください。
 
 ## 報告書
 
@@ -145,12 +228,6 @@ vendor/bin/security-dast --ignore=10038,10020
 ID はその派生も除きます。`10038` で `10038-1` も除きます。ID は、報告書のアラート ID と
 [ZAP のアラートの一覧](https://www.zaproxy.org/docs/alerts/) のものです。除外したアラートは、報告書の表紙に載ります。
 
-## ログインが必要なページ
-
-ベースラインスキャンは、ログインしていない訪問者としてクロールします。ログインが必要なページはスキャンしません。
-そうしたページのセキュリティヘッダーや Cookie も、ほかのページとほぼ同じなので、アラートの直し方はそのまま当てはまります。
-コードは [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/) で調べてください。
-
 ## トラブルシューティング
 
 **`ZAP failed (exit code 125): Cannot connect to the Docker daemon`**: Docker が動いていないか、そのユーザーが
@@ -166,8 +243,16 @@ ID はその派生も除きます。`10038` で `10038-1` も除きます。ID �
 テーブルがないなどです。テストと同じようにスキーマを読み込んでからスキャンするか、別の `--app-env` を使ってください。
 こうしたページは「アプリケーションエラーの露見」のアラートに出ます。
 
-**ZAP が見つけた URL が少ない**: クロールはページのリンクをたどります。`--minutes` を増やすか、JavaScript が作る
-リンクのために `--ajax-spider=1` を付けるか、テスト環境のトップページからリンクしてください。
+**ZAP が見つけた URL が少ない**: クロールはページのリンクをたどり、実行ごとに見つける数が少し変わります。`--minutes`
+を増やすか、JavaScript が作るリンクのために `--ajax-spider=1` を付けるか、`--end-to-end` で End-to-End テストをスキャン
+してください。
+
+**`ZAP could not log in as ...`**: ユーザー名とパスワード、そのユーザーがテストのデータベースにいること、ログインページに
+ほかの手順 (CAPTCHA や 2 段階認証など。テストのユーザーには付けないでください) がなく、ユーザー名とパスワードの欄が
+あることを確かめてください。
+
+**End-to-End テストがスキャンのときだけ失敗する**: テストは相対パスの URL を使い、`PANTHER_EXTERNAL_BASE_URI` に従う
+必要があります。コマンドのエラー出力で、テストの出力を確かめてください。
 
 **`Chrome is needed to print the report`**: Chrome か Chromium をインストールするか、`REPORT_CHROME_BINARY` を設定して
 ください ([pieceofcake2/report](https://pieceofcake2.github.io/report/ja/))。

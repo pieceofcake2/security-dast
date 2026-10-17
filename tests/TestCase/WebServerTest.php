@@ -15,11 +15,14 @@ class WebServerTest extends TestCase
      * @param string $url URL
      * @return array{0: string, 1: string}
      */
-    private static function get(string $url): array
+    private function get(string $url): array
     {
-        $body = (string)file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
-        // $http_response_header is set in this scope before PHP 8.4, and deprecated since
-        $headers = function_exists('http_get_last_response_headers') ? (array)http_get_last_response_headers() : $http_response_header;
+        $stream = fopen($url, 'r', false, stream_context_create(['http' => ['ignore_errors' => true]]));
+        $this->assertIsResource($stream);
+        // The headers of the response, without $http_response_header, deprecated since PHP 8.5
+        $headers = (array)(stream_get_meta_data($stream)['wrapper_data'] ?? []);
+        $body = (string)stream_get_contents($stream);
+        fclose($stream);
 
         return [(string)($headers[0] ?? ''), $body];
     }
@@ -33,10 +36,10 @@ class WebServerTest extends TestCase
             $this->assertMatchesRegularExpression('#\Ahttp://127\.0\.0\.1:\d+\z#', $url);
 
             // The pages go to index.php, through the router script
-            [$status, $body] = self::get($url . '/login');
+            [$status, $body] = $this->get($url . '/login');
             $this->assertStringContainsString('200', $status);
             $this->assertStringContainsString('<h1>Login</h1>', $body);
-            [$status] = self::get($url . '/error');
+            [$status] = $this->get($url . '/error');
             $this->assertStringContainsString('500', $status);
         } finally {
             $server->stop();

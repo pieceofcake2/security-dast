@@ -9,6 +9,11 @@ Cookie は `config/core.php` で、エラーページはデバッグレベルで
 
 | アラート ID | アラート | リスク | 直し方 |
 | --- | --- | --- | --- |
+| 40012、40014、40026 | クロスサイトスクリプティング (反射型、持続型、DOM ベース) | 高 | [XSS](#xss) (フルスキャン) |
+| 40018、40019、40020、40021、40022、40024 | SQL インジェクション | 高 | [SQL インジェクション](#sql-インジェクション) (フルスキャン) |
+| 6、7 | パストラバーサル、リモートファイルインクルージョン | 高 | [リクエストのパスとファイル](#リクエストのパスとファイル) (フルスキャン) |
+| 90020 | リモート OS コマンドインジェクション | 高 | [コマンド](#コマンド) (フルスキャン) |
+| 20019 | 外部リダイレクト | 高 | [リダイレクト](#リダイレクト) (フルスキャン) |
 | 10038 | Content Security Policy (CSP) ヘッダーが設定されていない | 中 | [セキュリティヘッダー](#セキュリティヘッダー) |
 | 10020 | クリックジャッキング対策ヘッダーの欠如 | 中 | [セキュリティヘッダー](#セキュリティヘッダー) |
 | 10202 | Anti-CSRF トークンが使用されていない | 中 | [CSRF トークンのないフォーム](#csrf-トークンのないフォーム) |
@@ -29,6 +34,65 @@ Cookie は `config/core.php` で、エラーページはデバッグレベルで
 | 10109、10111、10027、10096 | モダン Web アプリケーション、認証リクエストの特定、疑わしいコメント、タイムスタンプの開示 | 情報 | [情報](#情報) |
 
 アラートの名前は、ZAP の日本語訳とは少し違うことがあります。ID で探してください。
+
+## XSS
+
+リクエストの値 (パラメーターやフォームの欄) が、エスケープされずにページに出力されています。値に入ったスクリプトが、
+ページを開いたユーザーのブラウザで、そのセッションのまま動きます。反射型はそのリクエストのレスポンスに、持続型は
+保存されてから別のページに、DOM ベースはページの JavaScript によって出力されるものです。
+
+ビューのすべての値を `h()` でエスケープし、フォームやリンクはエスケープするヘルパーで作ってください。
+
+```php
+<!-- 見つかる書き方 -->
+<p>Sent: <?php echo $message; ?></p>
+
+<!-- 直し方 -->
+<p>Sent: <?= h($message) ?></p>
+```
+
+コードの中のこうした箇所は、[pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/rules#cakephp2-view-unescaped-output)
+のルール `cakephp2-view-unescaped-output` で見つけられます。DOM ベースの XSS は、JavaScript で `innerHTML` や
+`document.write()` を使って値をページに入れないでください。`textContent` を使います。`'unsafe-inline'` のない
+Content Security Policy ([セキュリティヘッダー](#セキュリティヘッダー)) も、こうしたスクリプトのほとんどを止めます。
+
+## SQL インジェクション
+
+リクエストの値が、そのまま SQL に入っています。攻撃者がデータベースを読んだり変えたりできます。値をエスケープする
+`find()` の条件の配列か、`query()` の値の配列を使ってください。
+
+```php
+// 見つかる書き方
+$this->Post->query("SELECT * FROM posts WHERE title LIKE '%" . $q . "%'");
+
+// 直し方
+$this->Post->find('all', ['conditions' => ['Post.title LIKE' => '%' . $q . '%']]);
+$this->Post->query('SELECT * FROM posts WHERE title LIKE ?', ['%' . $q . '%']);
+```
+
+pieceofcake2/security-sast のルール
+[cakephp2-query-concatenation](https://pieceofcake2.github.io/security-sast/ja/rules#cakephp2-query-concatenation) と
+[cakephp2-conditions-string](https://pieceofcake2.github.io/security-sast/ja/rules#cakephp2-conditions-string) で、
+こうした箇所を見つけられます。
+
+## リクエストのパスとファイル
+
+リクエストの値で、読み込むファイルや表示するビューを指定しています。値に `../` を入れると、ほかのファイルに届きます。
+値をパスとして使わず、許可した名前の一覧に対応させてください。アップロードされたファイルの名前は `basename()` で
+確かめます。ルール [cakephp2-render-request](https://pieceofcake2.github.io/security-sast/ja/rules#cakephp2-render-request)
+もご覧ください。
+
+## コマンド
+
+リクエストの値が、システムのコマンド (`exec()`、`shell_exec()`、`system()`、バッククォート) に入っています。攻撃者が
+サーバーでコマンドを実行できます。コマンドを使わないようにするか、値を 1 つずつ `escapeshellarg()` で渡してください。
+
+## リダイレクト
+
+リクエストの値をリダイレクト先の URL にしています。サイトのリンクから、ログインページの偽物など、別のサイトに
+ユーザーを送れてしまいます。ルートの配列などでアプリケーションのパスにだけリダイレクトするか、URL を一覧と照らして
+ください。ルール [cakephp2-redirect-request](https://pieceofcake2.github.io/security-sast/ja/rules#cakephp2-redirect-request)
+もご覧ください。
 
 ## セキュリティヘッダー
 

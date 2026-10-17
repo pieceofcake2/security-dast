@@ -52,7 +52,9 @@ class ReportBuilderTest extends TestCase
         $this->assertStringContainsString('<b class="t-medium">4</b><span>Medium</span>', $html);
         $this->assertStringContainsString('<b class="t-info">3</b><span>Informational</span>', $html);
         $this->assertStringContainsString('PHP&#039;s built-in web server (APP_ENV=test)', $html);
-        $this->assertStringContainsString('OWASP ZAP baseline scan (crawl 1 min)', $html);
+        $this->assertStringContainsString('OWASP ZAP baseline scan: crawl (1 min) and check the responses', $html);
+        $this->assertMatchesRegularExpression('#<th>Login</th>\s*<td>\s*None \(as a visitor\)#', $html);
+        $this->assertStringContainsString('it sends no attacks', $html);
         $this->assertStringContainsString('OWASP ZAP 2.17.0', $html);
         $this->assertMatchesRegularExpression('#<h3>1\. Medium</h3>.*<h3>2\. Low</h3>.*<h3>3\. Informational</h3>#s', $html);
 
@@ -82,8 +84,35 @@ class ReportBuilderTest extends TestCase
         $this->assertStringContainsString('<div class="verdict passed">', $html);
         $this->assertStringContainsString('Anti-CSRFトークンが使用されていない', $html);
         $this->assertStringContainsString('起動済みのアプリケーション', $html);
-        $this->assertStringContainsString('クロール 2 分、AJAX スパイダー付き', $html);
+        $this->assertStringContainsString('クロール（2 分）とレスポンスの確認、AJAX スパイダー付き', $html);
         $this->assertStringContainsString('<th>根拠</th>', $html);
+    }
+
+    public function testFullScanWithLogin(): void
+    {
+        $result = self::result();
+        $result->user = 'test@example.com';
+        $html = self::html($result, new Config(scan: 'full', scanMinutes: 15, loginUrl: '/users/login', username: 'test@example.com', password: 'secret'));
+
+        $this->assertStringContainsString('OWASP ZAP full scan: crawl (1 min), check the responses and attack (up to 15 min)', $html);
+        $this->assertStringContainsString('test@example.com on http://127.0.0.1:56557/users/login', $html);
+        $this->assertStringContainsString('The full scan attacks the pages', $html);
+        $this->assertStringNotContainsString('secret', $html);
+    }
+
+    public function testEndToEndTests(): void
+    {
+        $result = self::result();
+        $result->endToEndExitCode = 1;
+        $html = self::html($result, new Config(scan: 'full', endToEnd: 'vendor/bin/phpunit --testsuite EndToEnd'));
+
+        $this->assertStringContainsString('OWASP ZAP: check the requests and responses of the End-to-End tests, and attack them', $html);
+        $this->assertMatchesRegularExpression('#<th>End-to-End tests</th>\s*<td>\s*vendor/bin/phpunit --testsuite EndToEnd\s*<br><span class="warn">The tests failed \(exit code 1\)#', $html);
+
+        // Passed tests: no warning
+        $passed = self::result();
+        $passed->endToEndExitCode = 0;
+        $this->assertStringNotContainsString('class="warn"', self::html($passed, new Config(endToEnd: 'phpunit')));
     }
 
     public function testNoAlert(): void
