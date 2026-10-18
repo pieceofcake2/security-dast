@@ -22,13 +22,15 @@
 1. **Cover**: the result, the numbers of alerts by risk, the repository, branch and commit, and what was
    scanned: the URL, the server (the built-in web server and its `APP_ENV`, or a running application), the scan
    (baseline or full, its minutes), the End-to-End tests and their result, the user of the login, the number of
-   URLs with alerts, the ignored alerts and the threshold; then the date, environment and software of the run
+   URLs with alerts, the ignored alerts, the excluded URLs (`--exclude`) and the threshold; then the date, environment and software of the run
    (ZAP and its version)
 2. **Alerts by risk**: High, Medium, Low and Informational; each alert with its number of requests, and a link
    to its page
 3. **A page for each alert**: its name, alert ID, risk, confidence, CWE and WASC, what it means and how to fix
    it (as ZAP writes them, in the language of the report), each request where it was found, up to 50, and the
    links: the page of the alert on zaproxy.org first
+4. **Ignored alerts**, when `--ignore` left some out: each with its ID, name, risk and number of URLs
+   ([Ignoring an Alert](#ignoring-an-alert))
 
 Each request shows its method and URL, then what ZAP found in it:
 
@@ -72,7 +74,9 @@ vendor/bin/security-dast --ignore=10038,10020
 
 - An ID leaves out its variants too: `10038` leaves out `10038-1`.
 - The IDs are those of the report (Alert ID) and of [the alerts of ZAP](https://www.zaproxy.org/docs/alerts/).
-- The cover of the report lists the ignored alerts, so that they are not forgotten.
+- The report still lists the ignored alerts that the scan raised, so that they are not forgotten: their IDs on
+  the cover, and a group "Ignored alerts" with the name, risk and number of URLs of each. They do not fail the
+  scan, and the summary of the command counts them.
 
 The alerts to ignore are those of the scan environment, not of the application: e.g. the security headers that
 a proxy in front of production adds, which the built-in web server of the scan does not have, or the

@@ -50,5 +50,10 @@
     "field.endToEnd": "End-to-End tests",
     "endToEnd.failed": "The tests failed (exit code {code}): the pages after the failure may not be scanned",
     "scan.endToEnd.baseline": "OWASP ZAP: check the requests and responses of the End-to-End tests",
-    "scan.endToEnd.full": "OWASP ZAP: check the requests and responses of the End-to-End tests, and attack them (up to {scanMinutes} min)"
+    "scan.endToEnd.full": "OWASP ZAP: check the requests and responses of the End-to-End tests, and attack them (up to {scanMinutes} min)",
+    "field.excluded": "Excluded URLs",
+    "group.ignored": "Ignored alerts",
+    "badge.ignored": "Ignored",
+    "ignored.title": "Alerts of the ignored IDs",
+    "ignored.description": "These alerts were raised, but --ignore leaves them out of the result: they do not fail the scan. Check that each still does not apply, e.g. after a change of the web server."
 }

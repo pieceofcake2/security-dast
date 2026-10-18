@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- The alerts that `--ignore` leaves out are in the report: a group "Ignored alerts" with the ID, name, risk and
+  number of URLs of each, and their number in the summary of the command. They do not fail the scan
+- The cover shows the excluded URLs (`--exclude`, `.*logout.*` by default)
+
 ## 1.0.1
 
 - The password of the login is no longer written to the plan of ZAP: ZAP gets it in an environment variable of

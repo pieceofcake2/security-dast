@@ -17,6 +17,8 @@ final class ScanResult
      * @param array<string> $ignored Alert IDs left out of the report
      * @param string|null $user User that ZAP logged in as
      * @param int|null $endToEndExitCode Exit code of the End-to-End tests of the scenario
+     * @param array<\PieceOfCake2\SecurityDast\Alert> $ignoredAlerts Alerts of the IDs of `--ignore`: reported, but they do
+     *  not fail the scan
      */
     public function __construct(
         public array $alerts = [],
@@ -25,6 +27,7 @@ final class ScanResult
         public array $ignored = [],
         public ?string $user = null,
         public ?int $endToEndExitCode = null,
+        public array $ignoredAlerts = [],
     ) {
     }
 
@@ -41,6 +44,7 @@ final class ScanResult
             $base = explode('-', $alert->id)[0];
             if (in_array($alert->id, $ids, true) || in_array($base, $ids, true)) {
                 $this->ignored[] = $alert->id;
+                $this->ignoredAlerts[] = $alert;
             } else {
                 $alerts[] = $alert;
             }
