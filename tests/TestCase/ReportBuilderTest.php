@@ -78,8 +78,12 @@ class ReportBuilderTest extends TestCase
         // Not a page of its own, but a row of the ignored alerts, which do not fail the scan
         $this->assertDoesNotMatchRegularExpression('#<h3>[\d-]+　Content Security Policy#u', $html);
         $this->assertMatchesRegularExpression('#<h3>\d+\. Ignored alerts</h3>#', $html);
-        $this->assertMatchesRegularExpression('#<tr><td class="mono">10038-1</td><td>Content Security Policy \(CSP\) Header Not Set</td><td>Medium</td><td class="num">\d+</td></tr>#', $html);
+        $this->assertMatchesRegularExpression('#<tr><td class="mono">10038-1</td><td>Content Security Policy \(CSP\) Header Not Set</td><td>Medium</td><td class="num">\d+</td><td>-</td></tr>#', $html);
         $this->assertCount(1, $result->ignoredAlerts);
+
+        // With its reason from the settings file
+        $html = self::html($result, new Config(ignore: ['10038'], ignoreReasons: ['10038' => 'The load balancer adds CSP']));
+        $this->assertMatchesRegularExpression('#<td class="num">\d+</td><td>The load balancer adds CSP</td></tr>#', $html);
     }
 
     public function testReportInJapanese(): void

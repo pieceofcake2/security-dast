@@ -77,6 +77,24 @@ class CommandTest extends TestCase
         $this->assertSame('tmp/security/security-dast.pdf', $config->pdf);
     }
 
+    public function testIgnoreWithReasons(): void
+    {
+        $file = TMP . 'security-ignore.php';
+        file_put_contents($file, "<?php\nreturn ['dast' => ['ignore' => ['10038' => 'The load balancer adds CSP', '10020-1' => 'Framed on purpose']]];\n");
+
+        $config = Command::config(['--settings=' . $file]);
+
+        $this->assertNotNull($config);
+        $this->assertSame(['10038', '10020-1'], $config->ignore);
+        $this->assertSame(['10038' => 'The load balancer adds CSP', '10020-1' => 'Framed on purpose'], $config->ignoreReasons);
+
+        // A list, and the option, have no reasons
+        $config = Command::config(['--settings=' . $file, '--ignore=10049']);
+        $this->assertNotNull($config);
+        $this->assertSame(['10049'], $config->ignore);
+        $this->assertSame([], $config->ignoreReasons);
+    }
+
     public function testInvalidOptions(): void
     {
         $this->assertNull(Command::config(['--help']));

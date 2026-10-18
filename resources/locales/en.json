@@ -55,5 +55,6 @@
     "group.ignored": "Ignored alerts",
     "badge.ignored": "Ignored",
     "ignored.title": "Alerts of the ignored IDs",
-    "ignored.description": "These alerts were raised, but --ignore leaves them out of the result: they do not fail the scan. Check that each still does not apply, e.g. after a change of the web server."
+    "ignored.description": "These alerts were raised, but --ignore leaves them out of the result: they do not fail the scan. Check that each still does not apply, e.g. after a change of the web server.",
+    "field.reason": "Reason"
 }

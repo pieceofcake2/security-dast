@@ -5,6 +5,8 @@
 - The alerts that `--ignore` leaves out are in the report: a group "Ignored alerts" with the ID, name, risk and
   number of URLs of each, and their number in the summary of the command. They do not fail the scan
 - The cover shows the excluded URLs (`--exclude`, `.*logout.*` by default)
+- The settings file gives the reason of each ignored alert ID, `'ignore' => ['10038' => 'reason']`, which the
+  report shows with the alert
 
 ## 1.0.1
 

@@ -81,7 +81,7 @@ return [
         'username' => 'test@example.com',
         'password' => getenv('SECURITY_DAST_PASSWORD') ?: null,
         'exclude' => ['.*/users/logout.*', '.*/users/delete.*'],
-        'ignore' => ['10049'],
+        'ignore' => ['10049' => 'The public pages may be cached'],
     ],
 ];
 ```

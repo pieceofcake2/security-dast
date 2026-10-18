@@ -86,7 +86,8 @@ final class Settings
     }
 
     /**
-     * A value of the file as the value of an option: lists are comma separated
+     * A value of the file as the value of an option: lists are comma separated, and an array with keys is JSON, e.g.
+     * the alert IDs of `ignore` with their reasons
      *
      * @param mixed $value Value
      * @return string|bool
@@ -95,6 +96,9 @@ final class Settings
     {
         if (is_bool($value)) {
             return $value;
+        }
+        if (is_array($value) && array_keys($value) !== range(0, count($value) - 1)) {
+            return (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
         if (is_array($value)) {
             return implode(',', array_map('strval', $value));
