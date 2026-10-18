@@ -357,18 +357,20 @@ class ZapTest extends TestCase
         // A scenario through the proxy of ZAP: the page that it opens is checked
         $server = new WebServer(self::FIXTURES . DS . 'app' . DS . 'webroot', self::FIXTURES . DS . 'app');
         try {
-            $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site): void {
+            $other = '';
+            $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site) use (&$other): void {
                 $context = stream_context_create(['http' => ['proxy' => str_replace('http://', 'tcp://', $proxy), 'request_fulluri' => true, 'ignore_errors' => true]]);
                 file_get_contents($site . '/login', false, $context);
                 // A request to another site through the proxy, as a browser makes to a CDN
-                file_get_contents('http://example.com/', false, $context);
+                $other = (string)file_get_contents('http://example.com/', false, $context);
             });
         } finally {
             $server->stop();
         }
         $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
         $this->assertNotEmpty(preg_grep('#/login#', $uris));
-        // Only the site of the scan is reported
+        // The other site was reached through the proxy, and only the site of the scan is reported
+        $this->assertStringContainsString('Example Domain', $other);
         $this->assertSame([], preg_grep('#\Ahttps?://example\.com#', $uris));
     }
 }
