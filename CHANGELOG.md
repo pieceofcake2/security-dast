@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Only the alerts of the site of the scan are reported and counted: the browser of a scenario also requests other
+  sites through the proxy of ZAP, e.g. a CDN, whose alerts are not of the application
+
 ## 1.0.3
 
 - An empty list of the settings file, e.g. `'exclude' => []`, is no longer the text `[]` (an invalid pattern of

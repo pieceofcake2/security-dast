@@ -493,6 +493,11 @@ final class Zap
         $base = static fn(string $uri): string => str_starts_with($uri, rtrim($target, '/')) ? rtrim($url, '/') . substr($uri, strlen(rtrim($target, '/'))) : $uri;
         $alerts = [];
         foreach (is_array($data['site'] ?? null) ? $data['site'] : [] as $site) {
+            // Only the site of the scan: the browser of a scenario also requests other sites through the proxy,
+            // e.g. a CDN, whose alerts are not of the application
+            if (!is_array($site) || self::origin((string)($site['@name'] ?? '')) !== self::origin($target)) {
+                continue;
+            }
             foreach (is_array($site['alerts'] ?? null) ? $site['alerts'] : [] as $alert) {
                 if (!is_array($alert)) {
                     continue;
@@ -527,6 +532,21 @@ final class Zap
         usort($alerts, static fn(Alert $a, Alert $b): int => [array_search($a->severity, Severity::ALL, true), $a->name] <=> [array_search($b->severity, Severity::ALL, true), $b->name]);
 
         return new ScanResult($alerts, $url, is_string($data['@version'] ?? null) ? $data['@version'] : null);
+    }
+
+    /**
+     * The origin of a URL, with its default port: `http://example.com` is `http://example.com:80`
+     *
+     * @param string $url URL
+     * @return string
+     */
+    private static function origin(string $url): string
+    {
+        $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+        $host = strtolower(trim((string)parse_url($url, PHP_URL_HOST), '[]'));
+        $port = parse_url($url, PHP_URL_PORT) ?? ($scheme === 'https' ? 443 : 80);
+
+        return $scheme . '://' . $host . ':' . $port;
     }
 
     /**

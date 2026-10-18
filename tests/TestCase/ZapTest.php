@@ -36,7 +36,9 @@ class ZapTest extends TestCase
         return new Zap(run: static function (array $command, string $dir, array $env = []) use ($language, &$commands, $auth, &$plans): array {
             $commands[] = $command;
             $plans[] = (string)file_get_contents($dir . DS . 'plan.yaml');
-            copy(self::FIXTURES . DS . 'zap-' . $language . '.json', $dir . DS . 'zap.json');
+            // The report of the site of the plan, as ZAP writes it
+            $target = (string)(json_decode(end($plans), true)['env']['contexts'][0]['urls'][0] ?? self::TARGET);
+            file_put_contents($dir . DS . 'zap.json', str_replace(self::TARGET, $target, (string)file_get_contents(self::FIXTURES . DS . 'zap-' . $language . '.json')));
             copy(self::FIXTURES . DS . $auth, $dir . DS . 'auth.json');
 
             return [0, 'Automation plan succeeded!', ''];
@@ -277,6 +279,30 @@ class ZapTest extends TestCase
         $this->assertSame('<form method="post" action="/login">', $csrf->instances[0]['evidence']);
         $this->assertStringNotContainsString('<p>', $csrf->description);
         $this->assertContains('https://cwe.mitre.org/data/definitions/352.html', $csrf->references);
+    }
+
+    public function testOnlyTheSiteOfTheScan(): void
+    {
+        // A site that the browser of a scenario requested through the proxy, e.g. a CDN
+        $data = (array)json_decode((string)file_get_contents(self::FIXTURES . DS . 'zap-en.json'), true);
+        $other = $data['site'][0];
+        $other['@name'] = 'https://cdn.example.com';
+        $other['@host'] = 'cdn.example.com';
+        $other['@port'] = '443';
+        $other['@ssl'] = 'true';
+        foreach ($other['alerts'] as $i => $alert) {
+            foreach ($alert['instances'] as $j => $instance) {
+                $other['alerts'][$i]['instances'][$j]['uri'] = 'https://cdn.example.com/lib.js';
+            }
+        }
+        $data['site'][] = $other;
+
+        $result = Zap::result($data, self::URL, self::TARGET);
+
+        $this->assertCount(17, $result->alerts);
+        $this->assertSame(7, $result->urls());
+        $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
+        $this->assertSame([], preg_grep('#cdn\.example\.com#', $uris));
     }
 
     public function testIgnore(): void
