@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.0.1
 
 - The password of the login is no longer written to the plan of ZAP: ZAP gets it in an environment variable of
   its container, and the tests of `--end-to-end` and the application no longer get `SECURITY_DAST_PASSWORD`
