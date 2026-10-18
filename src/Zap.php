@@ -45,6 +45,24 @@ final class Zap
     public const CSRF_TOKENS = ['data[_Token][key]'];
 
     /**
+     * The policy of the full scan: every active rule of ZAP, as in its Default Policy (a definition rather than the
+     * policy by its name: with the Japanese locale, the default policy of ZAP turns off many rules, e.g. those of
+     * XSS and SQL injection), with the threshold of Path Traversal (6) at High. Below High, the rule also sends the
+     * file name of the URL as the value of each parameter, and reports it when the page is then OK and a random value
+     * is not (alert 6-5): the file name of a URL of CakePHP is an action or a passed argument, e.g. `1` of
+     * `/posts/edit/1`, which is often a valid value of a field of the form too, e.g. a status or an ID, never a file.
+     * The checks of High still send the paths of known files, e.g. `/etc/passwd` and `WEB-INF/web.xml`, and look
+     * for their content.
+     *
+     * @var array<string, mixed>
+     */
+    public const POLICY = [
+        'defaultStrength' => 'Medium',
+        'defaultThreshold' => 'Medium',
+        'rules' => [['id' => 6, 'name' => 'Path Traversal', 'threshold' => 'High']],
+    ];
+
+    /**
      * The names of the session cookies, the default of CakePHP
      */
     public const SESSION_COOKIES = ['CAKEPHP'];
@@ -412,9 +430,7 @@ final class Zap
         }
         $jobs[] = ['type' => 'passiveScan-wait'];
         if ($this->scan === 'full') {
-            // The policy by its name: with the Japanese locale, the default policy of ZAP turns off many rules, e.g.
-            // those of XSS and SQL injection
-            $jobs[] = ['type' => 'activeScan', 'parameters' => ['context' => 'app'] + $user + ['policy' => 'Default Policy', 'maxScanDurationInMins' => $this->scanMinutes]];
+            $jobs[] = ['type' => 'activeScan', 'parameters' => ['context' => 'app'] + $user + ['maxScanDurationInMins' => $this->scanMinutes], 'policyDefinition' => self::POLICY];
             // The responses of the attacks
             $jobs[] = ['type' => 'passiveScan-wait'];
         }

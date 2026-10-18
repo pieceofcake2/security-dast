@@ -39,7 +39,7 @@ vendor/bin/security-dast --scan=full --scan-minutes=20
 - **It finds many vulnerabilities, not all.** An attack is found by its effect in the responses. Check the code
   with [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/) too.
 
-The full scan runs every active rule of the Default Policy of ZAP, in every language of the report.
+The full scan runs every active rule of ZAP, as its Default Policy does, in every language of the report.
 
 ## CakePHP 2 and ZAP
 
@@ -54,6 +54,11 @@ ZAP is set up for the applications of CakePHP 2:
 - It knows the session cookie of CakePHP (`CAKEPHP`).
 - The URLs of the logout are left out (`.*logout.*`, see `--exclude`), so that a scan as a user stays logged
   in.
+- The full scan does not take the file name of a URL for a file: Path Traversal runs at the threshold High,
+  without its check that sends the file name of the URL as the value of a parameter (alert 6-5). The file name of
+  a URL of CakePHP is an action or a passed argument, e.g. `1` of `/posts/edit/1`, which is often a valid value of
+  a field of the form too, e.g. a status, so the page is OK with it and not with a random value. The other checks
+  of Path Traversal, with the paths of known files such as `/etc/passwd`, still run.
 
 ## Which Scan Where
 

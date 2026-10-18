@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The full scan no longer reports Path Traversal (alert 6-5) when a field of a form accepts the file name of the
+  URL, e.g. a status `1` on `/posts/edit/1`: Path Traversal runs at the threshold High, without the check on the
+  file name of the URL, which is an action or a passed argument in CakePHP. Its other checks still run, and the
+  other rules run as in the Default Policy of ZAP
+
 - The example workflows of the docs are in the Composer package, which `docs/ci.md` links to
 - Only the alerts of the site of the scan are reported and counted: the browser of a scenario also requests other
   sites through the proxy of ZAP, e.g. a CDN, whose alerts are not of the application
