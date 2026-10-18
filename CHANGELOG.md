@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The example workflows of the docs are in the Composer package, which `docs/ci.md` links to
 - Only the alerts of the site of the scan are reported and counted: the browser of a scenario also requests other
   sites through the proxy of ZAP, e.g. a CDN, whose alerts are not of the application
 
