@@ -36,7 +36,9 @@ class ZapTest extends TestCase
         return new Zap(run: static function (array $command, string $dir, array $env = []) use ($language, &$commands, $auth, &$plans): array {
             $commands[] = $command;
             $plans[] = (string)file_get_contents($dir . DS . 'plan.yaml');
-            copy(self::FIXTURES . DS . 'zap-' . $language . '.json', $dir . DS . 'zap.json');
+            // The report of the site of the plan, as ZAP writes it
+            $target = (string)(json_decode(end($plans), true)['env']['contexts'][0]['urls'][0] ?? self::TARGET);
+            file_put_contents($dir . DS . 'zap.json', str_replace(self::TARGET, $target, (string)file_get_contents(self::FIXTURES . DS . 'zap-' . $language . '.json')));
             copy(self::FIXTURES . DS . $auth, $dir . DS . 'auth.json');
 
             return [0, 'Automation plan succeeded!', ''];
@@ -279,6 +281,30 @@ class ZapTest extends TestCase
         $this->assertContains('https://cwe.mitre.org/data/definitions/352.html', $csrf->references);
     }
 
+    public function testOnlyTheSiteOfTheScan(): void
+    {
+        // A site that the browser of a scenario requested through the proxy, e.g. a CDN
+        $data = (array)json_decode((string)file_get_contents(self::FIXTURES . DS . 'zap-en.json'), true);
+        $other = $data['site'][0];
+        $other['@name'] = 'https://cdn.example.com';
+        $other['@host'] = 'cdn.example.com';
+        $other['@port'] = '443';
+        $other['@ssl'] = 'true';
+        foreach ($other['alerts'] as $i => $alert) {
+            foreach ($alert['instances'] as $j => $instance) {
+                $other['alerts'][$i]['instances'][$j]['uri'] = 'https://cdn.example.com/lib.js';
+            }
+        }
+        $data['site'][] = $other;
+
+        $result = Zap::result($data, self::URL, self::TARGET);
+
+        $this->assertCount(17, $result->alerts);
+        $this->assertSame(7, $result->urls());
+        $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
+        $this->assertSame([], preg_grep('#cdn\.example\.com#', $uris));
+    }
+
     public function testIgnore(): void
     {
         $result = self::zap()->scan(self::URL);
@@ -357,14 +383,20 @@ class ZapTest extends TestCase
         // A scenario through the proxy of ZAP: the page that it opens is checked
         $server = new WebServer(self::FIXTURES . DS . 'app' . DS . 'webroot', self::FIXTURES . DS . 'app');
         try {
-            $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site): void {
+            $other = '';
+            $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site) use (&$other): void {
                 $context = stream_context_create(['http' => ['proxy' => str_replace('http://', 'tcp://', $proxy), 'request_fulluri' => true, 'ignore_errors' => true]]);
                 file_get_contents($site . '/login', false, $context);
+                // A request to another site through the proxy, as a browser makes to a CDN
+                $other = (string)file_get_contents('http://example.com/', false, $context);
             });
         } finally {
             $server->stop();
         }
         $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
         $this->assertNotEmpty(preg_grep('#/login#', $uris));
+        // The other site was reached through the proxy, and only the site of the scan is reported
+        $this->assertStringContainsString('Example Domain', $other);
+        $this->assertSame([], preg_grep('#\Ahttps?://example\.com#', $uris));
     }
 }
