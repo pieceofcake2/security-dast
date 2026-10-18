@@ -28,7 +28,10 @@ Panther), as they are: nothing of them changes for the scan.
 
 The output of the tests goes to the error output of the command, and the summary to its output. When the tests
 fail, the scan goes on with the requests made until then, and the cover of the report says so with the exit
-code of the tests.
+code of the tests; the command then exits with `2`, whatever `--fail-on`, as the pages after the failure may not
+be scanned.
+
+The scenario replaces the crawl: `--minutes` and `--ajax-spider` do not apply.
 
 ## Writing Tests That Make a Good Scenario
 

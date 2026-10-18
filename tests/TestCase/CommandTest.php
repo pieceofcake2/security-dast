@@ -17,7 +17,7 @@ class CommandTest extends TestCase
 {
     public function testConfig(): void
     {
-        $config = Command::config(['--pdf=out/dast.pdf', '--fail-on=MEDIUM', '--url=https://staging.example.com', '--minutes=2', '--ajax-spider=1', '--language=ja', '--ignore=10038, 10037'], ['SECURITY_DAST_TITLE' => 'Scan', 'SECURITY_DAST_PDF' => 'env.pdf', 'SECURITY_DAST_APP_ENV' => 'e2e']);
+        $config = Command::config(['--pdf=out/dast.pdf', '--fail-on=MEDIUM', '--url=https://staging.example.com', '--minutes=2', '--ajax-spider=1', '--language=ja', '--ignore=10038, 10037'], ['SECURITY_DAST_TITLE' => 'Scan', 'SECURITY_DAST_PDF' => 'env.pdf', 'SECURITY_DAST_APP_ENV' => 'acceptance']);
 
         $this->assertNotNull($config);
         $this->assertSame('out/dast.pdf', $config->pdf);
@@ -25,7 +25,7 @@ class CommandTest extends TestCase
         $this->assertSame('https://staging.example.com', $config->url);
         $this->assertSame(2, $config->minutes);
         $this->assertTrue($config->ajaxSpider);
-        $this->assertSame('e2e', $config->appEnv);
+        $this->assertSame('acceptance', $config->appEnv);
         $this->assertSame('ja', $config->language);
         $this->assertSame('Scan', $config->title);
         $this->assertSame(['10038', '10037'], $config->ignore);
@@ -71,7 +71,7 @@ class CommandTest extends TestCase
         $this->assertSame(5, $config->minutes);
         $this->assertSame('low', $config->failOn);
         $this->assertTrue($config->ajaxSpider);
-        $this->assertSame('e2e', $config->appEnv);
+        $this->assertSame('acceptance', $config->appEnv);
         $this->assertSame('ja', $config->language);
         $this->assertSame('Acme', $config->projectName);
         $this->assertSame('tmp/security/security-dast.pdf', $config->pdf);
@@ -153,8 +153,11 @@ class CommandTest extends TestCase
 
         $code = $command->run(['--project=' . ZapTest::FIXTURES . DS . 'app', '--pdf=' . TMP . 'dast' . DS . 'end-to-end.pdf', '--end-to-end=' . $tests]);
 
-        rewind($stdout);
-        $this->assertSame(Command::SUCCESS, $code, (string)stream_get_contents($stdout));
+        // The report is written, but the failed tests do not pass: the pages after the failure may not be scanned
+        rewind($stderr);
+        $this->assertSame(Command::ERROR, $code);
+        $this->assertStringContainsString('the End-to-End tests failed (exit code 1)', (string)stream_get_contents($stderr));
+        $this->assertFileExists(TMP . 'dast' . DS . 'end-to-end.pdf');
         $this->assertMatchesRegularExpression('#\Ahttp://host\.docker\.internal:\d+ --proxy-server=http://127\.0\.0\.1:8090 --proxy-bypass-list=<-loopback> --ignore-certificate-errors test\z#', (string)file_get_contents($env));
     }
 

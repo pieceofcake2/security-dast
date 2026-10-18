@@ -19,8 +19,11 @@ use RuntimeException;
  * `SecurityComponent` are not reported as forms without a token, and that the active scan sends them with a new
  * token.
  *
- * A site on 127.0.0.1 or localhost is reached from the container with `--network host` on Linux, and through
- * `host.docker.internal` on macOS and Windows (Docker Desktop).
+ * A site on 127.0.0.1, localhost or [::1] is reached from the container with `--network host` on Linux, and
+ * through `host.docker.internal` on macOS and Windows (Docker Desktop).
+ *
+ * The password of the login is given to ZAP in an environment variable, which the plan names: the plan in the
+ * directory of the scan, which ZAP reads, holds no secret.
  */
 final class Zap
 {
@@ -58,7 +61,19 @@ final class Zap
     public const LOCALES = ['ja' => 'ja_JP'];
 
     /**
-     * @var \Closure(array<string>, string): array{0: int, 1: string, 2: string}
+     * The environment variable of the password of the login, for ZAP in its container
+     */
+    public const PASSWORD_ENV = 'SECURITY_DAST_ZAP_PASSWORD';
+
+    /**
+     * The directories of the scans that are running, removed at the end of the process also when it is stopped
+     *
+     * @var array<string, true>
+     */
+    private static array $dirs = [];
+
+    /**
+     * @var \Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string}
      */
     private Closure $run;
 
@@ -70,7 +85,8 @@ final class Zap
      * @param int $minutes Minutes to crawl the site
      * @param bool $ajaxSpider Whether to crawl with a browser too, for the pages that JavaScript builds
      * @param string $options More options of ZAP, e.g. `-config key=value`
-     * @param (\Closure(array<string>, string): array{0: int, 1: string, 2: string})|null $run Runs a command
+     * @param (\Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string})|null $run Runs a
+     *  command, with environment variables
      * @param string $os Operating system family, `PHP_OS_FAMILY`
      * @param string $scan `baseline` or `full`
      * @param int $scanMinutes Most minutes of the active scan of the full scan
@@ -108,7 +124,7 @@ final class Zap
             $target = $this->targetFromContainer($url);
             // JSON is YAML too
             file_put_contents($dir . DIRECTORY_SEPARATOR . 'plan.yaml', json_encode($this->plan($target), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
-            [$code, $output, $error] = ($this->run)($this->command($dir, $language), $dir);
+            [$code, $output, $error] = ($this->run)($this->command($dir, $language), $dir, $this->env());
             if (!is_file($dir . DIRECTORY_SEPARATOR . 'zap.json')) {
                 throw new RuntimeException(sprintf('ZAP failed (exit code %d): %s', $code, self::tail($output . "\n" . $error)));
             }
@@ -127,18 +143,20 @@ final class Zap
      * @param \Closure(string, string): void $scenario Runs the scenario with the URL of the proxy, and the URL of the
      *  site to use through it
      * @param string $language Language of the alerts
-     * @param \Closure(string, array<string>): \PieceOfCake2\SecurityDast\ZapDaemon|null $daemon Creates the daemon
-     *  with the directory of the plan and the options of ZAP
+     * @param \Closure(string, array<string>, array<string, string>): \PieceOfCake2\SecurityDast\ZapDaemon|null $daemon
+     *  Creates the daemon with the directory of the plan, the options of ZAP and its environment variables
      * @return \PieceOfCake2\SecurityDast\ScanResult
      * @throws \RuntimeException When ZAP fails, or cannot log in
      */
     public function scanScenario(string $url, Closure $scenario, string $language = 'en', ?Closure $daemon = null): ScanResult
     {
         $dir = self::workDir();
-        $daemon = $daemon !== null
-            ? $daemon($dir, $this->zapOptions($language))
-            : new ZapDaemon($dir, $this->zapOptions($language), $this->image, $this->docker, $this->os, run: $this->run);
+        $started = null;
         try {
+            $started = $daemon !== null
+                ? $daemon($dir, $this->zapOptions($language), $this->env())
+                : new ZapDaemon($dir, $this->zapOptions($language), $this->image, $this->docker, $this->os, run: $this->run, env: $this->env());
+            $daemon = $started;
             $proxy = $daemon->start();
             $target = $this->targetFromContainer($url);
             $scenario($proxy, $target);
@@ -150,8 +168,11 @@ final class Zap
 
             return $this->reports($dir, $url, $target);
         } finally {
-            $daemon->stop();
-            self::removeDir($dir);
+            try {
+                $started?->stop();
+            } finally {
+                self::removeDir($dir);
+            }
         }
     }
 
@@ -183,15 +204,35 @@ final class Zap
     }
 
     /**
-     * A new directory for the plan and the reports, that ZAP (the user zap of the image) can write
+     * The environment variables of ZAP: the password of the login
+     *
+     * @return array<string, string>
+     */
+    private function env(): array
+    {
+        return $this->login !== null ? [self::PASSWORD_ENV => $this->login->password] : [];
+    }
+
+    /**
+     * A new directory for the plan and the reports, that ZAP (the user zap of the image, another user than the one
+     * of the host on Linux) can write, and the other users of the host cannot list (`1733`): they do not find the
+     * random names of its files, and the sticky bit keeps them from removing or renaming those of others
      *
      * @return string
      */
-    private static function workDir(): string
+    public static function workDir(): string
     {
         $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'security-dast-' . bin2hex(random_bytes(6));
-        mkdir($dir, 0777, true);
-        chmod($dir, 0777);
+        mkdir($dir, 0700, true);
+        chmod($dir, 01733);
+        if (self::$dirs === []) {
+            register_shutdown_function(static function (): void {
+                foreach (array_keys(self::$dirs) as $dir) {
+                    self::removeDir($dir);
+                }
+            });
+        }
+        self::$dirs[$dir] = true;
 
         return $dir;
     }
@@ -202,10 +243,16 @@ final class Zap
      * @param string $dir Directory
      * @return void
      */
-    private static function removeDir(string $dir): void
+    public static function removeDir(string $dir): void
     {
-        foreach (glob($dir . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
-            unlink($file);
+        unset(self::$dirs[$dir]);
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach (scandir($dir) ?: [] as $file) {
+            if ($file !== '.' && $file !== '..') {
+                unlink($dir . DIRECTORY_SEPARATOR . $file);
+            }
         }
         rmdir($dir);
     }
@@ -223,6 +270,10 @@ final class Zap
         if ($this->os === 'Linux') {
             $command[] = '--network';
             $command[] = 'host';
+        }
+        // The names only: the values come from the environment of the command, not from its arguments
+        foreach (array_keys($this->env()) as $name) {
+            array_push($command, '-e', $name);
         }
         array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...$this->zapOptions($language));
 
@@ -281,11 +332,12 @@ final class Zap
         if ($this->login !== null) {
             $context['authentication'] = [
                 'method' => 'browser',
-                'parameters' => ['loginPageUrl' => $this->login->urlOn($target), 'loginPageWait' => 5, 'browserId' => 'firefox-headless'],
+                'parameters' => ['loginPageUrl' => $this->targetFromContainer($this->login->urlOn($target)), 'loginPageWait' => 5, 'browserId' => 'firefox-headless'],
                 'verification' => ['method' => 'autodetect'],
             ];
             $context['sessionManagement'] = ['method' => 'autodetect'];
-            $context['users'] = [['name' => 'user', 'credentials' => ['username' => $this->login->username, 'password' => $this->login->password]]];
+            // The password from the environment of ZAP, so that it is not in the file of the plan
+            $context['users'] = [['name' => 'user', 'credentials' => ['username' => $this->login->username, 'password' => '${' . self::PASSWORD_ENV . '}']]];
             $user = ['user' => 'user'];
         }
 
@@ -351,7 +403,7 @@ final class Zap
     }
 
     /**
-     * The URL of a site from the container: 127.0.0.1 and localhost are the host
+     * The URL of a site from the container: 127.0.0.1, localhost and [::1] are the host
      *
      * @param string $url URL
      * @return string
@@ -362,7 +414,7 @@ final class Zap
             return $url;
         }
 
-        return (string)preg_replace('#\A(https?://)(?:127\.0\.0\.1|localhost)(?=[:/]|\z)#i', '$1host.docker.internal', $url);
+        return (string)preg_replace('#\A(https?://)(?:127\.0\.0\.1|localhost|\[::1\])(?=[:/?\#]|\z)#i', '$1host.docker.internal', $url);
     }
 
     /**

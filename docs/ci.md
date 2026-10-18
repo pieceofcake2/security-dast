@@ -4,7 +4,7 @@ Two workflows cover most applications:
 
 | Workflow | When | Scan |
 | --- | --- | --- |
-| [docs/examples/security-dast.yml](examples/security-dast.yml) | Each push and pull request, and every week | The baseline scan of the application, with the test database of the job |
+| [docs/examples/security-dast.yml](examples/security-dast.yml) | Each push to `main`, each pull request, and every week | The baseline scan of the application, with the test database of the job |
 | [docs/examples/security-dast-full.yml](examples/security-dast-full.yml) | Every night, and by hand | The full scan on the End-to-End tests, as a test user |
 
 Both upload the report as a PDF (not a zip). The Ubuntu runners have Docker and Google Chrome.
@@ -77,5 +77,5 @@ To scan a staging server after a deployment, give its URL. Run the baseline scan
 The summary of the command is in the log of the job:
 
 ```text
-11 alerts (2 medium, 7 low, 2 info) on 14 URLs of http://127.0.0.1:49855 (ZAP 2.17.0). Report: tmp/security-dast.pdf
+11 alerts (2 medium, 7 low, 2 info) on 14 URLs of https://staging.example.com (ZAP 2.17.0). Report: tmp/security-dast-staging.pdf
 ```

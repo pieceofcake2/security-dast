@@ -18,6 +18,17 @@ class EndToEndTestsTest extends TestCase
         ], $tests->env('http://127.0.0.1:8090', 'http://host.docker.internal:8123/'));
     }
 
+    public function testInheritedWithoutThePassword(): void
+    {
+        putenv('SECURITY_DAST_PASSWORD=secret');
+        try {
+            $this->assertArrayNotHasKey('SECURITY_DAST_PASSWORD', EndToEndTests::inherited());
+            $this->assertArrayHasKey('PATH', EndToEndTests::inherited());
+        } finally {
+            putenv('SECURITY_DAST_PASSWORD');
+        }
+    }
+
     public function testCommand(): void
     {
         $this->assertSame('vendor/bin/phpunit --testsuite EndToEnd', (new EndToEndTests('vendor/bin/phpunit --testsuite EndToEnd', '.'))->command());

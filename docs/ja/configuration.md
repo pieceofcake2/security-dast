@@ -21,8 +21,8 @@
 | --- | --- | --- | --- |
 | `--scan=SCAN` | `SECURITY_DAST_SCAN` | `baseline` | `baseline`、またはページも攻撃する `full` ([スキャンの種類](scans.md)) |
 | `--scan-minutes=N` | `SECURITY_DAST_SCAN_MINUTES` | `10` | フルスキャンの攻撃の最大の分数 |
-| `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | サイトをクロールする分数 |
-| `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | JavaScript が作るリンクのために、ブラウザでもクロールします |
+| `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | サイトをクロールする分数。クロールしない `--end-to-end` では使いません |
+| `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | JavaScript が作るリンクのために、ブラウザでもクロールします。`--end-to-end` では使いません |
 | `--end-to-end=COMMAND` | `SECURITY_DAST_END_TO_END` | | クロールの代わりにスキャンする End-to-End テストのコマンド ([End-to-End テスト](end-to-end.md)) |
 | `--login-url=PATH` | `SECURITY_DAST_LOGIN_URL` | | ユーザーとしてスキャンするときのログインページ。パスか URL ([ログイン](login.md)) |
 | `--username=NAME` | `SECURITY_DAST_USERNAME` | | ログインするユーザー |
@@ -49,6 +49,9 @@
 | `--docker=COMMAND` | `SECURITY_DAST_DOCKER` | `docker` | Docker のコマンド。`podman` など |
 | `--zap-options=OPTIONS` | `SECURITY_DAST_ZAP_OPTIONS` | | ZAP のほかのオプション。空白区切り。`-config spider.maxDepth=5` など |
 | `--settings=FILE` | `SECURITY_SETTINGS` | `config/security.php` か `app/Config/security.php` | 設定ファイル |
+
+`--pdf`、`--settings`、`--locale-dir`、報告書の `dir` のパスは、プロジェクトではなくカレントディレクトリからの相対
+パスです。プロジェクトで実行するか、絶対パスで指定してください。`--webroot` はプロジェクトからの相対パスです。
 
 PDF を印刷する Chrome は、[pieceofcake2/report](https://pieceofcake2.github.io/report/ja/) の `REPORT_CHROME_BINARY` と
 `REPORT_NO_SANDBOX` で指定します。
@@ -87,8 +90,8 @@ return [
   あります。この例では `tmp/security/security-dast.pdf` に書き出します。
 - ファイルは PHP です。秘密は環境変数から読み、ファイルはコミットしてください。
 
-ファイルの設定は、オプションや環境変数を指定しなければ使われます。たとえば、毎晩のフルスキャンの設定のまま、push の
-たびにはベースラインスキャンをします。
+ファイルの設定は、オプションや環境変数を指定しなければ使われます。たとえば、毎晩のフルスキャンの設定のまま、pull
+request ではベースラインスキャンをします。
 
 ```bash
 SECURITY_DAST_SCAN=baseline vendor/bin/security-dast

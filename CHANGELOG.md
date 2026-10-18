@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## Unreleased
+
+- The password of the login is no longer written to the plan of ZAP: ZAP gets it in an environment variable of
+  its container, and the tests of `--end-to-end` and the application no longer get `SECURITY_DAST_PASSWORD`
+- The key of the API of the ZAP proxy is no longer on the command line, where the other users of the host could
+  see it
+- The directory of the scan is no longer readable by the other users of the host (`1733` instead of `0777`)
+- Ctrl+C and SIGTERM (with the pcntl extension) stop ZAP, the web server and the tests, and remove the directory
+  of the scan
+- A failed run of the End-to-End tests exits with `2` after the report, as the pages after the failure may not be
+  scanned
+- An absolute login URL on 127.0.0.1 or localhost is reached from the container, as the site is; `[::1]` too
+- The built-in web server serves the files of the document root by their encoded names, e.g. `my%20site.css`
+- The report says "on the pages of the End-to-End tests" when a scenario raised no alert
+- A `null` in the settings file is not set, e.g. `getenv('...') ?: null`
+- Windows: the End-to-End tests and the web server read from `NUL`
+- Documentation: `data[_Token][debug]`, `--minutes` and `--ajax-spider` with `--end-to-end`, the paths relative
+  to the current directory, the triggers of the example workflow, the sample reports by their URL
+
 ## 1.0.0
 
 - First release: `vendor/bin/security-dast` runs a CakePHP 2 application with PHP's built-in web server

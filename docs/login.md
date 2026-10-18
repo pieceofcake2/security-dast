@@ -87,4 +87,6 @@ read it from the environment:
 ],
 ```
 
-The password is not written to the report, and the plan of ZAP that has it is deleted after the scan.
+The password is not written to the report or to the plan of ZAP: ZAP gets it in an environment variable of its
+container, by name only, so that it is not on a command line either. The tests of `--end-to-end` and the
+application do not get `SECURITY_DAST_PASSWORD`.

@@ -49,7 +49,8 @@ ZAP is set up for the applications of CakePHP 2:
   reported as forms without a token, and the full scan gets a new token for each of its attacks, from the page
   of the form, in the session of the scan, so that `SecurityComponent` does not black-hole them.
 - It leaves the fields that `SecurityComponent` locks alone (`_method`, `data[_Token][fields]`,
-  `data[_Token][unlocked]`): a change of them is always black-holed, so attacking them would only spend time.
+  `data[_Token][unlocked]`, `data[_Token][debug]`): a change of them is always black-holed, so attacking them
+  would only spend time.
 - It knows the session cookie of CakePHP (`CAKEPHP`).
 - The URLs of the logout are left out (`.*logout.*`, see `--exclude`), so that a scan as a user stays logged
   in.

@@ -41,6 +41,13 @@ class WebServerTest extends TestCase
             $this->assertStringContainsString('<h1>Login</h1>', $body);
             [$status] = $this->get($url . '/error');
             $this->assertStringContainsString('500', $status);
+
+            // A file of the document root, by its encoded name; not a file outside of it
+            [$status, $body] = $this->get($url . '/css/my%20site.css');
+            $this->assertStringContainsString('200', $status);
+            $this->assertStringContainsString('body', $body);
+            [, $body] = $this->get($url . '/css/..%2F..%2Fcomposer.json');
+            $this->assertStringNotContainsString('"name"', $body);
         } finally {
             $server->stop();
         }

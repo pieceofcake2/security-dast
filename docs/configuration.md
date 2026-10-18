@@ -21,8 +21,8 @@ win over the environment variables, and the environment variables over the file.
 | --- | --- | --- | --- |
 | `--scan=SCAN` | `SECURITY_DAST_SCAN` | `baseline` | `baseline`, or `full` to attack the pages too ([Scans](scans.md)) |
 | `--scan-minutes=N` | `SECURITY_DAST_SCAN_MINUTES` | `10` | The most minutes of the attacks of the full scan |
-| `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | Minutes to crawl the site |
-| `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | Crawl with a browser too, for the links that JavaScript builds |
+| `--minutes=N` | `SECURITY_DAST_MINUTES` | `1` | Minutes to crawl the site; not with `--end-to-end`, which does not crawl |
+| `--ajax-spider=1` | `SECURITY_DAST_AJAX_SPIDER` | | Crawl with a browser too, for the links that JavaScript builds; not with `--end-to-end` |
 | `--end-to-end=COMMAND` | `SECURITY_DAST_END_TO_END` | | The command of the End-to-End tests to scan, instead of the crawl ([End-to-End Tests](end-to-end.md)) |
 | `--login-url=PATH` | `SECURITY_DAST_LOGIN_URL` | | The login page, a path or a URL, to scan as a user ([Login](login.md)) |
 | `--username=NAME` | `SECURITY_DAST_USERNAME` | | The user to log in as |
@@ -49,6 +49,10 @@ win over the environment variables, and the environment variables over the file.
 | `--docker=COMMAND` | `SECURITY_DAST_DOCKER` | `docker` | The Docker command, e.g. `podman` |
 | `--zap-options=OPTIONS` | `SECURITY_DAST_ZAP_OPTIONS` | | More options of ZAP, separated by spaces, e.g. `-config spider.maxDepth=5` |
 | `--settings=FILE` | `SECURITY_SETTINGS` | `config/security.php` or `app/Config/security.php` | The settings file |
+
+The paths of `--pdf`, `--settings`, `--locale-dir` and of the `dir` of the report are relative to the current
+directory, not to the project: run the command in the project, or give absolute paths. `--webroot` is relative
+to the project.
 
 The `REPORT_CHROME_BINARY` and `REPORT_NO_SANDBOX` variables of
 [pieceofcake2/report](https://pieceofcake2.github.io/report/) set the Chrome that prints the PDF.
@@ -89,7 +93,7 @@ return [
 - The file is PHP: read the secrets from the environment, and commit the file.
 
 A setting of the file is used unless the option or the environment variable is given, e.g. the baseline scan of
-each push with the settings of the nightly full scan:
+the pull requests with the settings of the nightly full scan:
 
 ```bash
 SECURITY_DAST_SCAN=baseline vendor/bin/security-dast

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PieceOfCake2\SecurityDast\Test;
 
 use PHPUnit\Framework\TestCase;
+use PieceOfCake2\SecurityDast\Zap;
 use PieceOfCake2\SecurityDast\ZapDaemon;
 use RuntimeException;
 
@@ -14,7 +15,10 @@ class ZapDaemonTest extends TestCase
         $command = (new ZapDaemon('/tmp/zap', ['-config', 'view.locale=ja_JP'], os: 'Darwin', port: 8090))->command();
 
         $this->assertSame(['docker', 'run', '-d', '--rm', '-p', '127.0.0.1:8090:8090', '-v', '/tmp/zap:/zap/wrk:rw', 'ghcr.io/zaproxy/zaproxy:stable', 'zap.sh', '-daemon', '-host', '0.0.0.0', '-port', '8090'], array_slice($command, 0, 15));
-        $this->assertMatchesRegularExpression('/\Aapi\.key=[0-9a-f]{32}\z/', $command[16]);
+        // The key is in a file of the directory, not on the command line
+        $this->assertSame('-configfile', $command[15]);
+        $this->assertMatchesRegularExpression('#\A/zap/wrk/key-[0-9a-f]{16}\.properties\z#', $command[16]);
+        $this->assertEmpty(preg_grep('/api\.key/', $command));
         $this->assertSame(['view.locale=ja_JP'], array_slice($command, -1));
     }
 
@@ -25,6 +29,34 @@ class ZapDaemonTest extends TestCase
         // The network of the host, and the proxy and the API on 127.0.0.1 only
         $this->assertSame(['docker', 'run', '-d', '--rm', '--network', 'host'], array_slice($command, 0, 6));
         $this->assertSame(['-host', '127.0.0.1', '-port', '8090'], array_slice($command, 11, 4));
+    }
+
+    public function testStartWithAKeyFileAndEnvironment(): void
+    {
+        $dir = Zap::workDir();
+        $runs = [];
+        $daemon = new ZapDaemon($dir, os: 'Darwin', port: 8090, run: static function (array $command, string $cwd, array $env = []) use (&$runs, $dir): array {
+            $file = $command[1] === 'run' ? $dir . DS . basename($command[array_search('-configfile', $command, true) + 1]) : null;
+            $runs[] = [$command, $env, $file !== null ? (string)file_get_contents($file) : null];
+
+            return [0, "container-id\n", ''];
+        }, get: static fn(string $url): string => str_contains($url, 'version') ? '{"version":"2.17.0"}' : '{}', env: [Zap::PASSWORD_ENV => 'secret']);
+        try {
+            $daemon->start();
+            [$command, $env, $key] = $runs[0];
+
+            $this->assertSame(['-e', Zap::PASSWORD_ENV], array_slice($command, 6, 2));
+            $this->assertSame([Zap::PASSWORD_ENV => 'secret'], $env);
+            $this->assertMatchesRegularExpression('/\Aapi\.key=[0-9a-f]{32}\n\z/', (string)$key);
+            // Removed once ZAP has started
+            $this->assertSame(['.', '..'], scandir($dir));
+
+            $daemon->stop();
+            $this->assertSame(['docker', 'rm', '-f', 'container-id'], $runs[1][0]);
+        } finally {
+            Zap::removeDir($dir);
+        }
+        $this->assertDirectoryDoesNotExist($dir);
     }
 
     public function testRunPlanFailed(): void

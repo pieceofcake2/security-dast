@@ -33,7 +33,7 @@ class ZapTest extends TestCase
      */
     public static function zap(string $language = 'en', array &$commands = [], string $os = 'Darwin', ?Login $login = null, string $auth = 'zap-auth.json', array &$plans = []): Zap
     {
-        return new Zap(run: static function (array $command, string $dir) use ($language, &$commands, $auth, &$plans): array {
+        return new Zap(run: static function (array $command, string $dir, array $env = []) use ($language, &$commands, $auth, &$plans): array {
             $commands[] = $command;
             $plans[] = (string)file_get_contents($dir . DS . 'plan.yaml');
             copy(self::FIXTURES . DS . 'zap-' . $language . '.json', $dir . DS . 'zap.json');
@@ -94,7 +94,8 @@ class ZapTest extends TestCase
         $this->assertSame(['.*/users/logout.*', '.*/admin/.*'], $context['excludePaths']);
         $this->assertSame('browser', $context['authentication']['method']);
         $this->assertSame(self::TARGET . '/users/login', $context['authentication']['parameters']['loginPageUrl']);
-        $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => 'secret']]], $context['users']);
+        // The password from the environment of ZAP, not in the plan
+        $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => '${SECURITY_DAST_ZAP_PASSWORD}']]], $context['users']);
         $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
         $this->assertSame(['context' => 'app', 'user' => 'user', 'policy' => 'Default Policy', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
         $this->assertSame('auth-report-json', $plan['jobs'][6]['parameters']['template']);
@@ -179,6 +180,28 @@ class ZapTest extends TestCase
         $this->assertSame('test@example.com', $result->user);
         // The plan is JSON, which is YAML too
         $this->assertSame(self::TARGET . '/users/login', json_decode($plans[0], true)['env']['contexts'][0]['authentication']['parameters']['loginPageUrl']);
+        // The password is given in the environment of the container, by its name only
+        $this->assertStringNotContainsString('secret', $plans[0]);
+        $this->assertContains(Zap::PASSWORD_ENV, $commands[0]);
+        $this->assertEmpty(preg_grep('/secret/', $commands[0]));
+    }
+
+    public function testAbsoluteLoginUrl(): void
+    {
+        $zap = new Zap(os: 'Darwin', login: new Login('http://127.0.0.1:56557/users/login', 'test@example.com', 'secret'));
+
+        $this->assertSame(self::TARGET . '/users/login', $zap->plan(self::TARGET)['env']['contexts'][0]['authentication']['parameters']['loginPageUrl']);
+    }
+
+    public function testWorkDir(): void
+    {
+        $dir = Zap::workDir();
+        file_put_contents($dir . DS . 'plan.yaml', '{}');
+
+        // ZAP can write, the other users cannot list
+        $this->assertSame('1733', substr(sprintf('%o', fileperms($dir)), -4));
+        Zap::removeDir($dir);
+        $this->assertDirectoryDoesNotExist($dir);
     }
 
     public function testLoginFailed(): void
@@ -198,6 +221,7 @@ class ZapTest extends TestCase
         $this->assertSame('http://host.docker.internal/', $zap->targetFromContainer('http://localhost/'));
         $this->assertSame('https://example.com', $zap->targetFromContainer('https://example.com'));
         $this->assertSame('http://127.0.0.1.example.com', $zap->targetFromContainer('http://127.0.0.1.example.com'));
+        $this->assertSame('http://host.docker.internal:8080/', $zap->targetFromContainer('http://[::1]:8080/'));
 
         $this->assertSame(self::URL, (new Zap(os: 'Linux'))->targetFromContainer(self::URL));
     }

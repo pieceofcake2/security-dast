@@ -4,16 +4,16 @@
 
 **ベースラインスキャン**: セキュリティヘッダーのないページ、トークンのないフォーム、エラーページのあるサイトです。
 
-- [ベースラインスキャンの見本 (日本語、PDF)](/report-sample-ja.pdf)
-- [ベースラインスキャンの見本 (英語、PDF)](/report-sample.pdf)
+- [ベースラインスキャンの見本 (日本語、PDF)](https://pieceofcake2.github.io/security-dast/report-sample-ja.pdf)
+- [ベースラインスキャンの見本 (英語、PDF)](https://pieceofcake2.github.io/security-dast/report-sample.pdf)
 
 ![表紙、リスク別のアラート、アラートのページとそのリクエスト](../img/report-sample-ja.png)
 
 **フルスキャン**: End-to-End テストをシナリオにした、CakePHP 2 アプリケーションです。`SecurityComponent` のフォームが
 値を `h()` なしで出力していて、反射型の XSS として見つかります。
 
-- [フルスキャンの見本 (日本語、PDF)](/report-sample-full-ja.pdf)
-- [フルスキャンの見本 (英語、PDF)](/report-sample-full.pdf)
+- [フルスキャンの見本 (日本語、PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full-ja.pdf)
+- [フルスキャンの見本 (英語、PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full.pdf)
 
 ![End-to-End テストでのフルスキャンの表紙、リスク別のアラート、XSS のページとその攻撃](../img/report-sample-full-ja.png)
 
