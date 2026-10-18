@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.0.2
 
 - The alerts that `--ignore` leaves out are in the report: a group "Ignored alerts" with the ID, name, risk and
   number of URLs of each, and their number in the summary of the command. They do not fail the scan
