@@ -95,6 +95,19 @@ class CommandTest extends TestCase
         $this->assertSame([], $config->ignoreReasons);
     }
 
+    public function testIgnoreOfInvalidJson(): void
+    {
+        // An empty ID is left out, and a value that is not an object of IDs is an error
+        $config = Command::config([], ['SECURITY_DAST_IGNORE' => '{"": "x", "10038": ""}']);
+        $this->assertNotNull($config);
+        $this->assertSame(['10038'], $config->ignore);
+        $this->assertSame([], $config->ignoreReasons);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('ignore must be a list of alert IDs, or of IDs and their reasons.');
+        Command::config([], ['SECURITY_DAST_IGNORE' => '{10038']);
+    }
+
     public function testInvalidOptions(): void
     {
         $this->assertNull(Command::config(['--help']));
