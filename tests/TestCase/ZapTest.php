@@ -360,11 +360,15 @@ class ZapTest extends TestCase
             $result = (new Zap())->scanScenario($server->start(), static function (string $proxy, string $site): void {
                 $context = stream_context_create(['http' => ['proxy' => str_replace('http://', 'tcp://', $proxy), 'request_fulluri' => true, 'ignore_errors' => true]]);
                 file_get_contents($site . '/login', false, $context);
+                // A request to another site through the proxy, as a browser makes to a CDN
+                file_get_contents('http://example.com/', false, $context);
             });
         } finally {
             $server->stop();
         }
         $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
         $this->assertNotEmpty(preg_grep('#/login#', $uris));
+        // Only the site of the scan is reported
+        $this->assertSame([], preg_grep('#\Ahttps?://example\.com#', $uris));
     }
 }
