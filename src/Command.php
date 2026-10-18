@@ -151,6 +151,9 @@ final class Command
             $before[$signal] = pcntl_signal_get_handler($signal);
             // Without restarting the system calls, so that it also ends while it waits for the output of the tests
             pcntl_signal($signal, static function (int $signal): void {
+                // A second Ctrl+C would end the shutdown functions, which stop ZAP, before they finish
+                pcntl_signal(SIGINT, SIG_IGN);
+                pcntl_signal(SIGTERM, SIG_IGN);
                 exit(128 + $signal);
             }, false);
         }
@@ -254,7 +257,13 @@ final class Command
         if ($options['login-url'] !== null && ($options['username'] === null || $options['password'] === null)) {
             throw new InvalidArgumentException('--login-url needs --username and --password (or SECURITY_DAST_PASSWORD).');
         }
-        $list = static fn(?string $value): array => $value === null ? [] : array_values(array_filter(array_map('trim', explode(',', $value)), static fn(string $item): bool => $item !== ''));
+        $list = static function (?string $value): array {
+            // A list of the settings file with gaps in its keys comes as JSON
+            $json = $value !== null && str_starts_with(ltrim($value), '{') ? json_decode($value, true) : null;
+            $items = is_array($json) ? array_map(static fn($item): string => is_scalar($item) ? (string)$item : '', $json) : explode(',', (string)$value);
+
+            return array_values(array_filter(array_map('trim', $items), static fn(string $item): bool => $item !== ''));
+        };
 
         // The settings file can give the IDs with their reasons, ['10038' => 'reason'], as JSON
         [$ignore, $ignoreReasons] = self::ignore($options['ignore'], $list);
@@ -304,6 +313,11 @@ final class Command
         $data = json_decode($value, true);
         if (!is_array($data)) {
             throw new InvalidArgumentException('ignore must be a list of alert IDs, or of IDs and their reasons.');
+        }
+        // A list with gaps in its keys, e.g. of array_filter(): its values are the IDs
+        $values = array_map(static fn($value): string => is_scalar($value) ? trim((string)$value) : '', $data);
+        if (array_filter($values, static fn(string $value): bool => !preg_match('/\A\d+(?:-\d+)?\z/', $value)) === []) {
+            return [array_values(array_filter($values, static fn(string $value): bool => $value !== '')), []];
         }
         $ids = [];
         $reasons = [];
@@ -359,7 +373,8 @@ Options:
                          default: .*logout.*)
   --minutes=N            Minutes to crawl the site (SECURITY_DAST_MINUTES, default: 1)
   --ajax-spider=1        Crawl with a browser too, for pages built by JavaScript (SECURITY_DAST_AJAX_SPIDER)
-  --ignore=LIST          Alert IDs to leave out of the report, comma separated, e.g. 10038 (SECURITY_DAST_IGNORE)
+  --ignore=LIST          Alert IDs that do not fail the scan, comma separated, e.g. 10038; the report lists them
+                         (SECURITY_DAST_IGNORE)
   --zap-options=OPTIONS  More options of ZAP (SECURITY_DAST_ZAP_OPTIONS)
   --language=LANG        en or ja (SECURITY_REPORT_LANGUAGE, default: en)
   --locale-dir=DIR       Directory of <language>.json files (SECURITY_REPORT_LOCALE_DIR)
@@ -369,7 +384,7 @@ Options:
   --settings=FILE        Settings file (SECURITY_SETTINGS, default: config/security.php or app/Config/security.php)
   --help                 Show this help
 
-Exit code: 0 passed, 1 an alert reaches --fail-on, 2 error.
+Exit code: 0 passed, 1 an alert reaches --fail-on, 2 error or failed End-to-End tests.
 
 TEXT;
     }

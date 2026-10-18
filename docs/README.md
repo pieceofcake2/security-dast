@@ -51,7 +51,7 @@ The command starts the application with `APP_ENV=test`, runs ZAP in Docker again
 ```
 
 The exit code is `0` when no alert reaches `--fail-on` (default `high`), `1` when one does, and `2` when the
-web server, ZAP or the report fails.
+web server, ZAP or the report fails, or when the End-to-End tests of `--end-to-end` fail.
 
 Then, step by step:
 
@@ -77,8 +77,11 @@ Then, step by step:
 
 - PHP 8.0+
 - Docker. The image of ZAP (about 1.5 GB) is pulled on the first run. On Linux the container uses the network
-  of the host (`--network host`); on macOS and Windows (Docker Desktop), it reaches the application through
+  of the host (`--network host`) and runs as the user of the command, with its files in a directory that only
+  this user can read; on macOS and Windows (Docker Desktop), it reaches the application through
   `host.docker.internal`
+- The pcntl extension of PHP, for Ctrl+C and SIGTERM to stop ZAP and remove its files (optional: without it, a
+  stopped scan can leave the container of ZAP running; remove it with `docker rm -f`)
 - Google Chrome or Chromium 131+ to print the PDF, and on Linux `fonts-noto-cjk` for a Japanese report
 - An application that runs with `APP_ENV=test`: its test database with the tables and the data that the pages
   need (e.g. the schema loaded by the tests), and its `config/.env.test`

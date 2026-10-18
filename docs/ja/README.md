@@ -50,7 +50,7 @@ vendor/bin/security-dast --pdf=tmp/security-dast.pdf --language=ja
 ```
 
 終了コードは、`--fail-on` (デフォルト `high`) に達するアラートがなければ `0`、あれば `1`、ウェブサーバー、ZAP、
-報告書のどれかが失敗したら `2` です。
+報告書のどれかが失敗したとき、または `--end-to-end` の End-to-End テストが失敗したときは `2` です。
 
 続けて、順に進めます。
 
@@ -76,7 +76,10 @@ vendor/bin/security-dast --pdf=tmp/security-dast.pdf --language=ja
 
 - PHP 8.0 以上
 - Docker。ZAP のイメージ (約 1.5 GB) は初回に取得します。Linux ではコンテナがホストのネットワーク (`--network host`)
-  を使い、macOS と Windows (Docker Desktop) では `host.docker.internal` からアプリケーションにアクセスします
+  を使い、コマンドを実行したユーザーとして、そのユーザーだけが読めるディレクトリのファイルで動きます。macOS と
+  Windows (Docker Desktop) では `host.docker.internal` からアプリケーションにアクセスします
+- PHP の pcntl 拡張。Ctrl+C や SIGTERM で ZAP を止め、そのファイルを消すためです (任意。ないと、止めたスキャンの
+  ZAP のコンテナが動いたまま残ることがあります。`docker rm -f` で消してください)
 - PDF の印刷に Google Chrome か Chromium 131 以上。日本語の報告書には、Linux では `fonts-noto-cjk`
 - `APP_ENV=test` で動くアプリケーション。ページに必要なテーブルとデータのあるテストのデータベース (テストが読み込む
   スキーマなど) と、`config/.env.test`

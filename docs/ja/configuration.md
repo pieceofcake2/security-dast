@@ -34,7 +34,7 @@
 | --- | --- | --- | --- |
 | `--pdf=PATH` | `SECURITY_DAST_PDF` | `tmp/security-dast.pdf` | PDF の報告書 |
 | `--fail-on=RISK` | `SECURITY_DAST_FAIL_ON` | `high` | 不合格にする最も低いリスク。`high`、`medium`、`low`、`info`、`none` |
-| `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | 報告書から除くアラート ID。カンマ区切り ([アラートを除外する](report.md#アラートを除外する)) |
+| `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | 不合格にしないアラート ID。カンマ区切り。報告書には載ります ([アラートを除外する](report.md#アラートを除外する)) |
 | `--language=LANG` | `SECURITY_REPORT_LANGUAGE` | `en` | `en` か `ja`、または `--locale-dir` の言語 |
 | `--locale-dir=DIR` | `SECURITY_REPORT_LOCALE_DIR` | | メッセージを足したり置き換えたりする `<言語>.json` のディレクトリ |
 | `--title=TITLE` | `SECURITY_DAST_TITLE` | 言語のタイトル | 報告書のタイトル |

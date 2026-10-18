@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## Unreleased
+
+- An empty list of the settings file, e.g. `'exclude' => []`, is no longer the text `[]` (an invalid pattern of
+  ZAP since 1.0.2), and a list with gaps in its keys, e.g. of `array_filter()`, is a list again
+- On Linux, ZAP runs as the user of the command, with its home in the directory of the scan, which is now
+  private (`0700`): the other users of the host can no longer read or replace the plan, the reports or the key
+  of the API
+- SIGTERM to the command alone also removes the container of a scan without `--end-to-end`, and a second Ctrl+C
+  no longer stops the cleanup halfway
+- The commands of the project, e.g. `config/define.php`, no longer get `SECURITY_DAST_PASSWORD`
+- `ext-pcntl` is suggested, for the cleanup on Ctrl+C and SIGTERM
+
 ## 1.0.2
 
 - The alerts that `--ignore` leaves out are in the report: a group "Ignored alerts" with the ID, name, risk and

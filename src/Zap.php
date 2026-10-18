@@ -73,6 +73,11 @@ final class Zap
     private static array $dirs = [];
 
     /**
+     * The name of the container of the scan while it runs
+     */
+    private ?string $container = null;
+
+    /**
      * @var \Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string}
      */
     private Closure $run;
@@ -124,7 +129,14 @@ final class Zap
             $target = $this->targetFromContainer($url);
             // JSON is YAML too
             file_put_contents($dir . DIRECTORY_SEPARATOR . 'plan.yaml', json_encode($this->plan($target), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
-            [$code, $output, $error] = ($this->run)($this->command($dir, $language), $dir, $this->env());
+            // Removed at the end of the process also when it is stopped, e.g. by a SIGTERM to this process only
+            $this->container = 'security-dast-' . bin2hex(random_bytes(6));
+            register_shutdown_function([$this, 'removeContainer']);
+            try {
+                [$code, $output, $error] = ($this->run)($this->command($dir, $language, $this->container), $dir, $this->env());
+            } finally {
+                $this->container = null;
+            }
             if (!is_file($dir . DIRECTORY_SEPARATOR . 'zap.json')) {
                 throw new RuntimeException(sprintf('ZAP failed (exit code %d): %s', $code, self::tail($output . "\n" . $error)));
             }
@@ -132,6 +144,19 @@ final class Zap
             return $this->reports($dir, $url, $target);
         } finally {
             self::removeDir($dir);
+        }
+    }
+
+    /**
+     * Removes the container of the scan when it runs, e.g. at the end of the process when it is stopped
+     *
+     * @return void
+     */
+    public function removeContainer(): void
+    {
+        if ($this->container !== null) {
+            ($this->run)([$this->docker, 'rm', '-f', $this->container], sys_get_temp_dir(), []);
+            $this->container = null;
         }
     }
 
@@ -214,17 +239,16 @@ final class Zap
     }
 
     /**
-     * A new directory for the plan and the reports, that ZAP (the user zap of the image, another user than the one
-     * of the host on Linux) can write, and the other users of the host cannot list (`1733`): they do not find the
-     * random names of its files, and the sticky bit keeps them from removing or renaming those of others
+     * A new directory for the plan, the reports and the home of ZAP, that only the user can read and write (`0700`):
+     * on Linux, ZAP runs as the same user (`containerUser()`), and Docker Desktop gives it the files of the user
      *
      * @return string
      */
     public static function workDir(): string
     {
         $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'security-dast-' . bin2hex(random_bytes(6));
-        mkdir($dir, 0700, true);
-        chmod($dir, 01733);
+        mkdir($dir . DIRECTORY_SEPARATOR . 'home', 0700, true);
+        chmod($dir, 0700);
         if (self::$dirs === []) {
             register_shutdown_function(static function (): void {
                 foreach (array_keys(self::$dirs) as $dir) {
@@ -246,15 +270,48 @@ final class Zap
     public static function removeDir(string $dir): void
     {
         unset(self::$dirs[$dir]);
-        if (!is_dir($dir)) {
+        if (!is_dir($dir) || is_link($dir)) {
             return;
         }
+        // With the home of ZAP and of its browser
         foreach (scandir($dir) ?: [] as $file) {
-            if ($file !== '.' && $file !== '..') {
-                unlink($dir . DIRECTORY_SEPARATOR . $file);
+            if ($file === '.' || $file === '..') {
+                continue;
             }
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            is_dir($path) && !is_link($path) ? self::removeDir($path) : unlink($path);
         }
         rmdir($dir);
+    }
+
+    /**
+     * The options of `docker run` that make ZAP the user of this process on Linux, with its home in the directory of
+     * the scan, so that the directory can be private; Docker Desktop (macOS, Windows) does it by itself
+     *
+     * @param string $os Operating system family, `PHP_OS_FAMILY`
+     * @return array<string>
+     */
+    public static function containerUser(string $os): array
+    {
+        if ($os !== 'Linux') {
+            return [];
+        }
+        $uid = function_exists('posix_getuid') ? posix_getuid() : (int)trim((string)shell_exec('id -u'));
+        $gid = function_exists('posix_getgid') ? posix_getgid() : (int)trim((string)shell_exec('id -g'));
+
+        // The user has no entry in the image: Java takes its home from user.home, the browser from HOME
+        return ['--user', $uid . ':' . $gid, '-e', 'HOME=/zap/wrk/home', '-e', 'JAVA_TOOL_OPTIONS=-Duser.home=/zap/wrk/home'];
+    }
+
+    /**
+     * The options of `zap.sh` for the home of ZAP in the directory of the scan, with `containerUser()`
+     *
+     * @param string $os Operating system family, `PHP_OS_FAMILY`
+     * @return array<string>
+     */
+    public static function zapHome(string $os): array
+    {
+        return $os === 'Linux' ? ['-dir', '/zap/wrk/home/.ZAP'] : [];
     }
 
     /**
@@ -262,20 +319,25 @@ final class Zap
      *
      * @param string $dir Directory of the plan and the reports, mounted at /zap/wrk
      * @param string $language Language of the alerts
+     * @param string|null $name Name of the container, to remove it when this process is stopped
      * @return array<string>
      */
-    public function command(string $dir, string $language = 'en'): array
+    public function command(string $dir, string $language = 'en', ?string $name = null): array
     {
         $command = [$this->docker, 'run', '--rm'];
+        if ($name !== null) {
+            array_push($command, '--name', $name);
+        }
         if ($this->os === 'Linux') {
             $command[] = '--network';
             $command[] = 'host';
         }
+        array_push($command, ...self::containerUser($this->os));
         // The names only: the values come from the environment of the command, not from its arguments
         foreach (array_keys($this->env()) as $name) {
             array_push($command, '-e', $name);
         }
-        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...$this->zapOptions($language));
+        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...self::zapHome($this->os), ...$this->zapOptions($language));
 
         return $command;
     }

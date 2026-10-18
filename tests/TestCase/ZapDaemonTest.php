@@ -26,9 +26,11 @@ class ZapDaemonTest extends TestCase
     {
         $command = (new ZapDaemon('/tmp/zap', os: 'Linux', port: 8090))->command();
 
-        // The network of the host, and the proxy and the API on 127.0.0.1 only
+        // The network of the host, ZAP as the user of this process, and the proxy and the API on 127.0.0.1 only
         $this->assertSame(['docker', 'run', '-d', '--rm', '--network', 'host'], array_slice($command, 0, 6));
-        $this->assertSame(['-host', '127.0.0.1', '-port', '8090'], array_slice($command, 11, 4));
+        $this->assertSame(Zap::containerUser('Linux'), array_slice($command, 6, 6));
+        $this->assertSame(['-host', '127.0.0.1', '-port', '8090'], array_slice($command, 17, 4));
+        $this->assertSame(['-dir', '/zap/wrk/home/.ZAP'], array_slice($command, -2));
     }
 
     public function testStartWithAKeyFileAndEnvironment(): void
@@ -48,8 +50,8 @@ class ZapDaemonTest extends TestCase
             $this->assertSame(['-e', Zap::PASSWORD_ENV], array_slice($command, 6, 2));
             $this->assertSame([Zap::PASSWORD_ENV => 'secret'], $env);
             $this->assertMatchesRegularExpression('/\Aapi\.key=[0-9a-f]{32}\n\z/', (string)$key);
-            // Removed once ZAP has started
-            $this->assertSame(['.', '..'], scandir($dir));
+            // Removed once ZAP has started; only the user could read it
+            $this->assertSame(['.', '..', 'home'], scandir($dir));
 
             $daemon->stop();
             $this->assertSame(['docker', 'rm', '-f', 'container-id'], $runs[1][0]);

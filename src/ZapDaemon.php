@@ -12,9 +12,9 @@ use RuntimeException;
  * goes through it, so that ZAP records their requests, and the plan of the scan then runs on what it recorded.
  *
  * The proxy and the API listen on 127.0.0.1 only, on the same port in and out of the container (ZAP takes a
- * request to another port for one to proxy), and the API needs a random key. The key is given in a file of a random
- * name in the directory, removed once ZAP has started, so that it is not on the command line, which the other users
- * of the host can see.
+ * request to another port for one to proxy), and the API needs a random key. The key is given in a file of the
+ * private directory of the scan, removed once ZAP has started, so that it is not on the command line, which the other
+ * users of the host can see.
  */
 final class ZapDaemon
 {
@@ -87,8 +87,8 @@ final class ZapDaemon
         $this->port ??= WebServer::freePort();
         $keyFile = $this->dir . DIRECTORY_SEPARATOR . $this->keyFile;
         file_put_contents($keyFile, 'api.key=' . $this->key . "\n");
-        // ZAP, another user on Linux, reads it; the other users of the host cannot list the directory
-        chmod($keyFile, 0644);
+        // Only the user, as whom ZAP runs (Zap::containerUser())
+        chmod($keyFile, 0600);
         try {
             [$code, $output, $error] = ($this->run)($this->command(), $this->dir, $this->env);
             if ($code !== 0) {
@@ -149,6 +149,7 @@ final class ZapDaemon
             array_push($command, '-p', sprintf('127.0.0.1:%d:%d', $this->port, $this->port));
             $host = '0.0.0.0';
         }
+        array_push($command, ...Zap::containerUser($this->os));
         // The names only: the values come from the environment of the command
         foreach (array_keys($this->env) as $name) {
             array_push($command, '-e', $name);
@@ -170,6 +171,7 @@ final class ZapDaemon
             'api.addrs.addr.name=.*',
             '-config',
             'api.addrs.addr.regex=true',
+            ...Zap::zapHome($this->os),
             ...$this->options,
         );
 
