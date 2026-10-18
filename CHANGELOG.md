@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.0.3
 
 - An empty list of the settings file, e.g. `'exclude' => []`, is no longer the text `[]` (an invalid pattern of
   ZAP since 1.0.2), and a list with gaps in its keys, e.g. of `array_filter()`, is a list again
