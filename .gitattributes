@@ -21,5 +21,4 @@
 /.gitignore export-ignore
 /phpcs.xml export-ignore
 /phpstan.neon export-ignore
-/docs/examples export-ignore
 /phpunit.xml.dist export-ignore
