@@ -28,8 +28,9 @@ class ZapDaemonTest extends TestCase
 
         // The network of the host, ZAP as the user of this process, and the proxy and the API on 127.0.0.1 only
         $this->assertSame(['docker', 'run', '-d', '--rm', '--network', 'host'], array_slice($command, 0, 6));
-        $this->assertSame(array_merge(['--user'], array_slice(Zap::containerUser('Linux'), 1)), array_slice($command, 6, 4));
-        $this->assertSame(['-host', '127.0.0.1', '-port', '8090'], array_slice($command, 15, 4));
+        $this->assertSame(Zap::containerUser('Linux'), array_slice($command, 6, 6));
+        $this->assertSame(['-host', '127.0.0.1', '-port', '8090'], array_slice($command, 17, 4));
+        $this->assertSame(['-dir', '/zap/wrk/home/.ZAP'], array_slice($command, -2));
     }
 
     public function testStartWithAKeyFileAndEnvironment(): void

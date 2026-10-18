@@ -171,6 +171,7 @@ final class ZapDaemon
             'api.addrs.addr.name=.*',
             '-config',
             'api.addrs.addr.regex=true',
+            ...Zap::zapHome($this->os),
             ...$this->options,
         );
 

@@ -86,7 +86,8 @@ class ZapTest extends TestCase
         // As the user of this process, with its home in the private directory
         $this->assertSame('--user', $command[5]);
         $this->assertMatchesRegularExpression('/\A\d+:\d+\z/', $command[6]);
-        $this->assertSame(['-e', 'HOME=/zap/wrk/home', '-v', '/tmp/zap:/zap/wrk:rw'], array_slice($command, 7, 4));
+        $this->assertSame(['-e', 'HOME=/zap/wrk/home', '-e', 'JAVA_TOOL_OPTIONS=-Duser.home=/zap/wrk/home', '-v', '/tmp/zap:/zap/wrk:rw'], array_slice($command, 7, 6));
+        $this->assertSame(['-dir', '/zap/wrk/home/.ZAP'], array_slice($command, 18, 2));
         $this->assertNotContains('view.locale=ja_JP', $command);
     }
 

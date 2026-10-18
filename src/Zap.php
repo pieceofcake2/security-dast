@@ -299,7 +299,19 @@ final class Zap
         $uid = function_exists('posix_getuid') ? posix_getuid() : (int)trim((string)shell_exec('id -u'));
         $gid = function_exists('posix_getgid') ? posix_getgid() : (int)trim((string)shell_exec('id -g'));
 
-        return ['--user', $uid . ':' . $gid, '-e', 'HOME=/zap/wrk/home'];
+        // The user has no entry in the image: Java takes its home from user.home, the browser from HOME
+        return ['--user', $uid . ':' . $gid, '-e', 'HOME=/zap/wrk/home', '-e', 'JAVA_TOOL_OPTIONS=-Duser.home=/zap/wrk/home'];
+    }
+
+    /**
+     * The options of `zap.sh` for the home of ZAP in the directory of the scan, with `containerUser()`
+     *
+     * @param string $os Operating system family, `PHP_OS_FAMILY`
+     * @return array<string>
+     */
+    public static function zapHome(string $os): array
+    {
+        return $os === 'Linux' ? ['-dir', '/zap/wrk/home/.ZAP'] : [];
     }
 
     /**
@@ -325,7 +337,7 @@ final class Zap
         foreach (array_keys($this->env()) as $name) {
             array_push($command, '-e', $name);
         }
-        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...$this->zapOptions($language));
+        array_push($command, '-v', $dir . ':/zap/wrk:rw', $this->image, 'zap.sh', '-cmd', '-autorun', '/zap/wrk/plan.yaml', ...self::zapHome($this->os), ...$this->zapOptions($language));
 
         return $command;
     }
