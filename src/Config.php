@@ -38,6 +38,7 @@ final class Config
      * @param string|null $password Password of the user
      * @param array<string>|null $exclude Regular expressions of the URLs to leave out, default: the logout
      * @param array<string> $ignore Alert IDs to leave out of the report, e.g. `10038` (with `10038-1`, ...)
+     * @param array<int|string, string> $ignoreReasons Why each alert ID is ignored, from the settings file (a numeric ID is an integer key)
      * @param string $zapOptions More options of ZAP
      * @param string $language Language of the report
      * @param string|null $localeDir Directory of more messages
@@ -64,6 +65,7 @@ final class Config
         public ?string $password = null,
         public ?array $exclude = null,
         public array $ignore = [],
+        public array $ignoreReasons = [],
         public string $zapOptions = '',
         public string $language = 'en',
         public ?string $localeDir = null,

@@ -29,8 +29,8 @@
 3. **A page for each alert**: its name, alert ID, risk, confidence, CWE and WASC, what it means and how to fix
    it (as ZAP writes them, in the language of the report), each request where it was found, up to 50, and the
    links: the page of the alert on zaproxy.org first
-4. **Ignored alerts**, when `--ignore` left some out: each with its ID, name, risk and number of URLs
-   ([Ignoring an Alert](#ignoring-an-alert))
+4. **Ignored alerts**, when `--ignore` left some out: each with its ID, name, risk, number of URLs
+   and the reason of the settings file ([Ignoring an Alert](#ignoring-an-alert))
 
 Each request shows its method and URL, then what ZAP found in it:
 
@@ -75,16 +75,23 @@ vendor/bin/security-dast --ignore=10038,10020
 - An ID leaves out its variants too: `10038` leaves out `10038-1`.
 - The IDs are those of the report (Alert ID) and of [the alerts of ZAP](https://www.zaproxy.org/docs/alerts/).
 - The report still lists the ignored alerts that the scan raised, so that they are not forgotten: their IDs on
-  the cover, and a group "Ignored alerts" with the name, risk and number of URLs of each. They do not fail the
+  the cover, and a group "Ignored alerts" with the name, risk, number of URLs and reason of each. They do not fail the
   scan, and the summary of the command counts them.
 
 The alerts to ignore are those of the scan environment, not of the application: e.g. the security headers that
 a proxy in front of production adds, which the built-in web server of the scan does not have, or the
-`X-Powered-By` of the PHP of CI. Keep the reason in the [settings file](configuration.md#the-settings-file):
+`X-Powered-By` of the PHP of CI. Give the reason of each ID in the [settings file](configuration.md#the-settings-file):
+the report shows it with the alert.
 
 ```php
 'dast' => [
-    // The load balancer of production adds CSP and X-Frame-Options; checked on staging with --url
-    'ignore' => ['10038', '10020'],
+    'ignore' => [
+        '10038' => 'The load balancer of production adds the CSP; checked on staging with --url',
+        '10020' => 'The load balancer of production adds X-Frame-Options; checked on staging with --url',
+    ],
 ],
 ```
+
+A list of IDs without reasons, `'ignore' => ['10038', '10020']`, works too; give either a reason for every ID or
+none, as PHP numbers the IDs without a key after those with one. `--ignore` and `SECURITY_DAST_IGNORE` take IDs
+only, and replace the IDs of the file.

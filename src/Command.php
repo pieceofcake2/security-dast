@@ -256,6 +256,9 @@ final class Command
         }
         $list = static fn(?string $value): array => $value === null ? [] : array_values(array_filter(array_map('trim', explode(',', $value)), static fn(string $item): bool => $item !== ''));
 
+        // The settings file can give the IDs with their reasons, ['10038' => 'reason'], as JSON
+        [$ignore, $ignoreReasons] = self::ignore($options['ignore'], $list);
+
         return new Config(
             pdf: (string)($options['pdf'] ?? 'tmp/security-dast.pdf'),
             failOn: $failOn,
@@ -274,7 +277,8 @@ final class Command
             username: $options['username'],
             password: $options['password'],
             exclude: $options['exclude'] === null ? null : $list($options['exclude']),
-            ignore: $list($options['ignore']),
+            ignore: $ignore,
+            ignoreReasons: $ignoreReasons,
             zapOptions: (string)($options['zap-options'] ?? ''),
             language: (string)($options['language'] ?? 'en'),
             localeDir: $options['locale-dir'],
@@ -282,6 +286,40 @@ final class Command
             projectName: $options['project-name'],
             note: $options['note'],
         );
+    }
+
+    /**
+     * The alert IDs to ignore, and their reasons: a list, or the JSON of the settings file with the reasons
+     *
+     * @param string|null $value Value of the option
+     * @param \Closure(?string): array<string> $list Parses a list
+     * @return array{0: array<string>, 1: array<int|string, string>}
+     * @throws \InvalidArgumentException When the JSON is not an object of IDs and reasons
+     */
+    private static function ignore(?string $value, Closure $list): array
+    {
+        if ($value === null || !str_starts_with(ltrim($value), '{')) {
+            return [$list($value), []];
+        }
+        $data = json_decode($value, true);
+        if (!is_array($data)) {
+            throw new InvalidArgumentException('ignore must be a list of alert IDs, or of IDs and their reasons.');
+        }
+        $ids = [];
+        $reasons = [];
+        foreach ($data as $id => $reason) {
+            // The keys of PHP are integers for numeric IDs, e.g. 10038
+            $id = trim((string)$id);
+            if ($id === '') {
+                continue;
+            }
+            $ids[] = $id;
+            if (is_scalar($reason) && trim((string)$reason) !== '') {
+                $reasons[$id] = trim((string)$reason);
+            }
+        }
+
+        return [$ids, $reasons];
     }
 
     /**

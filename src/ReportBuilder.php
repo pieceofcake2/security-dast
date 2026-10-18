@@ -117,7 +117,7 @@ final class ReportBuilder
             title: $title,
             verdict: new Verdict($passed, $this->t($passed ? 'verdict.passed' : 'verdict.failed'), $counts),
             columns: [$this->t('field.no'), $this->t('field.alert'), $this->t('field.risk'), $this->t('field.count')],
-            groups: $this->groups($result),
+            groups: $this->groups($result, $config->ignoreReasons),
             project: $project,
             target: $target,
             run: array_merge(
@@ -154,9 +154,10 @@ final class ReportBuilder
      * The alerts by risk
      *
      * @param \PieceOfCake2\SecurityDast\ScanResult $result Scan
+     * @param array<int|string, string> $ignoreReasons Why each alert ID is ignored
      * @return array<\PieceOfCake2\Report\Group>
      */
-    private function groups(ScanResult $result): array
+    private function groups(ScanResult $result, array $ignoreReasons = []): array
     {
         $groups = [];
         foreach (Severity::ALL as $severity) {
@@ -181,7 +182,7 @@ final class ReportBuilder
                 (string)count($result->ignoredAlerts),
                 [new Row($this->t('field.ignored'), (string)count($result->ignoredAlerts))],
                 $this->t('ignored.description'),
-                body: $this->ignored($result->ignoredAlerts),
+                body: $this->ignored($result->ignoredAlerts, $ignoreReasons),
             );
             $groups[] = $group;
         }
@@ -193,17 +194,19 @@ final class ReportBuilder
      * The table of the ignored alerts: their IDs, names, risks and URLs
      *
      * @param array<\PieceOfCake2\SecurityDast\Alert> $alerts Ignored alerts
+     * @param array<int|string, string> $reasons Why each alert ID is ignored, e.g. for `10038` or `10038-1`
      * @return string HTML
      */
-    private function ignored(array $alerts): string
+    private function ignored(array $alerts, array $reasons = []): string
     {
         $h = static fn(string $text): string => htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $html = '<table class="ignored-alerts"><thead><tr><th>' . $h($this->t('field.alertRef')) . '</th><th>' . $h($this->t('field.alert')) . '</th><th>'
-            . $h($this->t('field.risk')) . '</th><th>' . $h($this->t('field.urls')) . '</th></tr></thead><tbody>';
+            . $h($this->t('field.risk')) . '</th><th>' . $h($this->t('field.urls')) . '</th><th>' . $h($this->t('field.reason')) . '</th></tr></thead><tbody>';
         foreach ($alerts as $alert) {
             $urls = count(array_unique(array_column($alert->instances, 'uri')));
+            $reason = $reasons[$alert->id] ?? $reasons[explode('-', $alert->id)[0]] ?? '-';
             $html .= '<tr><td class="mono">' . $h($alert->id) . '</td><td>' . $h($alert->name) . '</td><td>' . $h($this->t('severity.' . $alert->severity))
-                . '</td><td class="num">' . $urls . '</td></tr>';
+                . '</td><td class="num">' . $urls . '</td><td>' . $h($reason) . '</td></tr>';
         }
 
         return $html . '</tbody></table>';

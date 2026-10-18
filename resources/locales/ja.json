@@ -55,5 +55,6 @@
     "group.ignored": "除外したアラート",
     "badge.ignored": "除外",
     "ignored.title": "除外した ID のアラート",
-    "ignored.description": "これらのアラートは出ましたが、--ignore で結果から除いたので、不合格にはなりません。Web サーバーを変えたあとなどに、それぞれがまだ当てはまらないか確かめてください。"
+    "ignored.description": "これらのアラートは出ましたが、--ignore で結果から除いたので、不合格にはなりません。Web サーバーを変えたあとなどに、それぞれがまだ当てはまらないか確かめてください。",
+    "field.reason": "理由"
 }
