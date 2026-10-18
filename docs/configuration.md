@@ -34,7 +34,7 @@ win over the environment variables, and the environment variables over the file.
 | --- | --- | --- | --- |
 | `--pdf=PATH` | `SECURITY_DAST_PDF` | `tmp/security-dast.pdf` | The PDF report |
 | `--fail-on=RISK` | `SECURITY_DAST_FAIL_ON` | `high` | The lowest risk that fails: `high`, `medium`, `low`, `info` or `none` |
-| `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | Alert IDs to leave out of the report, comma separated ([Ignoring an Alert](report.md#ignoring-an-alert)) |
+| `--ignore=LIST` | `SECURITY_DAST_IGNORE` | | Alert IDs that do not fail the scan, comma separated; the report lists them ([Ignoring an Alert](report.md#ignoring-an-alert)) |
 | `--language=LANG` | `SECURITY_REPORT_LANGUAGE` | `en` | `en` or `ja`, or a language of `--locale-dir` |
 | `--locale-dir=DIR` | `SECURITY_REPORT_LOCALE_DIR` | | `<language>.json` files that add or replace messages |
 | `--title=TITLE` | `SECURITY_DAST_TITLE` | the title of the language | The title of the report |

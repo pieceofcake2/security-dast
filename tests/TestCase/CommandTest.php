@@ -95,6 +95,26 @@ class CommandTest extends TestCase
         $this->assertSame([], $config->ignoreReasons);
     }
 
+    public function testListsOfTheSettingsFile(): void
+    {
+        $file = TMP . 'security-lists.php';
+
+        // An empty list is no exclusion, not the text []
+        file_put_contents($file, "<?php\nreturn ['dast' => ['exclude' => [], 'ignore' => []]];\n");
+        $config = Command::config(['--settings=' . $file]);
+        $this->assertNotNull($config);
+        $this->assertSame([], $config->exclude);
+        $this->assertSame([], $config->ignore);
+
+        // A list with gaps in its keys, e.g. of array_filter(), is a list
+        file_put_contents($file, "<?php\nreturn ['dast' => ['exclude' => array_filter([null, '.*admin.*']), 'ignore' => array_filter([null, '10038'])]];\n");
+        $config = Command::config(['--settings=' . $file]);
+        $this->assertNotNull($config);
+        $this->assertSame(['.*admin.*'], $config->exclude);
+        $this->assertSame(['10038'], $config->ignore);
+        $this->assertSame([], $config->ignoreReasons);
+    }
+
     public function testIgnoreOfInvalidJson(): void
     {
         // An empty ID is left out, and a value that is not an object of IDs is an error

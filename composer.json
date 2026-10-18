@@ -32,5 +32,8 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
+    },
+    "suggest": {
+        "ext-pcntl": "Stops ZAP and removes its files on Ctrl+C and SIGTERM"
     }
 }

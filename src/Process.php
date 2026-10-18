@@ -28,7 +28,8 @@ final class Process
             throw new RuntimeException('Cannot create the temporary files of a command.');
         }
         // Files instead of pipes, so that a large output of one does not block the other
-        $process = proc_open($command, [1 => $out, 2 => $err], $pipes, $dir, $env === [] ? null : array_merge(getenv(), $env));
+        // Without the password of the login, which a command gets only when it is given, e.g. ZAP
+        $process = proc_open($command, [1 => $out, 2 => $err], $pipes, $dir, array_merge(EndToEndTests::inherited(), $env));
         if (!is_resource($process)) {
             throw new RuntimeException(sprintf('Cannot run %s.', $command[0]));
         }

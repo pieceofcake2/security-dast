@@ -63,11 +63,30 @@ class ZapTest extends TestCase
         ], $command);
     }
 
+    public function testCommandWithAName(): void
+    {
+        $commands = [];
+        $zap = new Zap(run: static function (array $command, string $dir, array $env = []) use (&$commands): array {
+            $commands[] = $command;
+
+            return [0, '', ''];
+        }, os: 'Darwin');
+
+        // The name of the container, which the end of the process removes when it still runs
+        $this->assertSame(['docker', 'run', '--rm', '--name', 'security-dast-1'], array_slice($zap->command('/tmp/zap', 'en', 'security-dast-1'), 0, 5));
+        $zap->removeContainer();
+        $this->assertSame([], $commands);
+    }
+
     public function testCommandOnLinux(): void
     {
         $command = (new Zap(os: 'Linux'))->command('/tmp/zap');
 
-        $this->assertSame(['docker', 'run', '--rm', '--network', 'host', '-v', '/tmp/zap:/zap/wrk:rw'], array_slice($command, 0, 7));
+        $this->assertSame(['docker', 'run', '--rm', '--network', 'host'], array_slice($command, 0, 5));
+        // As the user of this process, with its home in the private directory
+        $this->assertSame('--user', $command[5]);
+        $this->assertMatchesRegularExpression('/\A\d+:\d+\z/', $command[6]);
+        $this->assertSame(['-e', 'HOME=/zap/wrk/home', '-v', '/tmp/zap:/zap/wrk:rw'], array_slice($command, 7, 4));
         $this->assertNotContains('view.locale=ja_JP', $command);
     }
 
@@ -197,9 +216,12 @@ class ZapTest extends TestCase
     {
         $dir = Zap::workDir();
         file_put_contents($dir . DS . 'plan.yaml', '{}');
+        mkdir($dir . DS . 'home' . DS . '.ZAP');
+        file_put_contents($dir . DS . 'home' . DS . '.ZAP' . DS . 'config.xml', '<config/>');
 
-        // ZAP can write, the other users cannot list
-        $this->assertSame('1733', substr(sprintf('%o', fileperms($dir)), -4));
+        // Only the user, as whom ZAP runs, and removed with the home of ZAP
+        $this->assertSame('700', substr(sprintf('%o', fileperms($dir)), -3));
+        $this->assertSame([], Zap::containerUser('Darwin'));
         Zap::removeDir($dir);
         $this->assertDirectoryDoesNotExist($dir);
     }

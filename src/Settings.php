@@ -97,7 +97,9 @@ final class Settings
         if (is_bool($value)) {
             return $value;
         }
-        if (is_array($value) && array_keys($value) !== range(0, count($value) - 1)) {
+        // Not an empty list; a list with gaps in its keys, e.g. of array_filter(), is JSON too, and the command takes
+        // its values
+        if (is_array($value) && $value !== [] && array_keys($value) !== range(0, count($value) - 1)) {
             return (string)json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
         if (is_array($value)) {
