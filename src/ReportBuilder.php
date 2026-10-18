@@ -94,6 +94,10 @@ final class ReportBuilder
         if ($result->ignored !== []) {
             $target[] = new Row($this->t('field.ignored'), implode('　', $result->ignored), monoValue: true);
         }
+        $exclude = $config->exclude ?? Zap::EXCLUDE;
+        if ($exclude !== []) {
+            $target[] = new Row($this->t('field.excluded'), implode('　', $exclude), monoValue: true);
+        }
         $target[] = new Row($this->t('field.threshold'), $config->failOn === 'none'
             ? $this->t('threshold.none')
             : $this->t('threshold.value', ['severity' => $this->t('severity.' . $config->failOn)]));
@@ -167,7 +171,42 @@ final class ReportBuilder
             $groups[] = $group;
         }
 
+        if ($result->ignoredAlerts !== []) {
+            $group = new Group(count($groups) + 1, $this->t('group.ignored'));
+            $group->items[] = new Item(
+                $group->no . '-1',
+                $this->t('ignored.title'),
+                'ignored',
+                $this->t('badge.ignored'),
+                (string)count($result->ignoredAlerts),
+                [new Row($this->t('field.ignored'), (string)count($result->ignoredAlerts))],
+                $this->t('ignored.description'),
+                body: $this->ignored($result->ignoredAlerts),
+            );
+            $groups[] = $group;
+        }
+
         return $groups;
+    }
+
+    /**
+     * The table of the ignored alerts: their IDs, names, risks and URLs
+     *
+     * @param array<\PieceOfCake2\SecurityDast\Alert> $alerts Ignored alerts
+     * @return string HTML
+     */
+    private function ignored(array $alerts): string
+    {
+        $h = static fn(string $text): string => htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $html = '<table class="ignored-alerts"><thead><tr><th>' . $h($this->t('field.alertRef')) . '</th><th>' . $h($this->t('field.alert')) . '</th><th>'
+            . $h($this->t('field.risk')) . '</th><th>' . $h($this->t('field.urls')) . '</th></tr></thead><tbody>';
+        foreach ($alerts as $alert) {
+            $urls = count(array_unique(array_column($alert->instances, 'uri')));
+            $html .= '<tr><td class="mono">' . $h($alert->id) . '</td><td>' . $h($alert->name) . '</td><td>' . $h($this->t('severity.' . $alert->severity))
+                . '</td><td class="num">' . $urls . '</td></tr>';
+        }
+
+        return $html . '</tbody></table>';
     }
 
     /**

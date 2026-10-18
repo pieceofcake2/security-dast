@@ -50,5 +50,10 @@
     "field.endToEnd": "End-to-End テスト",
     "endToEnd.failed": "テストが失敗しました（終了コード {code}）。失敗のあとのページは検査されていないことがあります",
     "scan.endToEnd.baseline": "OWASP ZAP：End-to-End テストのリクエストとレスポンスの確認",
-    "scan.endToEnd.full": "OWASP ZAP：End-to-End テストのリクエストとレスポンスの確認と攻撃（最大 {scanMinutes} 分）"
+    "scan.endToEnd.full": "OWASP ZAP：End-to-End テストのリクエストとレスポンスの確認と攻撃（最大 {scanMinutes} 分）",
+    "field.excluded": "除外した URL",
+    "group.ignored": "除外したアラート",
+    "badge.ignored": "除外",
+    "ignored.title": "除外した ID のアラート",
+    "ignored.description": "これらのアラートは出ましたが、--ignore で結果から除いたので、不合格にはなりません。Web サーバーを変えたあとなどに、それぞれがまだ当てはまらないか確かめてください。"
 }

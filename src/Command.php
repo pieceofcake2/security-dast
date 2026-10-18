@@ -113,13 +113,14 @@ final class Command
             }
         }
         fwrite($this->stdout, sprintf(
-            "%d alerts%s on %d URLs of %s%s (ZAP %s). Report: %s\n",
+            "%d alerts%s on %d URLs of %s%s (ZAP %s)%s. Report: %s\n",
             count($result->alerts),
             $summary === [] ? '' : ' (' . implode(', ', $summary) . ')',
             $result->urls(),
             $result->target,
             $result->user !== null ? ' as ' . $result->user : '',
             $result->version ?? '?',
+            $result->ignoredAlerts === [] ? '' : sprintf(', %d ignored alerts', count($result->ignoredAlerts)),
             $config->pdf,
         ));
 

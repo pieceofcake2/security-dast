@@ -1,7 +1,7 @@
 /* The risks of the alerts and the requests, added to the CSS of pieceofcake2/report */
 :root { --high: #b3261e; --medium: #c25e00; --low: #8a6d00; --info: #2f5f8a; }
 .badge.high { background: var(--high); } .badge.medium { background: var(--medium); }
-.badge.low { background: var(--low); } .badge.info { background: var(--info); }
+.badge.low { background: var(--low); } .badge.info { background: var(--info); } .badge.ignored { background: var(--sub); }
 .t-high { color: var(--high); } .t-medium { color: var(--medium); } .t-low { color: var(--low); } .t-info { color: var(--info); }
 /* The number of requests in the last column of the list, and the longer labels of the tables of the pages */
 .list col.time { width: 22mm; }
@@ -28,3 +28,8 @@ h4 { margin: 5mm 0 2mm; font-size: 9.5pt; }
 .instance .detail th { width: 26mm; background: #fff; color: var(--sub); font-weight: 600; }
 .instance .detail td { border-right: 0; font-family: "SF Mono", Menlo, "DejaVu Sans Mono", monospace; }
 .instance-more { color: var(--sub); font-size: 8pt; }
+/* The ignored alerts */
+.ignored-alerts { font-size: 8pt; }
+.ignored-alerts thead { display: table-header-group; }
+.ignored-alerts tr { break-inside: avoid; }
+.ignored-alerts td.mono { font-family: "SF Mono", Menlo, "DejaVu Sans Mono", monospace; font-size: 7.5pt; }
