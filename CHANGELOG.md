@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.1.1
 
 - The scans run the beta scan rules of ZAP again: the Docker image of ZAP has the release rules only, and since
   every release ran ZAP with a plan of its Automation Framework instead of `zap-baseline.py`, which installs
