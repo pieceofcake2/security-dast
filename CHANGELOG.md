@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.0.4
 
 - The full scan no longer reports Path Traversal (alert 6-5) when a field of a form accepts the file name of the
   URL, e.g. a status `1` on `/posts/edit/1`: Path Traversal runs at the threshold High, without the check on the
