@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PieceOfCake2\SecurityDast\Test;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use PieceOfCake2\SecurityDast\Login;
 use PieceOfCake2\SecurityDast\WebServer;
@@ -102,9 +103,12 @@ class ZapTest extends TestCase
         $this->assertSame(['\\Q' . self::TARGET . '\\E.*'], $context['includePaths']);
         $this->assertSame(['.*logout.*'], $context['excludePaths']);
         $this->assertArrayNotHasKey('authentication', $context);
-        $this->assertSame(['spider', 'passiveScan-wait', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['spider', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
         $this->assertSame(['context' => 'app', 'maxDuration' => 2], $plan['jobs'][0]['parameters']);
         $this->assertSame('traditional-json', $plan['jobs'][2]['parameters']['template']);
+        // The passing rules of the modern report: the rules that ran and raised no alert
+        $this->assertSame(['template' => 'modern', 'reportDir' => '/zap/wrk', 'reportFile' => 'rules'], $plan['jobs'][3]['parameters']);
+        $this->assertSame(['passingrules'], $plan['jobs'][3]['sections']);
     }
 
     public function testPlanOfFullScanWithLogin(): void
@@ -118,16 +122,20 @@ class ZapTest extends TestCase
         $this->assertSame(self::TARGET . '/users/login', $context['authentication']['parameters']['loginPageUrl']);
         // The password from the environment of ZAP, not in the plan
         $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => '${SECURITY_DAST_ZAP_PASSWORD}']]], $context['users']);
-        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report', 'report', 'report'], array_column($plan['jobs'], 'type'));
         $this->assertSame(['context' => 'app', 'user' => 'user', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
         // Every rule as in the Default Policy, and Path Traversal without its check on the file name of the URL
         $policy = $plan['jobs'][3]['policyDefinition'];
         $this->assertSame('Medium', $policy['defaultThreshold']);
         $this->assertSame([['id' => 6, 'name' => 'Path Traversal', 'threshold' => 'High']], $policy['rules']);
-        $this->assertSame('auth-report-json', $plan['jobs'][6]['parameters']['template']);
+        $this->assertSame('modern', $plan['jobs'][6]['parameters']['template']);
+        // The statistics of the rules that the active scan skipped
+        $this->assertSame(['template' => 'traditional-json-plus', 'reportDir' => '/zap/wrk', 'reportFile' => 'stats'], $plan['jobs'][7]['parameters']);
+        $this->assertSame(['statistics'], $plan['jobs'][7]['sections']);
+        $this->assertSame('auth-report-json', $plan['jobs'][8]['parameters']['template']);
 
         // Without the crawl, for a scenario
-        $this->assertSame(['passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($zap->plan(self::TARGET, false)['jobs'], 'type'));
+        $this->assertSame(['passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report', 'report', 'report'], array_column($zap->plan(self::TARGET, false)['jobs'], 'type'));
     }
 
     public function testScanScenario(): void
@@ -167,7 +175,7 @@ class ZapTest extends TestCase
             'options ' . implode(' ', $zap->zapOptions('ja')),
             'docker run -d',
             'scenario http://127.0.0.1:8090 ' . self::TARGET,
-            'plan passiveScan-wait,activeScan,passiveScan-wait,report',
+            'plan passiveScan-wait,activeScan,passiveScan-wait,report,report,report',
             'docker rm -f',
         ], $calls);
         $this->assertCount(17, $result->alerts);
@@ -188,6 +196,35 @@ class ZapTest extends TestCase
         $this->expectExceptionMessage('ZAP wrote no report.');
         (new Zap(os: 'Darwin'))->scanScenario(self::URL, static function (string $proxy, string $site): void {
         }, 'en', $daemon);
+    }
+
+    /**
+     * The rules of the passing rules report, with those that the active scan skipped, and its time limit
+     *
+     * @return void
+     */
+    public function testScanWithTheRules(): void
+    {
+        $run = static function (string $time): Closure {
+            return static function (array $command, string $dir, array $env = []) use ($time): array {
+                copy(self::FIXTURES . DS . 'zap-en.json', $dir . DS . 'zap.json');
+                copy(self::FIXTURES . DS . 'zap-rules.html', $dir . DS . 'rules.html');
+                file_put_contents($dir . DS . 'stats.json', '{"site": [], "statistics": {"stats.ascan.90019.skipped": 1, "stats.ascan.time": ' . $time . '}}');
+
+                return [0, '', ''];
+            };
+        };
+
+        $result = (new Zap(run: $run('600000'), os: 'Darwin', scan: 'full', scanMinutes: 10))->scan(self::URL);
+        $this->assertCount(5, (array)$result->rules);
+        $this->assertSame([false, true], array_column(array_values(array_filter((array)$result->rules, static fn(array $rule): bool => $rule['type'] === 'active')), 'skipped'));
+        $this->assertTrue($result->activeLimitReached);
+
+        $this->assertFalse((new Zap(run: $run('599000'), os: 'Darwin', scan: 'full', scanMinutes: 10))->scan(self::URL)->activeLimitReached);
+        // The baseline scan has no active scan
+        $this->assertFalse((new Zap(run: $run('600000'), os: 'Darwin'))->scan(self::URL)->activeLimitReached);
+        // Without the report of the rules, e.g. an older plan: unknown
+        $this->assertNull(self::zap()->scan(self::URL)->rules);
     }
 
     public function testLoggedIn(): void
@@ -340,6 +377,37 @@ class ZapTest extends TestCase
         $this->assertSame("First &lt; line\nSecond <b>\n\nThird", Zap::text('<p>First &amp;lt; line<br/>Second &lt;b&gt;</p><p></p><p>Third</p>'));
     }
 
+    /**
+     * The passing rules of the modern report of ZAP: the active rules have a strength, the passive ones `-`; an active
+     * rule that ZAP skipped has its statistic
+     *
+     * @return void
+     */
+    public function testRules(): void
+    {
+        $html = (string)file_get_contents(self::FIXTURES . DS . 'zap-rules.html');
+        $rules = Zap::rules($html, ['stats.ascan.40012.skipped' => 0, 'stats.ascan.90019.skipped' => 1]);
+
+        $this->assertSame(['id' => '10003', 'name' => 'Vulnerable JS Library', 'type' => 'passive', 'skipped' => false], $rules[0]);
+        $this->assertContains(['id' => '10011', 'name' => 'Cookie Without Secure Flag', 'type' => 'passive', 'skipped' => false], $rules);
+        $this->assertContains(['id' => '40012', 'name' => 'Cross Site Scripting (Reflected)', 'type' => 'active', 'skipped' => false], $rules);
+        $this->assertContains(['id' => '90019', 'name' => 'Server Side Code Injection', 'type' => 'active', 'skipped' => true], $rules);
+        // The passive rules, then the active ones, by ID
+        $types = array_column($rules, 'type');
+        $this->assertSame($types, array_merge(array_filter($types, static fn(string $type): bool => $type === 'passive'), array_values(array_filter($types, static fn(string $type): bool => $type === 'active'))));
+        $this->assertContains(['id' => '10099', 'name' => 'Cookie <Name> & "Quoted"', 'type' => 'passive', 'skipped' => false], $rules);
+
+        $this->assertSame([], Zap::rules('<html></html>'));
+    }
+
+    public function testStatistics(): void
+    {
+        $data = ['statistics' => ['stats.ascan.time' => 61000, 'stats.ascan.90019.skipped' => 1], 'site' => [['statistics' => ['stats.code.200' => 4, 'stats.ascan.90019.skipped' => 1]], ['@name' => 'x']]];
+
+        $this->assertSame(['stats.ascan.time' => 61000, 'stats.ascan.90019.skipped' => 1, 'stats.code.200' => 4], Zap::statistics($data));
+        $this->assertSame([], Zap::statistics([]));
+    }
+
     public function testLinks(): void
     {
         $this->assertSame(['https://a.example/x', 'http://b.example/?q=1&r=2'], Zap::links("<p>https://a.example/x</p><p>http://b.example/?q=1&amp;r=2</p>\nhttps://a.example/x"));
@@ -370,8 +438,25 @@ class ZapTest extends TestCase
 
         $ids = array_map(static fn($alert): string => $alert->id, $result->alerts);
         $this->assertContains('10202', $ids);
+        // The passive rules that ran and raised no alert: not those of the alerts
+        $this->assertNotNull($result->rules);
+        $this->assertGreaterThan(20, count($result->rules));
+        $this->assertSame(['passive'], array_values(array_unique(array_column($result->rules, 'type'))));
+        $this->assertNotContains('10202', array_column($result->rules, 'id'));
+        $this->assertNotContains('10037', array_column($result->rules, 'id'));
         $this->assertContains('10038-1', $ids);
         $this->assertContains('10037', $ids);
+
+        // The full scan: the active rules too, and the statistics of the rules that it skipped
+        $server = new WebServer(self::FIXTURES . DS . 'app' . DS . 'webroot', self::FIXTURES . DS . 'app');
+        try {
+            $result = (new Zap(scan: 'full', scanMinutes: 2))->scan($server->start());
+        } finally {
+            $server->stop();
+        }
+        $active = array_values(array_filter((array)$result->rules, static fn(array $rule): bool => $rule['type'] === 'active'));
+        $this->assertGreaterThan(10, count($active));
+        $this->assertNotContains('', array_column($active, 'name'));
 
         // As a user: the pages behind the login are crawled
         $server = new WebServer(self::FIXTURES . DS . 'login' . DS . 'webroot', self::FIXTURES . DS . 'login');

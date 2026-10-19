@@ -56,5 +56,19 @@
     "badge.ignored": "Ignored",
     "ignored.title": "Alerts of the ignored IDs",
     "ignored.description": "These alerts were raised, but --ignore leaves them out of the result: they do not fail the scan. Check that each still does not apply, e.g. after a change of the web server.",
-    "field.reason": "Reason"
+    "field.reason": "Reason",
+    "section.checks": "Checks",
+    "checks.passed": "Passed checks",
+    "checks.passed.note": "The scan rules of ZAP that ran and raised no alert on the site.",
+    "checks.notRun": "Not run",
+    "checks.notRun.note": "The scan rules that did not run, and why: they raised nothing because they checked nothing.",
+    "checks.notRun.limit": "The active scan reached its time limit ({minutes} min): the rules that it had not started are not listed.",
+    "field.ruleId": "Rule ID",
+    "field.rule": "Scan rule",
+    "field.scanType": "Scan",
+    "scan.type.passive": "Passive",
+    "scan.type.active": "Active",
+    "notRun.skipped": "Skipped by ZAP: not for the technology of the site, no page to attack, or a time limit",
+    "notRun.active.title": "The rules of the active scan (attacks)",
+    "notRun.baseline": "The baseline scan sends no attacks: run the full scan (--scan=full) on a test environment"
 }

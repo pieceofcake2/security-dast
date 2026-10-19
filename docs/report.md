@@ -7,15 +7,19 @@
 - [Sample report of the baseline scan (English, PDF)](https://pieceofcake2.github.io/security-dast/report-sample.pdf)
 - [Sample report of the baseline scan (Japanese, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-ja.pdf)
 
-![The cover, the alerts by risk, the page of an alert and its requests](img/report-sample.png)
+![The cover, the alerts by risk, the passed checks and the page of an alert](img/report-sample.png)
 
-**The full scan** of a CakePHP 2 application, with an End-to-End test as the scenario: a form of
+**The full scan** of a CakePHP 2 application, with an End-to-End test as the scenario: a form with the token of
 `SecurityComponent` that prints its value without `h()`, found as a reflected XSS:
 
 - [Sample report of the full scan (English, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full.pdf)
 - [Sample report of the full scan (Japanese, PDF)](https://pieceofcake2.github.io/security-dast/report-sample-full-ja.pdf)
 
-![The cover of a full scan with the End-to-End tests, the alerts by risk, and the page of the XSS with its attack](img/report-sample-full.png)
+![The cover of a full scan with the End-to-End tests, the alerts by risk, the passed checks and the page of the XSS](img/report-sample-full.png)
+
+The samples are built from the recorded scans of fictional applications with
+[docs/examples/report-sample.php](https://github.com/pieceofcake2/security-dast/blob/1.x/docs/examples/report-sample.php);
+the Samples workflow records the scans again with ZAP.
 
 ## The Pages
 
@@ -24,13 +28,23 @@
    (baseline or full, its minutes), the End-to-End tests and their result, the user of the login, the number of
    URLs with alerts, the ignored alerts, the excluded URLs (`--exclude`) and the threshold; then the date, environment and software of the run
    (ZAP and its version)
-2. **Alerts by risk**: High, Medium, Low and Informational; each alert with its number of requests, and a link
-   to its page
-3. **A page for each alert**: its name, alert ID, risk, confidence, CWE and WASC, what it means and how to fix
+2. **Alerts by risk**: High, Medium, Low and Informational, also without alerts (`None`); each alert with its
+   number of requests, and a link to its page. **Ignored alerts**, when `--ignore` left some out: each with its
+   ID, name, risk, number of URLs and the reason of the settings file ([Ignoring an Alert](#ignoring-an-alert))
+3. **Checks**: the scan rules of ZAP, by their ID (the ID of their alerts)
+   - **Passed checks**: the rules that ran and raised no alert on the site, passive or active
+   - **Not run**: the active rules that ZAP skipped (not for the technology of the site, no page to attack, or a
+     time limit), and, for the baseline scan, the rules of the active scan, which it does not run. When the active
+     scan reaches its time limit (`--scan-minutes`), the rules that it had not started are not listed, and the
+     note says so
+4. **A page for each alert**: its name, alert ID, risk, confidence, CWE and WASC, what it means and how to fix
    it (as ZAP writes them, in the language of the report), each request where it was found, up to 50, and the
    links: the page of the alert on zaproxy.org first
-4. **Ignored alerts**, when `--ignore` left some out: each with its ID, name, risk, number of URLs
-   and the reason of the settings file ([Ignoring an Alert](#ignoring-an-alert))
+
+ZAP lists the rules that ran in the passing rules of its `modern` report (the data of the jobs of the passive and
+active scans), and the skipped ones in the statistics of its `traditional-json-plus` report: the plan writes both
+to the directory of the scan, besides the alerts. A rule that raised alerts on another site only, e.g. a CDN that
+the browser of a scenario reached through the proxy, is in neither list.
 
 Each request shows its method and URL, then what ZAP found in it:
 

@@ -56,7 +56,11 @@ class ReportBuilderTest extends TestCase
         $this->assertMatchesRegularExpression('#<th>Login</th>\s*<td>\s*None \(as a visitor\)#', $html);
         $this->assertStringContainsString('it sends no attacks', $html);
         $this->assertStringContainsString('OWASP ZAP 2.17.0', $html);
-        $this->assertMatchesRegularExpression('#<h3>1\. Medium</h3>.*<h3>2\. Low</h3>.*<h3>3\. Informational</h3>#s', $html);
+        // Every risk, also without alerts
+        $this->assertMatchesRegularExpression('#<h3>1\. High</h3>\s*<p class="empty">None</p>#', $html);
+        $this->assertMatchesRegularExpression('#<h3>2\. Medium</h3>.*<h3>3\. Low</h3>.*<h3>4\. Informational</h3>#s', $html);
+        // Without the list of the rules of ZAP, no checks
+        $this->assertStringNotContainsString('<section class="checks">', $html);
 
         // The page of an alert: the solution, the requests and the links
         $this->assertStringContainsString('Absence of Anti-CSRF Tokens', $html);
@@ -140,5 +144,60 @@ class ReportBuilderTest extends TestCase
 
         $this->assertStringContainsString('and 3 more requests', $html);
         $this->assertSame(ReportBuilder::MAX_INSTANCES, substr_count($html, '<div class="instance">'));
+    }
+
+    /**
+     * The scan rules that ran and raised no alert, and those that did not run
+     *
+     * @return void
+     */
+    public function testChecks(): void
+    {
+        $result = self::result();
+        $result->rules = Zap::rules((string)file_get_contents(ZapTest::FIXTURES . DS . 'zap-rules.html'), ['stats.ascan.90019.skipped' => 1]);
+        $html = self::html($result, new Config(scan: 'full', scanMinutes: 5));
+
+        $this->assertStringContainsString('<h2>Checks</h2>', $html);
+        $passed = self::section($html, 'Passed checks');
+        $this->assertStringContainsString('<thead><tr><th>Rule ID</th><th>Scan rule</th><th>Scan</th></tr></thead>', $passed);
+        $this->assertMatchesRegularExpression('#<td class="mono">10003</td>\s*<td>Vulnerable JS Library</td>\s*<td>Passive</td>#', $passed);
+        $this->assertMatchesRegularExpression('#<td class="mono">40012</td>\s*<td>Cross Site Scripting \(Reflected\)</td>\s*<td>Active</td>#', $passed);
+        $this->assertStringContainsString('<td>Cookie &lt;Name&gt; &amp; &quot;Quoted&quot;</td>', $passed);
+        $this->assertStringNotContainsString('90019', $passed);
+        $notRun = self::section($html, 'Not run');
+        $this->assertMatchesRegularExpression('#<td class="mono">90019</td>\s*<td>Server Side Code Injection</td>\s*<td>Active</td>\s*<td>Skipped by ZAP: [^<]+</td>#', $notRun);
+        $this->assertStringNotContainsString('time limit (5 min)', $notRun);
+
+        $result->activeLimitReached = true;
+        $this->assertStringContainsString('The active scan reached its time limit (5 min)', self::section(self::html($result, new Config(scan: 'full', scanMinutes: 5)), 'Not run'));
+    }
+
+    public function testChecksOfTheBaselineScan(): void
+    {
+        $result = self::result('ja');
+        $result->rules = [['id' => '10011', 'name' => 'Secure フラグのない Cookie', 'type' => 'passive', 'skipped' => false]];
+        $html = self::html($result, new Config(language: 'ja'));
+
+        $this->assertStringContainsString('<h2>確認した項目</h2>', $html);
+        $this->assertMatchesRegularExpression('#<td class="mono">10011</td>\s*<td>Secure フラグのない Cookie</td>\s*<td>パッシブ</td>#', self::section($html, '確認した項目（問題なし）'));
+        // The active rules, which the baseline scan does not run
+        $this->assertMatchesRegularExpression('#<td class="mono">-</td>\s*<td>アクティブスキャン（攻撃）のルール</td>\s*<td>アクティブ</td>\s*<td>ベースラインスキャンは攻撃しません。[^<]*</td>#', self::section($html, '実行しなかった項目'));
+        $this->assertMatchesRegularExpression('#<h3>1\. 高</h3>\s*<p class="empty">なし</p>#', $html);
+    }
+
+    /**
+     * The table of checks of a heading
+     *
+     * @param string $html HTML
+     * @param string $title Heading
+     * @return string
+     */
+    private static function section(string $html, string $title): string
+    {
+        $start = strpos($html, '<h3>' . $title . '</h3>');
+        self::assertNotFalse($start, $title);
+        $end = strpos($html, '</div>', $start);
+
+        return substr($html, $start, $end - $start);
     }
 }

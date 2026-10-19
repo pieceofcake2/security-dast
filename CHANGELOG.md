@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## Unreleased
+
+- The report lists the scan rules of ZAP besides the alerts, on pages after the alerts by risk
+  (pieceofcake2/report 1.1):
+  - **Passed checks**: the passive and active rules that ran and raised no alert on the site
+  - **Not run**: the active rules that ZAP skipped, the rules of the active scan for the baseline scan, and a note
+    when the active scan reached its time limit
+  The plan of ZAP writes two more reports for them: `modern` with the section `passingrules`, and, for the full
+  scan, `traditional-json-plus` with the section `statistics` (the rules that the active scan skipped)
+- The alerts by risk show High, Medium, Low and Informational also without alerts (`None`), so that a reader tells a
+  risk without alerts from one that was left out
+- The samples are built from recorded scans with `docs/examples/report-sample.php`, and the Samples workflow
+  records them again with ZAP
+
 ## 1.0.6
 
 - The docs explain the alert 10038-1 "CSP Header Not Set" that ZAP raises for a report-only Content Security
