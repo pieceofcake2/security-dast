@@ -177,6 +177,20 @@ them by header, e.g. `Strict-Transport-Security` in the web server and the other
   2. Go through the pages (the End-to-End tests do), and move the inline scripts and styles to files, or add the
      sites that the pages need.
   3. Send it as `Content-Security-Policy` once the console is clean.
+
+  During steps 1 and 2, ZAP still raises alert 10038-1 "CSP Header Not Set" (medium): a report-only policy blocks
+  nothing, so for ZAP, as for the browsers, the page has no policy. It also raises 10038-3 "Report-Only Header
+  Found" (informational). To keep the scan passing while you adapt the policy, ignore 10038-1 only, with the
+  reason, in the [settings file](configuration.md#the-settings-file), and remove it at step 3:
+
+  ```php
+  'dast' => [
+      'ignore' => ['10038-1' => 'The CSP is in report-only mode until the console is clean'],
+  ],
+  ```
+
+  The report still lists 10038-1 in "Ignored alerts", and 10038-3 shows that the report-only policy is sent
+  ([Ignoring an Alert](report.md#ignoring-an-alert)).
 - **Cross-Origin-Embedder-Policy** (`require-corp`) blocks the images and scripts of other sites that do not
   allow it. Set it only when the pages use no such resources; the alert of it is low.
 - **Strict-Transport-Security** only on HTTPS: a browser keeps it for `max-age` seconds, so make sure every
