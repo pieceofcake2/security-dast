@@ -119,7 +119,11 @@ class ZapTest extends TestCase
         // The password from the environment of ZAP, not in the plan
         $this->assertSame([['name' => 'user', 'credentials' => ['username' => 'test@example.com', 'password' => '${SECURITY_DAST_ZAP_PASSWORD}']]], $context['users']);
         $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
-        $this->assertSame(['context' => 'app', 'user' => 'user', 'policy' => 'Default Policy', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
+        $this->assertSame(['context' => 'app', 'user' => 'user', 'maxScanDurationInMins' => 20], $plan['jobs'][3]['parameters']);
+        // Every rule as in the Default Policy, and Path Traversal without its check on the file name of the URL
+        $policy = $plan['jobs'][3]['policyDefinition'];
+        $this->assertSame('Medium', $policy['defaultThreshold']);
+        $this->assertSame([['id' => 6, 'name' => 'Path Traversal', 'threshold' => 'High']], $policy['rules']);
         $this->assertSame('auth-report-json', $plan['jobs'][6]['parameters']['template']);
 
         // Without the crawl, for a scenario
