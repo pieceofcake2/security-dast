@@ -400,6 +400,28 @@ class ZapTest extends TestCase
         $this->assertSame([], Zap::rules('<html></html>'));
     }
 
+    /**
+     * The passing rules and the statistics of a full scan of ZAP 2.17.0 (the Samples workflow)
+     *
+     * @return void
+     */
+    public function testRulesOfARecordedFullScan(): void
+    {
+        $statistics = Zap::statistics((array)json_decode((string)file_get_contents(self::FIXTURES . DS . 'zap-stats-full.json'), true));
+        $rules = Zap::rules((string)file_get_contents(self::FIXTURES . DS . 'zap-rules-full.html'), $statistics);
+
+        $this->assertCount(108, $rules);
+        $active = array_values(array_filter($rules, static fn(array $rule): bool => $rule['type'] === 'active'));
+        $this->assertCount(51, $active);
+        $this->assertContains(['id' => '10011', 'name' => 'Cookie Without Secure Flag', 'type' => 'passive', 'skipped' => false], $rules);
+        $this->assertSame(['id' => '0', 'name' => 'Directory Browsing', 'type' => 'active', 'skipped' => false], $active[0]);
+        // Log4Shell is listed among the completed rules, but ZAP skipped it
+        $this->assertSame([['id' => '40043', 'name' => 'Log4Shell', 'type' => 'active', 'skipped' => true]], array_values(array_filter($rules, static fn(array $rule): bool => $rule['skipped'])));
+        // The rule of the alert of the scan (XSS) is not a passing rule
+        $this->assertNotContains('40012', array_column($active, 'id'));
+        $this->assertLessThan(5 * 60000, $statistics['stats.ascan.time']);
+    }
+
     public function testStatistics(): void
     {
         $data = ['statistics' => ['stats.ascan.time' => 61000, 'stats.ascan.90019.skipped' => 1], 'site' => [['statistics' => ['stats.code.200' => 4, 'stats.ascan.90019.skipped' => 1]], ['@name' => 'x']]];
