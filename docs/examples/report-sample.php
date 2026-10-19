@@ -10,6 +10,9 @@
  * (`zap.json`, `rules.html`, `stats.json`) and the run (`run.json`) for each scan and language. Without it, the
  * reports are built from the records with the report of this version, and the images of their first pages are made
  * with `pdftoppm` (Poppler) and `magick` (ImageMagick).
+ *
+ * The alerts of the baseline sample are those of the fixtures of the tests (`tests/fixtures/zap-en.json`), of a scan
+ * with Docker Desktop on macOS, with the rules of a scan of the Samples workflow: `run.json` says so.
  */
 declare(strict_types=1);
 
@@ -30,9 +33,10 @@ $records = __DIR__ . '/records';
 // The version of ZAP of the samples
 $image = 'ghcr.io/zaproxy/zaproxy:2.17.0';
 $samples = [
-    // name => scan, webroot, settings of the report, pages of the image
-    'report-sample' => ['baseline', $root . '/tests/fixtures/app/webroot', [], [1, 2, 3, 4]],
-    'report-sample-full' => ['full', __DIR__ . '/app/webroot', ['endToEnd' => 'vendor/bin/phpunit --testsuite EndToEnd', 'failOn' => 'high', 'scanMinutes' => 5], [1, 2, 3, 5]],
+    // name => scan, webroot, settings of the report, pages of the image: the cover, the alerts by risk, the
+    // checks and the page of the first alert (0)
+    'report-sample' => ['baseline', $root . '/tests/fixtures/app/webroot', [], [1, 2, 3, 0]],
+    'report-sample-full' => ['full', __DIR__ . '/app/webroot', ['endToEnd' => 'vendor/bin/phpunit --testsuite EndToEnd', 'failOn' => 'high', 'scanMinutes' => 5], [1, 2, 3, 0]],
 ];
 $files = ['zap.json', 'rules.html', 'stats.json'];
 
@@ -145,6 +149,11 @@ foreach ($samples as $name => [$scan, $webroot, $settings, $pages]) {
         mkdir($tmp);
         $images = [];
         foreach ($pages as $page) {
+            // The first page with the table of an alert, after the checks
+            $label = ReportBuilder::translator($language)->translate('field.alertRef');
+            for ($i = 4; $page === 0 && $i <= 100; $i++) {
+                $page = str_contains((string)shell_exec(sprintf('pdftotext -f %d -l %d %s -', $i, $i, escapeshellarg($pdf))), $label) ? $i : 0;
+            }
             exec(sprintf('pdftoppm -png -scale-to-x 595 -scale-to-y 842 -f %d -l %d %s %s', $page, $page, escapeshellarg($pdf), escapeshellarg($tmp . '/p' . $page)));
             $images = array_merge($images, glob($tmp . '/p' . $page . '*.png') ?: []);
         }
