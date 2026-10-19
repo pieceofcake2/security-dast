@@ -79,6 +79,20 @@ final class Zap
     public const LOCALES = ['ja' => 'ja_JP'];
 
     /**
+     * The add-ons of the scan rules that the Docker image of ZAP does not have, installed from the ZAP Marketplace at
+     * the start of each scan, as the packaged scans of ZAP do (`zap-baseline.py`, `zap-full-scan.py`): the image has
+     * the release scan rules only. The beta passive rules are e.g. Content Cacheability (10049), Permissions Policy
+     * Header Not Set (10063) and Insufficient Site Isolation Against Spectre (90004); the beta active rules e.g. SSRF
+     * (40046), Session Fixation (40013) and Backup File Disclosure (10095)
+     *
+     * @var array<string, array<string>>
+     */
+    public const ADD_ONS = [
+        'baseline' => ['pscanrulesBeta'],
+        'full' => ['pscanrulesBeta', 'ascanrulesBeta'],
+    ];
+
+    /**
      * The environment variable of the password of the login, for ZAP in its container
      */
     public const PASSWORD_ENV = 'SECURITY_DAST_ZAP_PASSWORD';
@@ -368,7 +382,8 @@ final class Zap
     }
 
     /**
-     * The options of ZAP: the CSRF tokens of CakePHP, the locale, and the options given
+     * The options of ZAP: the CSRF tokens of CakePHP, the locale, the add-ons of the scan rules (`ADD_ONS`), and the
+     * options given
      *
      * @param string $language Language of the alerts
      * @return array<string>
@@ -389,6 +404,10 @@ final class Zap
         }
         if (isset(self::LOCALES[$language])) {
             array_push($options, '-config', 'view.locale=' . self::LOCALES[$language]);
+        }
+        // Installed before the plan runs (ZAP installs the add-ons of the command line first)
+        foreach (self::ADD_ONS[$this->scan] ?? self::ADD_ONS['baseline'] as $addOn) {
+            array_push($options, '-addoninstall', $addOn);
         }
         foreach (preg_split('/\s+/', trim($this->options)) ?: [] as $option) {
             if ($option !== '') {

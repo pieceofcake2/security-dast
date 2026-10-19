@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.1.1
+
+- The scans run the beta scan rules of ZAP again: the Docker image of ZAP has the release rules only, and since
+  every release ran ZAP with a plan of its Automation Framework instead of `zap-baseline.py`, which installs
+  them, the beta rules did not run. ZAP now installs `pscanrulesBeta` at the start of each scan, and
+  `ascanrulesBeta` for the full scan, from the ZAP Marketplace (`-addoninstall`), as its packaged scans do. A scan
+  finds again e.g. Content Cacheability (10049), Permissions Policy Header Not Set (10063) and Insufficient Site
+  Isolation Against Spectre (90004), and the full scan e.g. SSRF (40046) and Session Fixation (40013)
+
 ## 1.1.0
 
 - The report lists the scan rules of ZAP besides the alerts, on pages after the alerts by risk

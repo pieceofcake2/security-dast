@@ -41,6 +41,20 @@ vendor/bin/security-dast --scan=full --scan-minutes=20
 
 The full scan runs every active rule of ZAP, as its Default Policy does, in every language of the report.
 
+## The Scan Rules
+
+The scans run the release and the beta scan rules of ZAP, as its packaged scans do (`zap-baseline.py`,
+`zap-full-scan.py`). The Docker image of ZAP has the release rules only: at the start of each scan, ZAP installs
+the beta passive rules (`pscanrulesBeta`), and for the full scan the beta active rules (`ascanrulesBeta`), from the
+ZAP Marketplace. The scan needs to reach `https://www.zaproxy.org` for this; without it, ZAP logs the error and
+runs the release rules only.
+
+The beta passive rules include Content Cacheability (10049), Permissions Policy Header Not Set (10063),
+Insufficient Site Isolation Against Spectre (90004, the COEP, COOP and CORP headers), Dangerous JS Functions
+(10110), Source Code Disclosure (10099) and HTTP Parameter Override (10026); the beta active rules e.g. SSRF
+(40046), Session Fixation (40013), CORS Misconfiguration (40040), Backup File Disclosure (10095) and Possible
+Username Enumeration (40023).
+
 ## CakePHP 2 and ZAP
 
 ZAP is set up for the applications of CakePHP 2:
