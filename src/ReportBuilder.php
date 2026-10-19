@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace PieceOfCake2\SecurityDast;
 
 use DateTimeImmutable;
+use PieceOfCake2\Report\Check;
+use PieceOfCake2\Report\CheckList;
 use PieceOfCake2\Report\Count;
 use PieceOfCake2\Report\Cover;
 use PieceOfCake2\Report\Document;
@@ -15,7 +17,8 @@ use PieceOfCake2\Report\Translator;
 use PieceOfCake2\Report\Verdict;
 
 /**
- * Builds the report of a scan: the alerts by risk, one page for each with the requests where it was found.
+ * Builds the report of a scan: the alerts by risk, the scan rules that raised none and those that did not run, and
+ * one page for each alert with the requests where it was found.
  */
 final class ReportBuilder
 {
@@ -132,7 +135,54 @@ final class ReportBuilder
             headerRight: $cover->headerRight($startedAt, $environment),
             css: (string)file_get_contents(self::RESOURCE_DIR . DIRECTORY_SEPARATOR . 'dast.css'),
             language: $this->translator->language(),
+            checkLists: $this->checkLists($result, $config),
+            checksTitle: $this->t('section.checks'),
         );
+    }
+
+    /**
+     * The tables of the scan rules: those that ran and raised no alert, and those that did not run
+     *
+     * @param \PieceOfCake2\SecurityDast\ScanResult $result Scan
+     * @param \PieceOfCake2\SecurityDast\Config $config Settings
+     * @return array<\PieceOfCake2\Report\CheckList>
+     */
+    private function checkLists(ScanResult $result, Config $config): array
+    {
+        if ($result->rules === null) {
+            return [];
+        }
+        $passed = [];
+        $notRun = [];
+        foreach ($result->rules as $rule) {
+            if ($rule['skipped']) {
+                $notRun[] = new Check($rule['id'], $rule['name'], [$this->t('scan.type.' . $rule['type']), $this->t('notRun.skipped')]);
+            } else {
+                $passed[] = new Check($rule['id'], $rule['name'], [$this->t('scan.type.' . $rule['type'])]);
+            }
+        }
+        if ($config->scan !== 'full') {
+            $notRun[] = new Check('-', $this->t('notRun.active.title'), [$this->t('scan.type.active'), $this->t('notRun.baseline')]);
+        }
+        $note = $this->t('checks.notRun.note');
+        if ($result->activeLimitReached) {
+            $note .= ' ' . $this->t('checks.notRun.limit', ['minutes' => $config->scanMinutes]);
+        }
+
+        return [
+            new CheckList(
+                $this->t('checks.passed'),
+                [$this->t('field.ruleId'), $this->t('field.rule'), $this->t('field.scanType')],
+                $passed,
+                $this->t('checks.passed.note'),
+            ),
+            new CheckList(
+                $this->t('checks.notRun'),
+                [$this->t('field.ruleId'), $this->t('field.rule'), $this->t('field.scanType'), $this->t('field.reason')],
+                $notRun,
+                $note,
+            ),
+        ];
     }
 
     /**
@@ -151,7 +201,7 @@ final class ReportBuilder
     }
 
     /**
-     * The alerts by risk
+     * The alerts by risk: every risk, also without alerts
      *
      * @param \PieceOfCake2\SecurityDast\ScanResult $result Scan
      * @param array<int|string, string> $ignoreReasons Why each alert ID is ignored
@@ -161,10 +211,8 @@ final class ReportBuilder
     {
         $groups = [];
         foreach (Severity::ALL as $severity) {
+            // Every risk, also without alerts, so that a reader tells none from left out
             $alerts = array_values(array_filter($result->alerts, static fn(Alert $alert): bool => $alert->severity === $severity));
-            if ($alerts === []) {
-                continue;
-            }
             $group = new Group(count($groups) + 1, $this->t('severity.' . $severity));
             foreach ($alerts as $i => $alert) {
                 $group->items[] = $this->alert($group->no . '-' . ($i + 1), $alert);

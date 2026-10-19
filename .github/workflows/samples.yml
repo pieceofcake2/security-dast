@@ -1,0 +1,42 @@
+name: Samples
+
+# Records the scans of the sample reports with ZAP (docs/examples/report-sample.php --record): run it by hand, or
+# push a branch named samples/..., then download the records, copy them to docs/examples/records and build the
+# samples with `php docs/examples/report-sample.php`
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'samples/**'
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Install Composer Packages
+        run: composer install --no-ansi --no-interaction --no-progress
+
+      - name: Record the scans
+        run: php docs/examples/report-sample.php --record
+
+      - name: Upload the records
+        uses: actions/upload-artifact@v7
+        with:
+          name: records
+          path: docs/examples/records
+          retention-days: 7

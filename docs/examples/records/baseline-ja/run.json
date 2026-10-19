@@ -1,0 +1,9 @@
+{
+    "url": "http://127.0.0.1:56557",
+    "startedAt": "2026-10-17 14:53:11",
+    "finishedAt": "2026-10-17 14:54:26",
+    "software": "PHP 8.5.11　OWASP ZAP 2.17.0　pieceofcake2/security-dast 1.0.0",
+    "alerts": 17,
+    "rules": 50,
+    "note": "zap.json is tests/fixtures/zap-ja.json, of a scan with Docker Desktop on macOS; rules.html is of the Samples workflow (Linux)"
+}

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Checkmarx による ZAP スキャンレポート</title>
+<link href="rules/common.css"
+	rel="stylesheet" type="text/css">
+<link href="rules/console.css" rel="stylesheet" type="text/css">
+<script src="rules/chart.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    function showHide(id) {
+        showHideElement(id + "reqh");
+        showHideElement(id + "reqb");
+        showHideElement(id + "resph");
+        showHideElement(id + "respb");
+    }
+    function showHideElement(id) {
+        var x = document.getElementById(id);
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>
+<link rel="stylesheet" href="rules/chart.min.css">
+</head>
+<body>
+
+	
+		<div class="hero"></div>
+	
+
+	<header id="header">
+		<div class="wrap">
+			<div class="inner">
+				<h1>
+					<!-- The ZAP Logo -->
+					<img src="rules/zap32x32.png" alt="ZAP" />
+					Checkmarx による ZAP スキャンレポート
+				</h1>
+			</div>
+		</div>
+	</header>
+
+	<section id="segment-01" class="container">
+		<div class="wrap">
+			<div class="inner pt3">
+
+				
+
+				<h3>
+					生成日時 : 月, 19 10月 2026 12:43:07
+				</h3>
+
+				<h3>
+					ZAP バージョン: 2.17.0
+				</h3>
+
+				<h4>
+					ZAP by <a href="https://checkmarx.com/">Checkmarx</a>
+				</h4>
+
+				
+
+				
+
+			</div>
+		</div>
+	</section>
+
+	
+	
+	
+		<div></div>
+	
+
+	<section id="segment-02" class="container">
+		<div class="wrap">
+			<div class="inner">
+
+				
+
+				
+
+			</div>
+		</div>
+	</section>
+
+	<section id="segment-03" class="container">
+		<div class="wrap">
+			<div class="inner">
+
+				
+					<h3>Passing Rules</h3>
+					<div class="tableWrapper">
+						<table class="alerts" cellspacing="0" cellpadding="0">
+							<tr>
+								<th width="55%" height="24">名前</th>
+								<th width="15%"
+									align="center">Rule Type</th>
+								<th width="15%"
+									align="center">Threshold</th>
+								<th width="15%"
+									align="center">Strength</th>
+							</tr>
+							
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/0/">ディレクトリブラウジング</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/6/">パス・トラバーサル</a></td>
+										<td align="center">Active</td>
+										<td align="center">HIGH</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/7/">リモート ファイル　インクルージョン</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90017/">XSLTインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90019/">サーバーサイドコードインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90021/">XPathインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90020/">リモートOSコマンドインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90023/">XML外部実体参照 (XXE) 攻撃</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90024/">一般パディングオラクル</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90026/">SOAP Action スプーフィング</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90029/">SOAP XML インジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/20015/">Heartbleed OpenSSL の脆弱性</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/30001/">バッファ オーバーフロー</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/20017/">ソースコードの露見 - CVE-2012-1823</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/30002/">書式文字列エラー</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90035/">サーバーサイドテンプレートインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/20018/">リモートコード実行 - CVE-2012-1823</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90034/">クラウドメタデータが露呈する可能性</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/20019/">外部リダイレクト</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90037/">リモートOSコマンドインジェクション (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90036/">サーバーサイドテンプレートインジェクション (ブラインド)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10045/">ソースコードの露見 - /WEB-INF フォルダー</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10047/">HTTPSコンテンツがHTTP経由でアクセス可能</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10048/">リモートコード実行 - Shell Shock</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40003/">CRLFインジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40008/">パラメーター改ざん</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40009/">サーバーサイドインクルード</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/100043/">Swagger UI Secret &amp; Vulnerability Detector</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10058/">GET for POST</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40014/">クロスサイトスクリプティング (格納型)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/50000/">スクリプト アクティブスキャンルール</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40016/">クロスサイトスクリプティング (格納型) - Prime</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40017/">クロスサイトスクリプティング (格納型) - スパイダー</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40018/">SQL インジェクション</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40019/">SQLインジェクション - MySQL (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40020/">SQLインジェクション - Hypersonic SQL (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40021/">SQLインジェクション - Oracle (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40022/">SQLインジェクション - PostgreSQL (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40026/">クロス サイト スクリプティング (DOM ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40027/">SQLインジェクション - MsSQL (時間ベース)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40028/">ELMAH からの情報漏洩</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40029/">Trace.axd 情報漏洩</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40032/">.htaccess からの情報漏洩</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40034/">.env からの情報漏洩</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40035/">隠しファイルファインダー</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40042/">Spring Actuator 情報漏洩</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40043/">Log4Shell</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40044/">指数関数的エンティティ展開（Billion Laughs攻撃）</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40045/">Spring4Shell</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/40048/">リモートコード実行 (React2Shell)</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10106/">HTTPのみのサイト</a></td>
+										<td align="center">Active</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">MEDIUM</td>
+									</tr>
+								
+							
+							
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10113/">検証リクエストが特定されました</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/2/">プライベートIPの露見</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/3/">URLリライト内のセッションID</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10115/">悪意のあるドメインから配信されたスクリプト (polyfill)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10116/">古いZAPバージョン</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90001/">安全でないJSF ViewState</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90003/">サブリソース整合性属性の欠落</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10003/">脆弱なJSライブラリ (Retire.js による)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90002/">Javaシリアル化オブジェクト</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10009/">ページ内バナー情報漏洩</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90011/">文字セットの不一致</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10010/">CookieにHttpOnlyフラグがない</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10011/">secureフラグのないCookie</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10015/">Cache-controlディレクティブを再確認する</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10017/">クロスドメインJavaScriptソースファイルのインクルージョン</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10019/">Content-Typeヘッダーがありません</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10020/">クリックジャッキング対策ヘッダー</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90022/">アプリケーションエラーの露見</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10023/">情報漏洩 - デバッグエラーメッセージ</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10024/">情報漏洩 - URL内の機密情報</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10025/">情報漏洩 - HTTP Referrerヘッダー内の機密情報</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10027/">情報漏洩 - 疑わしいコメント</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10028/">外部サイトへのリダイレクト</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10029/">Cookieポイズニング</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10030/">ユーザーが制御可能な文字コード</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90030/">WSDLファイル検出</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10031/">ユーザーが制御可能なHTML要素属性 (XSSの可能性)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/90033/">スコープが広いクッキー</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10032/">Viewstate</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10033/">ディレクトリブラウジング</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10034/">Heartbleed OpenSSL の脆弱性 (指標)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10035/">Strict-Transport-Securityヘッダー</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10036/">HTTPサーバーレスポンスヘッダー</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10038/">Content Security Policy (CSP) ヘッダーが設定されていない</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10039/">X-Backend-Server ヘッダーによる情報漏洩</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10040/">セキュアなページに混在コンテンツが含まれる</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10041/">フォーム送信におけるHTTPからHTTPSへの安全でない遷移</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10042/">フォーム送信におけるHTTPSからHTTPへの安全でない遷移</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10043/">ユーザーが制御可能なJavaScriptイベント (XSS)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10044/">サイズの大きなリダイレクトを検出 (機密情報漏洩の可能性)</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10050/">キャッシュから取得</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10052/">X-ChromeLogger-Data (XCOLD) ヘッダーによる情報漏洩</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10055/">CSP</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10056/">X-Debug-Token ヘッダーによる情報漏洩</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10057/">ユーザー名ハッシュの検出</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10061/">X-AspNet-Version レスポンスヘッダー</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10062/">個人識別用情報の漏洩</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/50001/">スクリプト パッシブスキャンルール</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/50003/">統計 パッシブスキャンルール</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10202/">Anti-CSRFトークンが使用されていない</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10096/">タイムスタンプの露見</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10097/">ハッシュの露見</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10098/">クロスドメイン設定ミス</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10105/">脆弱な認証方法</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10108/">リバース・タブナビング</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10109/">モダンWebアプリケーション</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+									<tr>
+										<td><a
+											href="https://www.zaproxy.org/docs/alerts/10111/">認証リクエストが特定されました</a></td>
+										<td align="center">Passive</td>
+										<td align="center">MEDIUM</td>
+										<td align="center">-</td>
+									</tr>
+								
+							
+						</table>
+					</div>
+				
+
+			</div>
+		</div>
+	</section>
+
+	<section id="segment-04" class="container">
+		<div class="wrap">
+			<div class="inner">
+
+				<h2>サイト</h2>
+				
+					<h3>http://127.0.0.1:39823</h3>
+					
+					
+					
+				
+
+				
+
+				<footer>
+					Report by 
+					<a href="https://www.zaproxy.org/" target="_blank">ZAP</a>
+					
+				</footer>
+
+			</div>
+		</div>
+	</section>
+
+</body>
+</html>

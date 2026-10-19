@@ -1,0 +1,8 @@
+{
+    "url": "http://127.0.0.1:39823",
+    "startedAt": "2026-10-19 12:41:50",
+    "finishedAt": "2026-10-19 12:43:08",
+    "software": "PHP 8.4.26　OWASP ZAP 2.17.0　pieceofcake2/security-dast 1.x-dev",
+    "alerts": 6,
+    "rules": 108
+}

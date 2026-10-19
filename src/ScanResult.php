@@ -19,6 +19,11 @@ final class ScanResult
      * @param int|null $endToEndExitCode Exit code of the End-to-End tests of the scenario
      * @param array<\PieceOfCake2\SecurityDast\Alert> $ignoredAlerts Alerts of the IDs of `--ignore`: reported, but they do
      *  not fail the scan
+     * @param array<array{id: string, name: string, type: string, skipped: bool}>|null $rules The scan rules of ZAP that ran
+     *  and raised no alert, `passive` or `active`, and whether ZAP skipped an active one (e.g. not for the technology of
+     *  the site, or at a time limit), or null when ZAP did not list them
+     * @param bool $activeLimitReached Whether the active scan reached its time limit: the rules that it had not started
+     *  are not listed
      */
     public function __construct(
         public array $alerts = [],
@@ -28,6 +33,8 @@ final class ScanResult
         public ?string $user = null,
         public ?int $endToEndExitCode = null,
         public array $ignoredAlerts = [],
+        public ?array $rules = null,
+        public bool $activeLimitReached = false,
     ) {
     }
 

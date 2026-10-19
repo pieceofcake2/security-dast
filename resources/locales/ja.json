@@ -56,5 +56,19 @@
     "badge.ignored": "除外",
     "ignored.title": "除外した ID のアラート",
     "ignored.description": "これらのアラートは出ましたが、--ignore で結果から除いたので、不合格にはなりません。Web サーバーを変えたあとなどに、それぞれがまだ当てはまらないか確かめてください。",
-    "field.reason": "理由"
+    "field.reason": "理由",
+    "section.checks": "確認した項目",
+    "checks.passed": "確認した項目（問題なし）",
+    "checks.passed.note": "ZAP のスキャンルールのうち、実行してサイトにアラートを出さなかったものです。",
+    "checks.notRun": "実行しなかった項目",
+    "checks.notRun.note": "実行しなかったスキャンルールとその理由です。何も検査していないため、アラートは出ていません。",
+    "checks.notRun.limit": "アクティブスキャンが制限時間（{minutes}分）に達しました。始めていなかったルールはこの一覧に載りません。",
+    "field.ruleId": "ルール ID",
+    "field.rule": "スキャンルール",
+    "field.scanType": "スキャン",
+    "scan.type.passive": "パッシブ",
+    "scan.type.active": "アクティブ",
+    "notRun.skipped": "ZAP が飛ばしました（サイトの技術に当てはまらない、攻撃するページがない、または制限時間）",
+    "notRun.active.title": "アクティブスキャン（攻撃）のルール",
+    "notRun.baseline": "ベースラインスキャンは攻撃しません。テスト環境でフルスキャン（--scan=full）を実行してください"
 }

@@ -29,7 +29,7 @@ class ConfigTest extends TestCase
         $plan = $zap->plan('http://host.docker.internal:8123');
         $this->assertSame(['.*/admin/.*'], $plan['env']['contexts'][0]['excludePaths']);
         $this->assertSame('http://host.docker.internal:8123/users/login', $plan['env']['contexts'][0]['authentication']['parameters']['loginPageUrl']);
-        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report'], array_column($plan['jobs'], 'type'));
+        $this->assertSame(['spider', 'spiderAjax', 'passiveScan-wait', 'activeScan', 'passiveScan-wait', 'report', 'report', 'report', 'report'], array_column($plan['jobs'], 'type'));
         $this->assertSame(2, $plan['jobs'][0]['parameters']['maxDuration']);
         $this->assertSame(15, $plan['jobs'][3]['parameters']['maxScanDurationInMins']);
         $this->assertSame(['-config', 'spider.maxDepth=3'], array_slice($zap->zapOptions(), -2));

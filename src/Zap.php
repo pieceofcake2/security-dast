@@ -235,6 +235,13 @@ final class Zap
             throw new RuntimeException('ZAP wrote no report.');
         }
         $result = self::result(self::json($report), $url, $target);
+        $rules = $dir . DIRECTORY_SEPARATOR . 'rules.html';
+        if (is_file($rules)) {
+            $stats = $dir . DIRECTORY_SEPARATOR . 'stats.json';
+            $statistics = self::statistics(is_file($stats) ? self::json($stats) : []);
+            $result->rules = self::rules((string)file_get_contents($rules), $statistics);
+            $result->activeLimitReached = $this->scan === 'full' && ($statistics['stats.ascan.time'] ?? 0) >= $this->scanMinutes * 60000;
+        }
         if ($this->login !== null) {
             $auth = $dir . DIRECTORY_SEPARATOR . 'auth.json';
             if (!self::loggedIn(is_file($auth) ? self::json($auth) : [])) {
@@ -435,6 +442,12 @@ final class Zap
             $jobs[] = ['type' => 'passiveScan-wait'];
         }
         $jobs[] = ['type' => 'report', 'parameters' => ['template' => 'traditional-json', 'reportDir' => '/zap/wrk', 'reportFile' => 'zap']];
+        // The scan rules that ran and raised no alert: the passing rules of the modern report (the data of the jobs of
+        // the passive and active scans), and, for the active scan, the statistics of the rules that ZAP skipped
+        $jobs[] = ['type' => 'report', 'parameters' => ['template' => 'modern', 'reportDir' => '/zap/wrk', 'reportFile' => 'rules'], 'sections' => ['passingrules']];
+        if ($this->scan === 'full') {
+            $jobs[] = ['type' => 'report', 'parameters' => ['template' => 'traditional-json-plus', 'reportDir' => '/zap/wrk', 'reportFile' => 'stats'], 'sections' => ['statistics']];
+        }
         if ($this->login !== null) {
             $jobs[] = ['type' => 'report', 'parameters' => ['template' => 'auth-report-json', 'reportDir' => '/zap/wrk', 'reportFile' => 'auth']];
         }
@@ -460,6 +473,64 @@ final class Zap
         }
 
         return false;
+    }
+
+    /**
+     * The scan rules that ran and raised no alert, from the passing rules of the modern report of ZAP: a rule of the
+     * active scan has a strength, one of the passive scan `-`. An active rule is skipped when its statistic
+     * `stats.ascan.<id>.skipped` is set: ZAP lists the skipped rules among those that completed
+     *
+     * @param string $html HTML of the report `modern` with the section `passingrules`
+     * @param array<string, int> $statistics Statistics of ZAP
+     * @return array<array{id: string, name: string, type: string, skipped: bool}>
+     */
+    public static function rules(string $html, array $statistics = []): array
+    {
+        $rules = [];
+        preg_match_all('#<tr\b[^>]*>(.*?)</tr>#is', $html, $rows);
+        foreach ($rows[1] as $row) {
+            if (!preg_match('#<a\b[^>]*href="https://www\.zaproxy\.org/docs/alerts/(\d+)/"[^>]*>(.*?)</a>#is', $row, $link)) {
+                continue;
+            }
+            preg_match_all('#<td\b[^>]*>(.*?)</td>#is', $row, $cells);
+            $strength = trim(html_entity_decode(strip_tags($cells[1][3] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $type = $strength === '-' || $strength === '' ? 'passive' : 'active';
+            $rules[$type . ' ' . $link[1]] = [
+                'id' => $link[1],
+                'name' => trim(html_entity_decode(strip_tags($link[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                'type' => $type,
+                'skipped' => $type === 'active' && ($statistics['stats.ascan.' . $link[1] . '.skipped'] ?? 0) > 0,
+            ];
+        }
+        $rules = array_values($rules);
+        usort($rules, static fn(array $a, array $b): int => [$a['type'] === 'active', (int)$a['id']] <=> [$b['type'] === 'active', (int)$b['id']]);
+
+        return $rules;
+    }
+
+    /**
+     * The statistics of the report `traditional-json-plus` of ZAP with the section `statistics`: the global ones and
+     * those of the sites (the highest value of a key in both)
+     *
+     * @param array<string, mixed> $data JSON
+     * @return array<string, int>
+     */
+    public static function statistics(array $data): array
+    {
+        $statistics = [];
+        $sources = [is_array($data['statistics'] ?? null) ? $data['statistics'] : []];
+        foreach (is_array($data['site'] ?? null) ? $data['site'] : [] as $site) {
+            $sources[] = is_array($site['statistics'] ?? null) ? $site['statistics'] : [];
+        }
+        foreach ($sources as $source) {
+            foreach ($source as $key => $value) {
+                if (is_numeric($value)) {
+                    $statistics[(string)$key] = max($statistics[(string)$key] ?? 0, (int)$value);
+                }
+            }
+        }
+
+        return $statistics;
     }
 
     /**

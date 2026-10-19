@@ -1,0 +1,1119 @@
+{
+    "@programName": "ZAP",
+    "@version": "2.17.0",
+    "@generated": "Mon, 19 Oct 2026 12:41:49",
+	"created": "2026-10-19T12:41:49.260046016Z",
+	"insights":[
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.error",
+			"description": "ZAP errors logged - see the zap.log file for details",
+			"statistic": "1"
+		},
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.warn",
+			"description": "ZAP warnings logged - see the zap.log file for details",
+			"statistic": "49"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "",
+			"key": "insight.network.failure",
+			"description": "Percentage of network failures",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:34681",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:34681",
+			"key": "insight.endpoint.ctype.text/html",
+			"description": "Percentage of endpoints with content type text/html",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:34681",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "66"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:34681",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "33"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:34681",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "3"
+		}
+    ],
+	"site":[ 
+        {
+            "@name": "http://127.0.0.1:34681",
+            "@host": "127.0.0.1",
+            "@port": "34681",
+            "@ssl": "false",
+            "alerts": [ 
+                {
+                    "pluginid": "40012",
+                    "alertRef": "40012",
+                    "alert": "Cross Site Scripting (Reflected)",
+                    "name": "Cross Site Scripting (Reflected)",
+                    "riskcode": "3",
+                    "confidence": "2",
+                    "riskdesc": "High (Medium)",
+                    "desc": "<p>Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into a user's browser instance. A browser instance can be a standard web browser client, or a browser object embedded in a software product such as the browser within WinAmp, an RSS reader, or an email client. The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, Flash, or any other browser-supported technology.</p><p>When an attacker gets a user's browser to execute his/her code, the code will run within the security context (or zone) of the hosting web site. With this level of privilege, the code has the ability to read, modify and transmit any sensitive data accessible by the browser. A Cross-site Scripted user could have his/her account hijacked (cookie theft), their browser redirected to another location, or possibly shown fraudulent content delivered by the web site they are visiting. Cross-site Scripting attacks essentially compromise the trust relationship between a user and the web site. Applications utilizing browser object instances which load content from the file system may execute code under the local machine zone allowing for system compromise.</p><p></p><p>There are three types of Cross-site Scripting attacks: non-persistent, persistent and DOM-based.</p><p>Non-persistent attacks and DOM-based attacks require a user to either visit a specially crafted link laced with malicious code, or visit a malicious web page containing a web form, which when posted to the vulnerable site, will mount the attack. Using a malicious form will oftentimes take place when the vulnerable resource only accepts HTTP POST requests. In such a case, the form can be submitted automatically, without the victim's knowledge (e.g. by using JavaScript). Upon clicking on the malicious link or submitting the malicious form, the XSS payload will get echoed back and will get interpreted by the user's browser and execute. Another technique to send almost arbitrary requests (GET and POST) is by using an embedded client, such as Adobe Flash.</p><p>Persistent attacks occur when the malicious code is submitted to a web site where it's stored for a period of time. Examples of an attacker's favorite targets often include message board posts, web mail messages, and web chat software. The unsuspecting user is not required to interact with any additional site/link (e.g. an attacker site or a malicious link sent via email), just simply view the web page containing the code.</p>",
+                    "instances":[ 
+                        {
+                            "id": "10",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "data[Contact][message]",
+                            "attack": "</p><scrIpt>alert(1);</scRipt><p>",
+                            "evidence": "</p><scrIpt>alert(1);</scRipt><p>",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\ncontent-length: 133\r\nContent-Type: application/x-www-form-urlencoded\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=5281f8de3deccb4a&data%5BContact%5D%5Bmessage%5D=%3C%2Fp%3E%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E%3Cp%3E",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:43 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p></p><scrIpt>alert(1);</scRipt><p></p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"1735f528fbec0bf1\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "1",
+                    "systemic": false,
+                    "solution": "<p>Phase: Architecture and Design</p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p>Examples of libraries and frameworks that make it easier to generate properly encoded output include Microsoft's Anti-XSS library, the OWASP ESAPI Encoding module, and Apache Wicket.</p><p></p><p>Phases: Implementation; Architecture and Design</p><p>Understand the context in which your data will be used and the encoding that will be expected. This is especially important when transmitting data between different components, or when generating outputs that can contain multiple encodings at the same time, such as web pages or multi-part mail messages. Study all expected communication protocols and data representations to determine the required encoding strategies.</p><p>For any data that will be output to another web page, especially any data that was received from external inputs, use the appropriate encoding on all non-alphanumeric characters.</p><p>Consult the XSS Prevention Cheat Sheet for more details on the types of encoding and escaping that are needed.</p><p></p><p>Phase: Architecture and Design</p><p>For any security checks that are performed on the client side, ensure that these checks are duplicated on the server side, in order to avoid CWE-602. Attackers can bypass the client-side checks by modifying values after the checks have been performed, or by changing the client to remove the client-side checks entirely. Then, these modified values would be submitted to the server.</p><p></p><p>If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.</p><p></p><p>Phase: Implementation</p><p>For every web page that is generated, use and specify a character encoding such as ISO-8859-1 or UTF-8. When an encoding is not specified, the web browser may choose a different encoding by guessing which encoding is actually being used by the web page. This can cause the web browser to treat certain sequences as special, opening up the client to subtle XSS attacks. See CWE-116 for more mitigations related to encoding/escaping.</p><p></p><p>To help mitigate XSS attacks against the user's session cookie, set the session cookie to be HttpOnly. In browsers that support the HttpOnly feature (such as more recent versions of Internet Explorer and Firefox), this attribute can prevent the user's session cookie from being accessible to malicious client-side scripts that use document.cookie. This is not a complete solution, since HttpOnly is not supported by all browsers. More importantly, XMLHTTPRequest and other powerful browser technologies provide read access to HTTP headers, including the Set-Cookie header in which the HttpOnly flag is set.</p><p></p><p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>Ensure that you perform input validation at well-defined interfaces within the application. This will help protect the application even if a component is reused or moved elsewhere.</p><p>\t</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/www-community/attacks/xss/</p><p>https://cwe.mitre.org/data/definitions/79.html</p>",
+                    "cweid": "79",
+                    "wascid": "8",
+                    "sourceid": "124",
+                    "tags":[ 
+                        {
+                            "tag": "CWE-79",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/79.html"
+                        },
+                        {
+                            "tag": "POLICY_SEQUENCE",
+                            "link": ""
+                        },
+                        {
+                            "tag": "OWASP_2021_A03",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A03_2021-Injection\/"
+                        },
+                        {
+                            "tag": "PCI_DSS",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#compliance"
+                        },
+                        {
+                            "tag": "WSTG-v42-INPV-01",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/07-Input_Validation_Testing\/01-Testing_for_Reflected_Cross_Site_Scripting"
+                        },
+                        {
+                            "tag": "POLICY_QA_CICD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_DEV_CICD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "OWASP_2025_A05",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A05_2025-Injection\/"
+                        },
+                        {
+                            "tag": "POLICY_DEV_FULL",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_QA_FULL",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "HIPAA",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#compliance"
+                        },
+                        {
+                            "tag": "OWASP_2017_A07",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A7_2017-Cross-Site_Scripting_(XSS).html"
+                        },
+                        {
+                            "tag": "POLICY_DEV_STD",
+                            "link": ""
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10054",
+                    "alertRef": "10054-1",
+                    "alert": "Cookie without SameSite Attribute",
+                    "name": "Cookie without SameSite Attribute",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "Low (Medium)",
+                    "desc": "<p>A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a 'cross-site' request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.</p>",
+                    "instances":[ 
+                        {
+                            "id": "4",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add",
+                            "method": "GET",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "Set-Cookie: CAKEPHP",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"fd4e12a84c4fa6d3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "5",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "Set-Cookie: CAKEPHP",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=fd4e12a84c4fa6d3&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"5c95741e9ec1cf01\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "2",
+                    "systemic": false,
+                    "solution": "<p>Ensure that the SameSite attribute is set to either 'lax' or ideally 'strict' for all cookies.</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-same-site</p>",
+                    "cweid": "1275",
+                    "wascid": "13",
+                    "sourceid": "3",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A01_2021-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "WSTG-v42-SESS-02",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/06-Session_Management_Testing\/02-Testing_for_Cookies_Attributes"
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "CWE-1275",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/1275.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A01_2025-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "OWASP_2017_A05",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A5_2017-Broken_Access_Control.html"
+                        },
+                        {
+                            "tag": "POLICY_DEV_STD",
+                            "link": ""
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10037",
+                    "alertRef": "10037",
+                    "alert": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+                    "name": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "Low (Medium)",
+                    "desc": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+                    "instances":[ 
+                        {
+                            "id": "3",
+                            "uri": "http://127.0.0.1:34681/",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/",
+                            "method": "GET",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:34681/ HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Home</title></head><body><h1>Home</h1><a href=\"/contacts/add\">Contact</a></body></html>"
+                        },
+                        {
+                            "id": "9",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add",
+                            "method": "GET",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"fd4e12a84c4fa6d3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "8",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=fd4e12a84c4fa6d3&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"5c95741e9ec1cf01\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "3",
+                    "systemic": false,
+                    "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress \"X-Powered-By\" headers.</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework</p><p>https://www.troyhunt.com/shhh-dont-let-your-response-headers/</p>",
+                    "cweid": "497",
+                    "wascid": "13",
+                    "sourceid": "1",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A01_2021-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "WSTG-v42-INFO-08",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/01-Information_Gathering\/08-Fingerprint_Web_Application_Framework"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "OWASP_2017_A03",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A3_2017-Sensitive_Data_Exposure.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A01_2025-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "CWE-497",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/497.html"
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10021",
+                    "alertRef": "10021",
+                    "alert": "X-Content-Type-Options Header Missing",
+                    "name": "X-Content-Type-Options Header Missing",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "Low (Medium)",
+                    "desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+                    "instances":[ 
+                        {
+                            "id": "7",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add",
+                            "method": "GET",
+                            "param": "x-content-type-options",
+                            "attack": "",
+                            "evidence": "",
+                            "otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses.",
+                            "request-header": "GET http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"fd4e12a84c4fa6d3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "6",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "x-content-type-options",
+                            "attack": "",
+                            "evidence": "",
+                            "otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses.",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=fd4e12a84c4fa6d3&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"5c95741e9ec1cf01\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "2",
+                    "systemic": false,
+                    "solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+                    "otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+                    "reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+                    "cweid": "693",
+                    "wascid": "15",
+                    "sourceid": "3",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A05",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A05_2021-Security_Misconfiguration\/"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "CWE-693",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/693.html"
+                        },
+                        {
+                            "tag": "OWASP_2017_A06",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A6_2017-Security_Misconfiguration.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A02",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A02_2025-Security_Misconfiguration\/"
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10112",
+                    "alertRef": "10112",
+                    "alert": "Session Management Response Identified",
+                    "name": "Session Management Response Identified",
+                    "riskcode": "0",
+                    "confidence": "2",
+                    "riskdesc": "Informational (Medium)",
+                    "desc": "<p>The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to \"Auto-Detect\" then this rule will change the session management to use the tokens identified.</p>",
+                    "instances":[ 
+                        {
+                            "id": "0",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add",
+                            "method": "GET",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "CAKEPHP",
+                            "otherinfo": "cookie:CAKEPHP",
+                            "request-header": "GET http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:40:41 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"fd4e12a84c4fa6d3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "1",
+                    "systemic": false,
+                    "solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+                    "otherinfo": "<p>cookie:CAKEPHP</p>",
+                    "reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id/</p>",
+                    "cweid": "-1",
+                    "wascid": "-1",
+                    "sourceid": "3",
+                    "tags":[ 
+                    ]
+                },
+                {
+                    "pluginid": "10104",
+                    "alertRef": "10104",
+                    "alert": "User Agent Fuzzer",
+                    "name": "User Agent Fuzzer",
+                    "riskcode": "0",
+                    "confidence": "2",
+                    "riskdesc": "Informational (Medium)",
+                    "desc": "<p>Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.</p>",
+                    "instances":[ 
+                        {
+                            "id": "12",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add",
+                            "method": "GET",
+                            "param": "Header User-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:41:47 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"219044d9af0ce434\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "13",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "Header User-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=d249df2547fbb2fd&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:41:47 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"a15e95da5d3c6859\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "11",
+                            "uri": "http://127.0.0.1:34681/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:34681\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "Header User-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:34681/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:34681\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=d1a24ebb21c34760&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:34681\r\nDate: Mon, 19 Oct 2026 12:41:47 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"4ea13db026907fc3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "3",
+                    "systemic": true,
+                    "solution": "",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/www-project-web-security-testing-guide/</p>",
+                    "cweid": "0",
+                    "wascid": "0",
+                    "sourceid": "643",
+                    "tags":[ 
+                        {
+                            "tag": "CUSTOM_PAYLOADS",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        }
+                    ]
+                }
+            ],
+            "statistics":{ 
+                "stats.contentType.text\/html; charset=UTF-8": 746
+                ,
+                "stats.responseTime.0": 168
+                ,
+                "stats.acsrf.data[_Token][key]": 496
+                ,
+                "stats.tag.Form": 496
+                ,
+                "stats.tag.SetCookie": 496
+                ,
+                "stats.tag.Hidden": 496
+                ,
+                "stats.code.200": 746
+                ,
+                "stats.auth.sessiontoken.CAKEPHP": 2
+                ,
+                "stats.tag.Script": 2
+                ,
+                "stats.responseTime.2": 418
+                ,
+                "stats.responseTime.4": 137
+                ,
+                "stats.responseTime.8": 23
+                ,
+                "stats.tag.Comment": 7
+                
+            }
+        }
+    ],
+    "statistics":{ 
+        "stats.ascan.90035.started": 1
+        ,
+        "stats.pscan.10027.time": 2
+        ,
+        "stats.reports.generated.traditional-json": 1
+        ,
+        "stats.config.scanner.excludedParameters(0).name": 1
+        ,
+        "stats.ascan.40035.started": 1
+        ,
+        "stats.ascan.40027.time": 27
+        ,
+        "stats.ascan.20017.urls": 2
+        ,
+        "stats.pscan.10037.alerts": 3
+        ,
+        "stats.pscan.90022.time": 45
+        ,
+        "stats.ascan.40027.urls": 20
+        ,
+        "stats.ascan.20017.time": 17
+        ,
+        "stats.pscan.10112.time": 53
+        ,
+        "stats.ascan.40026.started": 1
+        ,
+        "stats.pscan.10042.time": 0
+        ,
+        "stats.ascan.40044.time": 64
+        ,
+        "stats.ascan.10058.started": 1
+        ,
+        "stats.pscan.10056.time": 0
+        ,
+        "stats.ascan.90017.urls": 16
+        ,
+        "stats.ascan.40029.started": 1
+        ,
+        "stats.pscan.10061.time": 0
+        ,
+        "stats.ascan.10106.started": 1
+        ,
+        "stats.pscan.10109.time": 0
+        ,
+        "stats.ascan.40008.time": 16
+        ,
+        "stats.ascan.90029.started": 1
+        ,
+        "stats.ascan.40044.started": 1
+        ,
+        "stats.ascan.20015.time": 3
+        ,
+        "stats.log.warn.org.zaproxy.zap.extension.ascanrules.Spring4ShellScanRule.NoHttpResponseException(DefaultBHttpClientConnection.java:333)": 1
+        ,
+        "stats.log.error.org.zaproxy.addon.client.ExtensionClientIntegration": 1
+        ,
+        "stats.ascan.40003.started": 1
+        ,
+        "stats.ascan.40032.started": 1
+        ,
+        "stats.config.api.addrs.addr.name": 1
+        ,
+        "stats.ascan.40017.started": 1
+        ,
+        "stats.selenium.launch.2.firefox-headless": 5
+        ,
+        "stats.ascan.20017.started": 1
+        ,
+        "stats.auto.job.passiveScan-wait.run": 2
+        ,
+        "stats.ascan.0.started": 1
+        ,
+        "stats.config.scanner.excludedParameters(3).type": 1
+        ,
+        "stats.ascan.40008.urls": 14
+        ,
+        "stats.ascan.90034.time": 19
+        ,
+        "stats.pscan.90003.time": 5
+        ,
+        "stats.pscan.10040.time": 0
+        ,
+        "stats.reports.generated.modern": 1
+        ,
+        "stats.pscan.10023.time": 0
+        ,
+        "stats.ascan.90023.started": 1
+        ,
+        "stats.ascan.90034.urls": 13
+        ,
+        "stats.pscan.10029.time": 0
+        ,
+        "stats.ascan.90017.started": 1
+        ,
+        "stats.ascan.10047.time": 5
+        ,
+        "stats.pscan.10017.time": 0
+        ,
+        "stats.ascan.40014.started": 1
+        ,
+        "stats.ascan.10047.started": 1
+        ,
+        "stats.pscan.10011.time": 0
+        ,
+        "stats.ascan.40034.urls": 2
+        ,
+        "stats.pscan.10112.alerts": 2
+        ,
+        "stats.config.scanner.excludeAntiCsrfTokens": 1
+        ,
+        "stats.pscan.10030.time": 0
+        ,
+        "domxss.scan.count": 5
+        ,
+        "stats.api.call.json.httpSessions.action.setActiveSession": 1
+        ,
+        "stats.ascan.40034.time": 5
+        ,
+        "stats.pscan.10039.time": 0
+        ,
+        "stats.pscan.10052.time": 0
+        ,
+        "stats.api.call.json.core.view.version": 1
+        ,
+        "stats.ascan.90026.started": 1
+        ,
+        "stats.pscan.10105.time": 0
+        ,
+        "stats.ascan.90037.time": 34
+        ,
+        "stats.pscan.10035.time": 0
+        ,
+        "stats.ascan.40019.urls": 20
+        ,
+        "stats.ascan.10058.urls": 1
+        ,
+        "stats.selenium.profile.create.failure.Linux": 1
+        ,
+        "stats.ascan.90037.started": 1
+        ,
+        "stats.pscan.90001.time": 0
+        ,
+        "stats.ascan.90036.time": 27
+        ,
+        "stats.auto.jobs.run": 5
+        ,
+        "stats.pscan.10020.time": 0
+        ,
+        "stats.ascan.90020.started": 1
+        ,
+        "stats.pscan.10034.time": 0
+        ,
+        "stats.ascan.10058.time": 5
+        ,
+        "stats.ascan.40022.time": 28
+        ,
+        "stats.log.warn.org.openqa.selenium.manager.SeleniumManager": 1
+        ,
+        "stats.ascan.90035.time": 36
+        ,
+        "stats.ascan.30001.started": 1
+        ,
+        "stats.config.scanner.excludedParameters(2).type": 1
+        ,
+        "stats.pscan.90030.time": 0
+        ,
+        "stats.ascan.6.started": 1
+        ,
+        "stats.ascan.20015.started": 1
+        ,
+        "stats.ascan.40027.started": 1
+        ,
+        "stats.ascan.40019.time": 49
+        ,
+        "stats.ascan.40003.time": 26
+        ,
+        "stats.auto.job.report.run": 2
+        ,
+        "stats.pscan.10097.time": 0
+        ,
+        "stats.ascan.40003.urls": 14
+        ,
+        "stats.ascan.40022.urls": 10
+        ,
+        "stats.ascan.90036.urls": 24
+        ,
+        "stats.pscan.10202.time": 4
+        ,
+        "stats.ascan.6.time": 107
+        ,
+        "stats.ascan.40008.started": 1
+        ,
+        "stats.ascan.40021.started": 1
+        ,
+        "stats.ascan.7.urls": 20
+        ,
+        "stats.log.error": 1
+        ,
+        "stats.ascan.40029.time": 5
+        ,
+        "stats.ascan.90020.time": 49
+        ,
+        "stats.pscan.10054.time": 13
+        ,
+        "stats.auto.job.activeScan.run": 1
+        ,
+        "stats.ascan.0.time": 10
+        ,
+        "stats.ascan.40032.time": 3
+        ,
+        "stats.ascan.90017.time": 28
+        ,
+        "stats.log.warn.org.zaproxy.addon.client.RedirectScript": 5
+        ,
+        "stats.ascan.90035.urls": 28
+        ,
+        "stats.ascan.90020.urls": 38
+        ,
+        "stats.ascan.40032.urls": 2
+        ,
+        "stats.pscan.90011.time": 0
+        ,
+        "stats.pscan.10015.time": 0
+        ,
+        "stats.ascan.7.time": 55
+        ,
+        "stats.ascan.90019.started": 1
+        ,
+        "stats.ascan.40042.started": 1
+        ,
+        "stats.ascan.50000.time": 273
+        ,
+        "stats.config.anticsrf.tokens.token(100).name": 1
+        ,
+        "stats.config.scanner.excludedParameters(0).type": 1
+        ,
+        "stats.ascan.6.urls": 28
+        ,
+        "stats.ascan.40029.urls": 2
+        ,
+        "stats.pscan.90002.time": 0
+        ,
+        "stats.ascan.40045.started": 1
+        ,
+        "stats.pscan.10025.time": 0
+        ,
+        "stats.pscan.10098.time": 0
+        ,
+        "stats.ascan.0.urls": 6
+        ,
+        "stats.ascan.started": 1
+        ,
+        "stats.api.call.json.httpSessions.view.sessions": 1
+        ,
+        "stats.ascan.40012.started": 1
+        ,
+        "stats.network.send.success": 1128
+        ,
+        "stats.ascan.30002.time": 15
+        ,
+        "stats.pscan.50001.time": 14
+        ,
+        "stats.ascan.40048.time": 2
+        ,
+        "stats.ascan.40042.urls": 2
+        ,
+        "stats.pscan.10044.time": 0
+        ,
+        "stats.pscan.10113.time": 1
+        ,
+        "stats.pscan.Parameter Scanner": 558
+        ,
+        "stats.ascan.30002.urls": 6
+        ,
+        "stats.config.scanner.excludedParameters(1).type": 1
+        ,
+        "stats.ascan.40048.urls": 1
+        ,
+        "stats.ascan.40042.time": 5
+        ,
+        "stats.ascan.90026.time": 5
+        ,
+        "stats.network.send.failure": 17
+        ,
+        "stats.ascan.40043.time": 1
+        ,
+        "stats.ascan.40022.started": 1
+        ,
+        "stats.ascan.40043.skipped": 1
+        ,
+        "stats.ascan.10104.time": 68
+        ,
+        "stats.ascan.30001.urls": 2
+        ,
+        "stats.script.call.Graal.js.active": 23
+        ,
+        "stats.pscan.10043.time": 0
+        ,
+        "stats.ascan.40009.time": 25
+        ,
+        "stats.pscan.10057.time": 13
+        ,
+        "stats.config.scanner.excludedParameters(3).name": 1
+        ,
+        "stats.ascan.30001.time": 14
+        ,
+        "stats.ascan.10104.urls": 72
+        ,
+        "stats.ascan.40028.time": 2
+        ,
+        "stats.pscan.10111.time": 6
+        ,
+        "stats.ascan.10048.started": 1
+        ,
+        "stats.ascan.20018.time": 24
+        ,
+        "stats.ascan.40014.time": 17
+        ,
+        "stats.ascan.10048.urls": 4
+        ,
+        "stats.pscan.50003.time": 30
+        ,
+        "stats.ascan.20018.urls": 10
+        ,
+        "stats.ascan.10106.time": 7
+        ,
+        "stats.ascan.100043.started": 1
+        ,
+        "stats.ascan.40028.urls": 1
+        ,
+        "stats.ascan.10048.time": 19
+        ,
+        "stats.ascan.40048.started": 1
+        ,
+        "stats.auth.detect.session.CAKEPHP": 2
+        ,
+        "stats.pscan.10010.time": 1
+        ,
+        "stats.ascan.40009.urls": 8
+        ,
+        "stats.pscan.2.time": 3
+        ,
+        "stats.config.scanner.excludedParameters(2).name": 1
+        ,
+        "stats.ascan.90034.started": 1
+        ,
+        "stats.pscan.10024.time": 0
+        ,
+        "stats.pscan.10021.alerts": 3
+        ,
+        "stats.config.anticsrf.partialMatchingEnabled": 1
+        ,
+        "stats.log.warn.org.zaproxy.zap.session.CookieBasedSessionManagementHelper": 42
+        ,
+        "stats.ascan.10104.started": 1
+        ,
+        "stats.pscan.10062.time": 37
+        ,
+        "stats.pscan.-1.time": 104
+        ,
+        "stats.pscan.10115.time": 0
+        ,
+        "stats.ascan.90021.time": 9
+        ,
+        "stats.auth.sessiontokens.max": 2
+        ,
+        "stats.ascan.40012.urls": 4
+        ,
+        "stats.ascan.40043.started": 1
+        ,
+        "stats.ascan.40018.urls": 44
+        ,
+        "stats.api.call.json.httpSessions.action.addDefaultSessionToken": 1
+        ,
+        "stats.ascan.7.started": 1
+        ,
+        "stats.ascan.100043.time": 807
+        ,
+        "stats.ascan.40018.started": 1
+        ,
+        "stats.config.api.key": 1
+        ,
+        "stats.pscan.10033.time": 0
+        ,
+        "stats.pscan.10108.time": 1
+        ,
+        "stats.ascan.20018.started": 1
+        ,
+        "stats.pscan.10036.time": 0
+        ,
+        "stats.ascan.90021.urls": 6
+        ,
+        "stats.ascan.40012.time": 29
+        ,
+        "stats.pscan.10055.time": 38
+        ,
+        "stats.ascan.30002.started": 1
+        ,
+        "stats.client.launch.fail.firefox": 5
+        ,
+        "stats.ascan.40018.time": 119
+        ,
+        "stats.pscan.10021.time": 25
+        ,
+        "stats.pscan.recordsToScan": 467
+        ,
+        "stats.ascan.40009.started": 1
+        ,
+        "stats.ascan.40020.started": 1
+        ,
+        "stats.ascan.90023.time": 5
+        ,
+        "stats.pscan.Anti CSRF Token Detection": 76
+        ,
+        "stats.ascan.40035.time": 73
+        ,
+        "stats.pscan.10096.time": 0
+        ,
+        "stats.ascan.40021.urls": 10
+        ,
+        "stats.ascan.40035.urls": 52
+        ,
+        "stats.pscan.10054.alerts": 2
+        ,
+        "stats.ascan.40021.time": 24
+        ,
+        "stats.ascan.90037.urls": 32
+        ,
+        "stats.ascan.100043.urls": 12
+        ,
+        "stats.ascan.90019.time": 21
+        ,
+        "stats.ascan.time": 65656
+        ,
+        "stats.auto.plans.run": 1
+        ,
+        "stats.config.anticsrf.tokens.token(100).enabled": 1
+        ,
+        "stats.ascan.90024.time": 5
+        ,
+        "stats.pscan.10050.time": 0
+        ,
+        "stats.config.scanner.excludedParameters(1).name": 1
+        ,
+        "stats.ascan.40017.time": 15
+        ,
+        "stats.pscan.90033.time": 2
+        ,
+        "stats.ascan.10045.urls": 2
+        ,
+        "stats.ascan.40019.started": 1
+        ,
+        "stats.ascan.40017.urls": 6
+        ,
+        "stats.pscan.10019.time": 0
+        ,
+        "domxss.gets.count": 96
+        ,
+        "stats.ascan.urls": 624
+        ,
+        "stats.ascan.10104.alerts": 24
+        ,
+        "stats.ascan.40034.started": 1
+        ,
+        "stats.pscan.3.time": 1
+        ,
+        "stats.ascan.started.policy.user": 1
+        ,
+        "stats.ascan.20019.started": 1
+        ,
+        "stats.ascan.10045.time": 10
+        ,
+        "stats.pscan.10032.time": 1
+        ,
+        "stats.ascan.90036.started": 1
+        ,
+        "stats.ascan.40012.alerts": 1
+        ,
+        "stats.ascan.40016.urls": 2
+        ,
+        "stats.pscan.10038.time": 0
+        ,
+        "stats.log.warn": 49
+        ,
+        "stats.config.api.addrs.addr.regex": 1
+        ,
+        "stats.ascan.40016.time": 17
+        ,
+        "stats.pscan.10037.time": 10
+        ,
+        "stats.ascan.90021.started": 1
+        ,
+        "stats.pscan.10031.time": 0
+        ,
+        "stats.ascan.40026.urls": 23
+        ,
+        "stats.ascan.40020.urls": 20
+        ,
+        "stats.pscan.10028.time": 0
+        ,
+        "stats.ascan.10045.started": 1
+        ,
+        "stats.ascan.20019.urls": 18
+        ,
+        "stats.pscan.10003.time": 32
+        ,
+        "stats.ascan.40028.started": 1
+        ,
+        "stats.pscan.10009.time": 0
+        ,
+        "stats.ascan.40045.urls": 11
+        ,
+        "stats.ascan.90024.started": 1
+        ,
+        "stats.ascan.90019.urls": 16
+        ,
+        "stats.api.call.json.automation.action.runPlan": 1
+        ,
+        "stats.pscan.10041.time": 3
+        ,
+        "stats.api.call.json.automation.view.planProgress": 34
+        ,
+        "stats.ascan.40020.time": 40
+        ,
+        "stats.ascan.40045.time": 12
+        ,
+        "stats.pscan.10116.time": 19
+        ,
+        "stats.ascan.50000.started": 1
+        ,
+        "stats.ascan.40026.time": 59216
+        ,
+        "stats.ascan.90029.time": 7
+        ,
+        "stats.ascan.20019.time": 56
+        ,
+        "stats.ascan.40016.started": 1
+        
+    }
+}
+

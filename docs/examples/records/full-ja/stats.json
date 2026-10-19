@@ -1,0 +1,1125 @@
+{
+    "@programName": "ZAP",
+    "@version": "2.17.0",
+    "@generated": "\u6708, 19 10\u6708 2026 12:43:07",
+	"created": "2026-10-19T12:43:07.623493549Z",
+	"insights":[
+		{
+			"level": "低",
+			"reason": "警告",
+			"site": "",
+			"key": "insight.log.error",
+			"description": "ZAP のエラーが記録されました。詳細は zap.log ファイルを参照してください",
+			"statistic": "1"
+		},
+		{
+			"level": "低",
+			"reason": "警告",
+			"site": "",
+			"key": "insight.log.warn",
+			"description": "ZAP の警告が記録されました。詳細は zap.log ファイルを参照してください",
+			"statistic": "49"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "",
+			"key": "insight.network.failure",
+			"description": "ネットワーク障害の割合",
+			"statistic": "1"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "http://127.0.0.1:39823",
+			"key": "insight.code.2xx",
+			"description": "ステータスコード 2xx のレスポンスの割合",
+			"statistic": "100"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "http://127.0.0.1:39823",
+			"key": "insight.endpoint.ctype.text/html",
+			"description": "コンテンツタイプ text/html のエンドポイントの割合",
+			"statistic": "100"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "http://127.0.0.1:39823",
+			"key": "insight.endpoint.method.GET",
+			"description": "メソッド GET のエンドポイントの割合",
+			"statistic": "66"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "http://127.0.0.1:39823",
+			"key": "insight.endpoint.method.POST",
+			"description": "メソッド POST のエンドポイントの割合",
+			"statistic": "33"
+		},
+		{
+			"level": "情報",
+			"reason": "情報",
+			"site": "http://127.0.0.1:39823",
+			"key": "insight.endpoint.total",
+			"description": "エンドポイントの総数",
+			"statistic": "3"
+		}
+    ],
+	"site":[ 
+        {
+            "@name": "http://127.0.0.1:39823",
+            "@host": "127.0.0.1",
+            "@port": "39823",
+            "@ssl": "false",
+            "alerts": [ 
+                {
+                    "pluginid": "40012",
+                    "alertRef": "40012",
+                    "alert": "\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0 (\u53CD\u5C04\u578B)",
+                    "name": "\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0 (\u53CD\u5C04\u578B)",
+                    "riskcode": "3",
+                    "confidence": "2",
+                    "riskdesc": "\u9AD8 (\u4E2D)",
+                    "desc": "<p>\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0 (XSS) \u306F\u3001\u653B\u6483\u8005\u304C\u63D0\u4F9B\u3057\u305F\u30B3\u30FC\u30C9\u3092\u30E6\u30FC\u30B6\u30FC\u306E\u30D6\u30E9\u30A6\u30B6\u30FC\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u306B\u53CD\u6620 (echo) \u3055\u305B\u308B\u653B\u6483\u624B\u6CD5\u3067\u3059\u3002 \u30D6\u30E9\u30A6\u30B6\u30FC\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u306B\u306F\u3001\u6A19\u6E96\u7684\u306AWeb\u30D6\u30E9\u30A6\u30B6\u30FC\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u306E\u307B\u304B\u3001WinAmp\u5185\u306E\u30D6\u30E9\u30A6\u30B6\u3001RSS\u30EA\u30FC\u30C0\u30FC\u3001\u30E1\u30FC\u30EB\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u306A\u3069\u306E\u30BD\u30D5\u30C8\u30A6\u30A7\u30A2\u88FD\u54C1\u306B\u57CB\u3081\u8FBC\u307E\u308C\u305F\u30D6\u30E9\u30A6\u30B6\u30FC\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8\u3082\u542B\u307E\u308C\u307E\u3059\u3002 \u30B3\u30FC\u30C9\u81EA\u4F53\u306F\u901A\u5E38HTML/JavaScript\u3067\u8A18\u8FF0\u3055\u308C\u307E\u3059\u304C\u3001VBScript\u3001ActiveX\u3001Java\u3001Flash\u3001\u305D\u306E\u4ED6\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u30B5\u30DD\u30FC\u30C8\u3059\u308B\u3042\u3089\u3086\u308B\u6280\u8853\u306B\u53CA\u3076\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002</p><p>\u653B\u6483\u8005\u304C\u30E6\u30FC\u30B6\u30FC\u306E\u30D6\u30E9\u30A6\u30B6\u30FC\u306B\u81EA\u8EAB\u306E\u30B3\u30FC\u30C9\u3092\u5B9F\u884C\u3055\u305B\u308B\u3068\u3001\u305D\u306E\u30B3\u30FC\u30C9\u306F\u30DB\u30B9\u30C6\u30A3\u30F3\u30B0\u3057\u3066\u3044\u308BWeb\u30B5\u30A4\u30C8\u306E\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30B3\u30F3\u30C6\u30AD\u30B9\u30C8 (\u307E\u305F\u306F\u30BE\u30FC\u30F3) \u5185\u3067\u5B9F\u884C\u3055\u308C\u307E\u3059\u3002 \u3053\u306E\u6A29\u9650\u30EC\u30D9\u30EB\u3067\u306F\u3001\u30B3\u30FC\u30C9\u306F\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u30A2\u30AF\u30BB\u30B9\u53EF\u80FD\u306A\u3042\u3089\u3086\u308B\u6A5F\u5BC6\u30C7\u30FC\u30BF\u306E\u8AAD\u307F\u53D6\u308A\u3001\u5909\u66F4\u3001\u9001\u4FE1\u3059\u308B\u80FD\u529B\u3092\u6301\u3061\u307E\u3059\u3002 \u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0\u306E\u88AB\u5BB3\u3092\u53D7\u3051\u305F\u30E6\u30FC\u30B6\u30FC\u306F\u3001\u30A2\u30AB\u30A6\u30F3\u30C8\u3092\u4E57\u3063\u53D6\u3089\u308C\u305F\u308A (Cookie\u7A83\u53D6)\u3001\u30D6\u30E9\u30A6\u30B6\u30FC\u3092\u5225\u306E\u5834\u6240\u306B\u30EA\u30C0\u30A4\u30EC\u30AF\u30C8\u3055\u308C\u305F\u308A\u3001\u8A2A\u554F\u3057\u3066\u3044\u308BWeb\u30B5\u30A4\u30C8\u304B\u3089\u914D\u4FE1\u3055\u308C\u308B\u8A50\u6B3A\u7684\u306A\u30B3\u30F3\u30C6\u30F3\u30C4\u3092\u8868\u793A\u3055\u305B\u3089\u308C\u305F\u308A\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002 \u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0\u653B\u6483\u306F\u672C\u8CEA\u7684\u306B\u30E6\u30FC\u30B6\u30FC\u3068Web\u30B5\u30A4\u30C8\u3068\u306E\u9593\u306E\u4FE1\u983C\u95A2\u4FC2\u3092\u4FB5\u5BB3\u3057\u307E\u3059\u3002 \u30D5\u30A1\u30A4\u30EB\u30B7\u30B9\u30C6\u30E0\u304B\u3089\u30B3\u30F3\u30C6\u30F3\u30C4\u3092\u8AAD\u307F\u8FBC\u3080\u30D6\u30E9\u30A6\u30B6\u30FC\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u3092\u5229\u7528\u3059\u308B\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u306F\u30ED\u30FC\u30AB\u30EB\u30DE\u30B7\u30F3\u30BE\u30FC\u30F3\u4E0B\u3067\u30B3\u30FC\u30C9\u3092\u5B9F\u884C\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u3001\u30B7\u30B9\u30C6\u30E0\u306E\u4FB5\u5BB3\u306B\u3064\u306A\u304C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002</p><p></p><p>\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C6\u30A3\u30F3\u30B0\u653B\u6483\u306B\u306F\u3001\u975E\u6C38\u7D9A\u7684 (non-persistent)\u3001\u6C38\u7D9A\u7684 (persistent)\u3001DOM\u30D9\u30FC\u30B9\u306E3\u3064\u306E\u30BF\u30A4\u30D7\u304C\u3042\u308A\u307E\u3059\u3002</p><p>\u975E\u6C38\u7D9A\u7684\u653B\u6483\u3068DOM\u30D9\u30FC\u30B9\u653B\u6483\u3067\u306F\u3001\u30E6\u30FC\u30B6\u30FC\u306F\u60AA\u610F\u306E\u3042\u308B\u30B3\u30FC\u30C9\u304C\u4ED5\u8FBC\u307E\u308C\u305F\u7279\u5225\u306B\u7D30\u5DE5\u3055\u308C\u305F\u30EA\u30F3\u30AF\u3092\u8A2A\u554F\u3059\u308B\u304B\u3001\u8106\u5F31\u306A\u30B5\u30A4\u30C8\u306BPOST\u3059\u308B\u3068\u653B\u6483\u3092\u958B\u59CB\u3059\u308B\u60AA\u610F\u306E\u3042\u308BWeb\u30D5\u30A9\u30FC\u30E0\u3092\u542B\u3080Web\u30DA\u30FC\u30B8\u3092\u8A2A\u554F\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002 \u60AA\u610F\u306E\u3042\u308B\u30D5\u30A9\u30FC\u30E0\u306E\u4F7F\u7528\u306F\u3001\u8106\u5F31\u306A\u30EA\u30BD\u30FC\u30B9\u304CHTTP POST\u30EA\u30AF\u30A8\u30B9\u30C8\u306E\u307F\u3092\u53D7\u3051\u4ED8\u3051\u308B\u5834\u5408\u306B\u3088\u304F\u884C\u308F\u308C\u307E\u3059\u3002 \u305D\u306E\u3088\u3046\u306A\u5834\u5408\u3001\u30D5\u30A9\u30FC\u30E0\u306F (\u4F8B\u3048\u3070JavaScript\u3092\u4F7F\u7528\u3057\u3066) \u88AB\u5BB3\u8005\u306E\u77E5\u3089\u306A\u3044\u3046\u3061\u306B\u81EA\u52D5\u7684\u306B\u9001\u4FE1\u3055\u308C\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002 \u60AA\u610F\u306E\u3042\u308B\u30EA\u30F3\u30AF\u3092\u30AF\u30EA\u30C3\u30AF\u3059\u308B\u304B\u60AA\u610F\u306E\u3042\u308B\u30D5\u30A9\u30FC\u30E0\u3092\u9001\u4FE1\u3059\u308B\u3068\u3001XSS\u30DA\u30A4\u30ED\u30FC\u30C9\u304C\u53CD\u6620\u3055\u308C\u3066\u30E6\u30FC\u30B6\u30FC\u306E\u30D6\u30E9\u30A6\u30B6\u30FC\u306B\u3088\u3063\u3066\u89E3\u91C8\u3055\u308C\u3001\u5B9F\u884C\u3055\u308C\u307E\u3059\u3002 Adobe Flash\u306E\u3088\u3046\u306A\u57CB\u3081\u8FBC\u307F\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u3092\u4F7F\u7528\u3059\u308B\u3053\u3068\u3067\u3001\u307B\u307C\u4EFB\u610F\u306E\u30EA\u30AF\u30A8\u30B9\u30C8 (GET\u304A\u3088\u3073POST) \u3092\u9001\u4FE1\u3059\u308B\u624B\u6CD5\u3082\u3042\u308A\u307E\u3059\u3002</p><p>\u6C38\u7D9A\u7684\u653B\u6483\u306F\u3001\u60AA\u610F\u306E\u3042\u308B\u30B3\u30FC\u30C9\u304CWeb\u30B5\u30A4\u30C8\u306B\u9001\u4FE1\u3055\u308C\u3001\u4E00\u5B9A\u671F\u9593\u4FDD\u5B58\u3055\u308C\u308B\u5834\u5408\u306B\u767A\u751F\u3057\u307E\u3059\u3002 \u653B\u6483\u8005\u306E\u304A\u6C17\u306B\u5165\u308A\u306E\u30BF\u30FC\u30B2\u30C3\u30C8\u306E\u4F8B\u306B\u306F\u3001\u30E1\u30C3\u30BB\u30FC\u30B8\u30DC\u30FC\u30C9\u306E\u6295\u7A3F\u3001Web\u30E1\u30FC\u30EB\u306E\u30E1\u30C3\u30BB\u30FC\u30B8\u3001Web\u30C1\u30E3\u30C3\u30C8\u30BD\u30D5\u30C8\u30A6\u30A7\u30A2\u306A\u3069\u304C\u3088\u304F\u542B\u307E\u308C\u307E\u3059\u3002 \u7591\u3044\u3092\u6301\u305F\u306A\u3044\u30E6\u30FC\u30B6\u30FC\u306F\u3001\u8FFD\u52A0\u306E\u30B5\u30A4\u30C8/\u30EA\u30F3\u30AF (\u4F8B: \u653B\u6483\u8005\u306E\u30B5\u30A4\u30C8\u3084\u30E1\u30FC\u30EB\u3067\u9001\u4FE1\u3055\u308C\u305F\u60AA\u610F\u306E\u3042\u308B\u30EA\u30F3\u30AF) \u3068\u5BFE\u8A71\u3059\u308B\u5FC5\u8981\u306F\u306A\u304F\u3001\u5358\u306B\u30B3\u30FC\u30C9\u3092\u542B\u3080Web\u30DA\u30FC\u30B8\u3092\u8868\u793A\u3059\u308B\u3060\u3051\u3067\u88AB\u5BB3\u306B\u906D\u3044\u307E\u3059\u3002</p>",
+                    "instances":[ 
+                        {
+                            "id": "10",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "data[Contact][message]",
+                            "attack": "</p><scrIpt>alert(1);</scRipt><p>",
+                            "evidence": "</p><scrIpt>alert(1);</scRipt><p>",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\ncontent-length: 133\r\nContent-Type: application/x-www-form-urlencoded\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=31efe6a3f8280029&data%5BContact%5D%5Bmessage%5D=%3C%2Fp%3E%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E%3Cp%3E",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:01 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p></p><scrIpt>alert(1);</scRipt><p></p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"51c96668cef1ebd3\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "1",
+                    "systemic": false,
+                    "solution": "<p>\u30D5\u30A7\u30FC\u30BA: \u30A2\u30FC\u30AD\u30C6\u30AF\u30C1\u30E3\u304A\u3088\u3073\u8A2D\u8A08</p><p>\u3053\u306E\u8106\u5F31\u6027\u306E\u767A\u751F\u3092\u8A31\u3055\u306A\u3044\u3001\u3042\u308B\u3044\u306F\u56DE\u907F\u3092\u5BB9\u6613\u306B\u3059\u308B\u69CB\u9020\u3092\u5099\u3048\u305F\u3001\u5341\u5206\u306B\u691C\u8A3C\u3055\u308C\u305F\u30E9\u30A4\u30D6\u30E9\u30EA\u3084\u30D5\u30EC\u30FC\u30E0\u30EF\u30FC\u30AF\u3092\u4F7F\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p>\u9069\u5207\u306B\u30A8\u30F3\u30B3\u30FC\u30C9\u3055\u308C\u305F\u51FA\u529B\u3092\u751F\u6210\u3057\u3084\u3059\u304F\u3059\u308B\u30E9\u30A4\u30D6\u30E9\u30EA\u3084\u30D5\u30EC\u30FC\u30E0\u30EF\u30FC\u30AF\u306E\u4F8B\u306B\u306F\u3001Microsoft\u306EAnti-XSS\u30E9\u30A4\u30D6\u30E9\u30EA\u3001OWASP ESAPI\u306EEncoding\u30E2\u30B8\u30E5\u30FC\u30EB\u3001Apache Wicket\u306A\u3069\u304C\u3042\u308A\u307E\u3059\u3002</p><p></p><p>\u30D5\u30A7\u30FC\u30BA: \u5B9F\u88C5\u3001\u30A2\u30FC\u30AD\u30C6\u30AF\u30C1\u30E3\u304A\u3088\u3073\u8A2D\u8A08</p><p>\u30C7\u30FC\u30BF\u304C\u4F7F\u7528\u3055\u308C\u308B\u30B3\u30F3\u30C6\u30AD\u30B9\u30C8\u3068\u671F\u5F85\u3055\u308C\u308B\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u7406\u89E3\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u3053\u308C\u306F\u3001\u7570\u306A\u308B\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u9593\u3067\u30C7\u30FC\u30BF\u3092\u8EE2\u9001\u3059\u308B\u5834\u5408\u3084\u3001Web\u30DA\u30FC\u30B8\u3084\u30DE\u30EB\u30C1\u30D1\u30FC\u30C8\u30E1\u30FC\u30EB\u30E1\u30C3\u30BB\u30FC\u30B8\u306E\u3088\u3046\u306B\u8907\u6570\u306E\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u540C\u6642\u306B\u542B\u3080\u53EF\u80FD\u6027\u306E\u3042\u308B\u51FA\u529B\u3092\u751F\u6210\u3059\u308B\u5834\u5408\u306B\u7279\u306B\u91CD\u8981\u3067\u3059\u3002 \u671F\u5F85\u3055\u308C\u308B\u3059\u3079\u3066\u306E\u901A\u4FE1\u30D7\u30ED\u30C8\u30B3\u30EB\u3068\u30C7\u30FC\u30BF\u8868\u73FE\u3092\u8ABF\u67FB\u3057\u3001\u5FC5\u8981\u306A\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u6226\u7565\u3092\u6C7A\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p>\u5225\u306EWeb\u30DA\u30FC\u30B8\u306B\u51FA\u529B\u3055\u308C\u308B\u30C7\u30FC\u30BF\u3001\u7279\u306B\u5916\u90E8\u5165\u529B\u304B\u3089\u53D7\u3051\u53D6\u3063\u305F\u30C7\u30FC\u30BF\u306B\u3064\u3044\u3066\u306F\u3001\u3059\u3079\u3066\u306E\u975E\u82F1\u6570\u5B57\u306B\u5BFE\u3057\u3066\u9069\u5207\u306A\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u4F7F\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p>\u5FC5\u8981\u306A\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3068\u30A8\u30B9\u30B1\u30FC\u30D7\u306E\u7A2E\u985E\u306E\u8A73\u7D30\u306B\u3064\u3044\u3066\u306F\u3001XSS\u5BFE\u7B56\u30C1\u30FC\u30C8\u30B7\u30FC\u30C8\u3092\u53C2\u7167\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p></p><p>\u30D5\u30A7\u30FC\u30BA: \u30A2\u30FC\u30AD\u30C6\u30AF\u30C1\u30E3\u304A\u3088\u3073\u8A2D\u8A08</p><p>\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u5074\u3067\u5B9F\u884C\u3055\u308C\u308B\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30C1\u30A7\u30C3\u30AF\u306B\u3064\u3044\u3066\u306F\u3001CWE-602\u3092\u56DE\u907F\u3059\u308B\u305F\u3081\u306B\u3001\u3053\u308C\u3089\u306E\u30C1\u30A7\u30C3\u30AF\u304C\u30B5\u30FC\u30D0\u30FC\u5074\u3067\u8907\u88FD\u3055\u308C\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u653B\u6483\u8005\u306F\u3001\u30C1\u30A7\u30C3\u30AF\u304C\u5B9F\u884C\u3055\u308C\u305F\u5F8C\u306B\u5024\u3092\u5909\u66F4\u3057\u305F\u308A\u3001\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u3092\u5909\u66F4\u3057\u3066\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u5074\u306E\u30C1\u30A7\u30C3\u30AF\u3092\u5B8C\u5168\u306B\u524A\u9664\u3057\u305F\u308A\u3059\u308B\u3053\u3068\u3067\u3001\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u5074\u306E\u30C1\u30A7\u30C3\u30AF\u3092\u30D0\u30A4\u30D1\u30B9\u3067\u304D\u307E\u3059\u3002 \u305D\u306E\u5F8C\u3001\u3053\u308C\u3089\u306E\u5909\u66F4\u3055\u308C\u305F\u5024\u304C\u30B5\u30FC\u30D0\u30FC\u306B\u9001\u4FE1\u3055\u308C\u307E\u3059\u3002</p><p></p><p>\u5229\u7528\u53EF\u80FD\u3067\u3042\u308C\u3070\u3001\u30C7\u30FC\u30BF\u3068\u30B3\u30FC\u30C9\u306E\u5206\u96E2\u3092\u81EA\u52D5\u7684\u306B\u5F37\u5236\u3059\u308B\u69CB\u9020\u5316\u3055\u308C\u305F\u30E1\u30AB\u30CB\u30BA\u30E0\u3092\u4F7F\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u3053\u308C\u3089\u306E\u30E1\u30AB\u30CB\u30BA\u30E0\u306F\u3001\u958B\u767A\u8005\u304C\u51FA\u529B\u3092\u751F\u6210\u3059\u308B\u3059\u3079\u3066\u306E\u7B87\u6240\u3067\u3053\u306E\u6A5F\u80FD\u3092\u63D0\u4F9B\u3059\u308B\u3053\u3068\u306B\u983C\u308B\u306E\u3067\u306F\u306A\u304F\u3001\u95A2\u9023\u3059\u308B\u30AF\u30A9\u30FC\u30C6\u30A3\u30F3\u30B0\u3001\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3001\u304A\u3088\u3073\u691C\u8A3C\u3092\u81EA\u52D5\u7684\u306B\u63D0\u4F9B\u3067\u304D\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002</p><p></p><p>\u30D5\u30A7\u30FC\u30BA: \u5B9F\u88C5</p><p>\u751F\u6210\u3055\u308C\u308B\u3059\u3079\u3066\u306EWeb\u30DA\u30FC\u30B8\u306B\u3064\u3044\u3066\u3001ISO-8859-1\u3084UTF-8\u306A\u3069\u306E\u6587\u5B57\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u4F7F\u7528\u3057\u3001\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u304C\u6307\u5B9A\u3055\u308C\u3066\u3044\u306A\u3044\u5834\u5408\u3001Web\u30D6\u30E9\u30A6\u30B6\u30FC\u306FWeb\u30DA\u30FC\u30B8\u3067\u5B9F\u969B\u306B\u4F7F\u7528\u3055\u308C\u3066\u3044\u308B\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u63A8\u6E2C\u3057\u3066\u3001\u7570\u306A\u308B\u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0\u3092\u9078\u629E\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002 \u3053\u308C\u306B\u3088\u308A\u3001Web\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u7279\u5B9A\u306E\u30B7\u30FC\u30B1\u30F3\u30B9\u3092\u7279\u6B8A\u306A\u3082\u306E\u3068\u3057\u3066\u6271\u3044\u3001\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u304C\u5DE7\u5999\u306AXSS\u653B\u6483\u306B\u3055\u3089\u3055\u308C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002 \u30A8\u30F3\u30B3\u30FC\u30C7\u30A3\u30F3\u30B0/\u30A8\u30B9\u30B1\u30FC\u30D7\u306B\u95A2\u9023\u3059\u308B\u305D\u306E\u4ED6\u306E\u7DE9\u548C\u7B56\u306B\u3064\u3044\u3066\u306F\u3001CWE-116\u3092\u53C2\u7167\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p></p><p>\u30E6\u30FC\u30B6\u30FC\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u30AF\u30C3\u30AD\u30FC\u306B\u5BFE\u3059\u308BXSS\u653B\u6483\u3092\u7DE9\u548C\u3059\u308B\u305F\u3081\u306B\u3001\u30BB\u30C3\u30B7\u30E7\u30F3Cookie\u3092 HttpOnly \u306B\u8A2D\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002 HttpOnly \u6A5F\u80FD\u3092\u30B5\u30DD\u30FC\u30C8\u3059\u308B\u30D6\u30E9\u30A6\u30B6\u30FC (\u6700\u8FD1\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\u306EFirefox\u306A\u3069) \u3067\u306F\u3001\u3053\u306E\u5C5E\u6027\u306B\u3088\u308A document.cookie \u3092\u4F7F\u7528\u3059\u308B\u60AA\u610F\u306E\u3042\u308B\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u30B5\u30A4\u30C9\u30B9\u30AF\u30EA\u30D7\u30C8\u304C\u30E6\u30FC\u30B6\u30FC\u306E\u30BB\u30C3\u30B7\u30E7\u30F3Cookie\u306B\u30A2\u30AF\u30BB\u30B9\u3059\u308B\u306E\u3092\u9632\u3050\u3053\u3068\u304C\u3067\u304D\u307E\u3059\u3002 \u3053\u308C\u306F\u5B8C\u5168\u306A\u89E3\u6C7A\u7B56\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u306A\u305C\u306A\u3089\u3001HttpOnly \u306F\u3059\u3079\u3066\u306E\u30D6\u30E9\u30A6\u30B6\u30FC\u3067\u30B5\u30DD\u30FC\u30C8\u3055\u308C\u3066\u3044\u308B\u308F\u3051\u3067\u306F\u306A\u3044\u304B\u3089\u3067\u3059\u3002 \u3055\u3089\u306B\u91CD\u8981\u306A\u3053\u3068\u306B\u3001XMLHTTPRequest \u3084\u305D\u306E\u4ED6\u306E\u5F37\u529B\u306A\u30D6\u30E9\u30A6\u30B6\u30FC\u6280\u8853\u306F\u3001HttpOnly \u30D5\u30E9\u30B0\u304C\u8A2D\u5B9A\u3055\u308C\u3066\u3044\u308B Set-Cookie \u30D8\u30C3\u30C0\u30FC\u3092\u542B\u3080HTTP\u30D8\u30C3\u30C0\u30FC\u3078\u306E\u8AAD\u307F\u53D6\u308A\u30A2\u30AF\u30BB\u30B9\u3092\u63D0\u4F9B\u3057\u307E\u3059\u3002</p><p></p><p>\u3059\u3079\u3066\u306E\u5165\u529B\u3092\u60AA\u610F\u306E\u3042\u308B\u3082\u306E\u3068\u60F3\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u300C\u65E2\u77E5\u306E\u5B89\u5168\u306A\u3082\u306E\u3092\u53D7\u3051\u5165\u308C\u308B (accept known good)\u300D\u5165\u529B\u691C\u8A3C\u6226\u7565\u3001\u3064\u307E\u308A\u3001\u4ED5\u69D8\u306B\u53B3\u5BC6\u306B\u6E96\u62E0\u3059\u308B\u5165\u529B\u306E\u8A31\u53EF\u30EA\u30B9\u30C8 (\u30DB\u30EF\u30A4\u30C8\u30EA\u30B9\u30C8) \u3092\u4F7F\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u4ED5\u69D8\u306B\u53B3\u5BC6\u306B\u5F93\u308F\u306A\u3044\u5165\u529B\u306F\u62D2\u5426\u3059\u308B\u304B\u3001\u6E96\u62E0\u3059\u308B\u3088\u3046\u5909\u63DB\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u60AA\u610F\u306E\u3042\u308B\u3001\u307E\u305F\u306F\u4E0D\u6B63\u306A\u5F62\u5F0F\u306E\u5165\u529B\u3092\u63A2\u3059\u3053\u3068\u3060\u3051\u306B\u983C\u3089\u306A\u3044\u3067\u304F\u3060\u3055\u3044 (\u3059\u306A\u308F\u3061\u3001\u62D2\u5426\u30EA\u30B9\u30C8 (\u30D6\u30E9\u30C3\u30AF\u30EA\u30B9\u30C8) \u306B\u983C\u3089\u306A\u3044\u3067\u304F\u3060\u3055\u3044)\u3002 \u305F\u3060\u3057\u3001\u62D2\u5426\u30EA\u30B9\u30C8\u306F\u6F5C\u5728\u7684\u306A\u653B\u6483\u3092\u691C\u51FA\u3057\u305F\u308A\u3001\u3069\u306E\u5165\u529B\u304C\u975E\u5E38\u306B\u4E0D\u6B63\u306A\u5F62\u5F0F\u3067\u3042\u308B\u305F\u3081\u5B8C\u5168\u306B\u62D2\u5426\u3059\u3079\u304D\u304B\u3092\u5224\u65AD\u3057\u305F\u308A\u3059\u308B\u306E\u306B\u5F79\u7ACB\u3061\u307E\u3059\u3002</p><p></p><p>\u5165\u529B\u691C\u8A3C\u3092\u5B9F\u884C\u3059\u308B\u969B\u306F\u3001\u9577\u3055\u3001\u5165\u529B\u306E\u7A2E\u985E\u3001\u8A31\u5BB9\u53EF\u80FD\u306A\u5024\u306E\u5168\u7BC4\u56F2\u3001\u5165\u529B\u306E\u6B20\u843D\u307E\u305F\u306F\u904E\u5270\u3001\u69CB\u6587\u3001\u95A2\u9023\u30D5\u30A3\u30FC\u30EB\u30C9\u9593\u306E\u4E00\u8CAB\u6027\u3001\u304A\u3088\u3073\u30D3\u30B8\u30CD\u30B9\u30EB\u30FC\u30EB\u3078\u306E\u6E96\u62E0\u306A\u3069\u3001\u3059\u3079\u3066\u306E\u6F5C\u5728\u7684\u306B\u95A2\u9023\u3059\u308B\u30D7\u30ED\u30D1\u30C6\u30A3\u3092\u8003\u616E\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u30D3\u30B8\u30CD\u30B9\u30EB\u30FC\u30EB\u306E\u30ED\u30B8\u30C3\u30AF\u306E\u4F8B\u3068\u3057\u3066\u3001\u300Cboat\u300D\u306F\u82F1\u6570\u5B57\u306E\u307F\u3092\u542B\u3080\u305F\u3081\u69CB\u6587\u7684\u306B\u306F\u6709\u52B9\u304B\u3082\u3057\u308C\u307E\u305B\u3093\u304C\u3001\u300Cred\u300D\u3084\u300Cblue\u300D\u306E\u3088\u3046\u306A\u8272\u3092\u671F\u5F85\u3057\u3066\u3044\u308B\u5834\u5408\u306F\u6709\u52B9\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002</p><p></p><p>\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u5185\u306E\u660E\u78BA\u306B\u5B9A\u7FA9\u3055\u308C\u305F\u30A4\u30F3\u30BF\u30FC\u30D5\u30A7\u30FC\u30B9\u3067\u5165\u529B\u691C\u8A3C\u3092\u5B9F\u884C\u3059\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002 \u3053\u308C\u306B\u3088\u308A\u3001\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u304C\u518D\u5229\u7528\u3055\u308C\u305F\u308A\u3001\u4ED6\u306E\u5834\u6240\u306B\u79FB\u52D5\u3055\u308C\u305F\u308A\u3057\u3066\u3082\u3001\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u3092\u4FDD\u8B77\u3059\u308B\u306E\u306B\u5F79\u7ACB\u3061\u307E\u3059\u3002</p><p>\t</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/www-community/attacks/xss/</p><p>https://cwe.mitre.org/data/definitions/79.html</p>",
+                    "cweid": "79",
+                    "wascid": "8",
+                    "sourceid": "124",
+                    "tags":[ 
+                        {
+                            "tag": "CWE-79",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/79.html"
+                        },
+                        {
+                            "tag": "POLICY_SEQUENCE",
+                            "link": ""
+                        },
+                        {
+                            "tag": "OWASP_2021_A03",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A03_2021-Injection\/"
+                        },
+                        {
+                            "tag": "PCI_DSS",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#compliance"
+                        },
+                        {
+                            "tag": "WSTG-v42-INPV-01",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/07-Input_Validation_Testing\/01-Testing_for_Reflected_Cross_Site_Scripting"
+                        },
+                        {
+                            "tag": "POLICY_QA_CICD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_DEV_CICD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "OWASP_2025_A05",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A05_2025-Injection\/"
+                        },
+                        {
+                            "tag": "POLICY_DEV_FULL",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_QA_FULL",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "HIPAA",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#compliance"
+                        },
+                        {
+                            "tag": "OWASP_2017_A07",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A7_2017-Cross-Site_Scripting_(XSS).html"
+                        },
+                        {
+                            "tag": "POLICY_DEV_STD",
+                            "link": ""
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10054",
+                    "alertRef": "10054-1",
+                    "alert": "SameSite\u5C5E\u6027\u306E\u306A\u3044Cookie",
+                    "name": "SameSite\u5C5E\u6027\u306E\u306A\u3044Cookie",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "\u4F4E (\u4E2D)",
+                    "desc": "<p>SameSite \u5C5E\u6027\u304C\u306A\u3044Cookie\u304C\u8A2D\u5B9A\u3055\u308C\u307E\u3057\u305F\u3002\u3053\u306E\u305F\u3081\u3001\u305D\u306ECookie\u306F\u300C\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u300D\u30EA\u30AF\u30A8\u30B9\u30C8\u306E\u7D50\u679C\u3068\u3057\u3066\u9001\u4FE1\u3055\u308C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002SameSite\u5C5E\u6027\u306F\u3001\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30EA\u30AF\u30A8\u30B9\u30C8\u30D5\u30A9\u30FC\u30B8\u30A7\u30EA\u3001\u30AF\u30ED\u30B9\u30B5\u30A4\u30C8\u30B9\u30AF\u30EA\u30D7\u30C8\u30A4\u30F3\u30AF\u30EB\u30FC\u30B8\u30E7\u30F3\u3001\u304A\u3088\u3073\u30BF\u30A4\u30DF\u30F3\u30B0\u653B\u6483\u306B\u5BFE\u3059\u308B\u52B9\u679C\u7684\u306A\u5BFE\u7B56\u3067\u3059\u3002</p>",
+                    "instances":[ 
+                        {
+                            "id": "5",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add",
+                            "method": "GET",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "Set-Cookie: CAKEPHP",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"278620944479a082\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "4",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "Set-Cookie: CAKEPHP",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=278620944479a082&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"a06e19fe2d13bc88\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "2",
+                    "systemic": false,
+                    "solution": "<p>\u3059\u3079\u3066\u306ECookie\u306B\u3064\u3044\u3066\u3001SameSite\u5C5E\u6027\u3092 'lax' \u307E\u305F\u306F\u3001\u7406\u60F3\u7684\u306B\u306F 'strict' \u306B\u8A2D\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-same-site</p>",
+                    "cweid": "1275",
+                    "wascid": "13",
+                    "sourceid": "3",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A01_2021-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "WSTG-v42-SESS-02",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/06-Session_Management_Testing\/02-Testing_for_Cookies_Attributes"
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "CWE-1275",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/1275.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A01_2025-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "OWASP_2017_A05",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A5_2017-Broken_Access_Control.html"
+                        },
+                        {
+                            "tag": "POLICY_DEV_STD",
+                            "link": ""
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10021",
+                    "alertRef": "10021",
+                    "alert": "X-Content-Type-Options\u30D8\u30C3\u30C0\u30FC\u304C\u3042\u308A\u307E\u305B\u3093",
+                    "name": "X-Content-Type-Options\u30D8\u30C3\u30C0\u30FC\u304C\u3042\u308A\u307E\u305B\u3093",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "\u4F4E (\u4E2D)",
+                    "desc": "<p>MIME\u63A8\u6E2C\u9632\u6B62\u30D8\u30C3\u30C0\u30FC X-Content-Type-Options \u304C 'nosniff' \u306B\u8A2D\u5B9A\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002\u3053\u306E\u8A2D\u5B9A\u306B\u3088\u308A\u3001\u30D6\u30E9\u30A6\u30B6\u304CContent-Type\u30D8\u30C3\u30C0\u30FC\u3092\u7121\u8996\u3057\u3066\u30D5\u30A1\u30A4\u30EB\u5185\u5BB9\u304B\u3089\u63A8\u6E2C\u3067MIME\u30BF\u30A4\u30D7\u3092\u6C7A\u5B9A\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u3053\u308C\u306F\u3001\u653B\u6483\u8005\u304C\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3057\u305F\u30D5\u30A1\u30A4\u30EB\u3092\u610F\u56F3\u3057\u306A\u3044\u30B3\u30F3\u30C6\u30F3\u30C4\u30BF\u30A4\u30D7 (JavaScript\u3001HTML\u306A\u3069) \u3068\u3057\u3066\u5B9F\u884C\u3055\u305B\u3001XSS\u653B\u6483\u3092\u5B9F\u884C\u3059\u308B\u624B\u6CD5\u306B\u60AA\u7528\u3055\u308C\u308B\u6050\u308C\u304C\u3042\u308A\u307E\u3059\u3002\u73FE\u4EE3\u306E\u30D6\u30E9\u30A6\u30B6\u3067\u3082\u3001\u3053\u306E\u8A2D\u5B9A\u304C\u306A\u3044\u5834\u5408\u306FMIME\u63A8\u6E2C\u304C\u5B9F\u884C\u3055\u308C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002</p>",
+                    "instances":[ 
+                        {
+                            "id": "6",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add",
+                            "method": "GET",
+                            "param": "x-content-type-options",
+                            "attack": "",
+                            "evidence": "",
+                            "otherinfo": "\u3053\u306E\u554F\u984C\u306F\u3001\u30A8\u30E9\u30FC\u30DA\u30FC\u30B8 (401\u3001403\u3001500 \u306A\u3069) \u306B\u3082\u4F9D\u7136\u3068\u3057\u3066\u8A72\u5F53\u3057\u307E\u3059\u3002\u3053\u308C\u3089\u306E\u30DA\u30FC\u30B8\u3082\u30A4\u30F3\u30B8\u30A7\u30AF\u30B7\u30E7\u30F3\u653B\u6483\u306E\u5F71\u97FF\u3092\u53D7\u3051\u308B\u3053\u3068\u304C\u591A\u304F\u3001\u305D\u306E\u5834\u5408\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u610F\u56F3\u3055\u308C\u305F\u30B3\u30F3\u30C6\u30F3\u30C4\u30BF\u30A4\u30D7\u3092\u7121\u8996\u3057\u3066 MIME \u30B9\u30CB\u30C3\u30D5\u30A3\u30F3\u30B0\u3092\u884C\u3046\u30EA\u30B9\u30AF\u304C\u6B8B\u308B\u305F\u3081\u3067\u3059\u3002\n\u3057\u304D\u3044\u5024\u300C\u9AD8\u300D\u3067\u306F\u3001\u3053\u306E\u30B9\u30AD\u30E3\u30F3\u30EB\u30FC\u30EB\u306F\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u30A8\u30E9\u30FC\u304A\u3088\u3073\u30B5\u30FC\u30D0\u30FC\u30A8\u30E9\u30FC\u306E\u30EC\u30B9\u30DD\u30F3\u30B9\u306B\u5BFE\u3057\u3066\u30A2\u30E9\u30FC\u30C8\u3092\u767A\u751F\u3055\u305B\u307E\u305B\u3093\u3002",
+                            "request-header": "GET http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"278620944479a082\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "7",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "x-content-type-options",
+                            "attack": "",
+                            "evidence": "",
+                            "otherinfo": "\u3053\u306E\u554F\u984C\u306F\u3001\u30A8\u30E9\u30FC\u30DA\u30FC\u30B8 (401\u3001403\u3001500 \u306A\u3069) \u306B\u3082\u4F9D\u7136\u3068\u3057\u3066\u8A72\u5F53\u3057\u307E\u3059\u3002\u3053\u308C\u3089\u306E\u30DA\u30FC\u30B8\u3082\u30A4\u30F3\u30B8\u30A7\u30AF\u30B7\u30E7\u30F3\u653B\u6483\u306E\u5F71\u97FF\u3092\u53D7\u3051\u308B\u3053\u3068\u304C\u591A\u304F\u3001\u305D\u306E\u5834\u5408\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u610F\u56F3\u3055\u308C\u305F\u30B3\u30F3\u30C6\u30F3\u30C4\u30BF\u30A4\u30D7\u3092\u7121\u8996\u3057\u3066 MIME \u30B9\u30CB\u30C3\u30D5\u30A3\u30F3\u30B0\u3092\u884C\u3046\u30EA\u30B9\u30AF\u304C\u6B8B\u308B\u305F\u3081\u3067\u3059\u3002\n\u3057\u304D\u3044\u5024\u300C\u9AD8\u300D\u3067\u306F\u3001\u3053\u306E\u30B9\u30AD\u30E3\u30F3\u30EB\u30FC\u30EB\u306F\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u30A8\u30E9\u30FC\u304A\u3088\u3073\u30B5\u30FC\u30D0\u30FC\u30A8\u30E9\u30FC\u306E\u30EC\u30B9\u30DD\u30F3\u30B9\u306B\u5BFE\u3057\u3066\u30A2\u30E9\u30FC\u30C8\u3092\u767A\u751F\u3055\u305B\u307E\u305B\u3093\u3002",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=278620944479a082&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"a06e19fe2d13bc88\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "2",
+                    "systemic": false,
+                    "solution": "<p>\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3/Web\u30B5\u30FC\u30D0\u30FC\u304C Content-Type \u30D8\u30C3\u30C0\u30FC\u3092\u9069\u5207\u306B\u8A2D\u5B9A\u3057\u3001\u3059\u3079\u3066\u306EWeb\u30DA\u30FC\u30B8\u306B\u5BFE\u3057\u3066 X-Content-Type-Options \u30D8\u30C3\u30C0\u30FC\u306B 'nosniff' \u3092\u8A2D\u5B9A\u3057\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p><p>\u53EF\u80FD\u3067\u3042\u308C\u3070\u3001\u30A8\u30F3\u30C9\u30E6\u30FC\u30B6\u30FC\u304C MIME \u30B9\u30CB\u30C3\u30D5\u30A3\u30F3\u30B0\u3092\u4E00\u5207\u5B9F\u884C\u3057\u306A\u3044\u304B\u3001Web\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3/Web\u30B5\u30FC\u30D0\u30FC\u306E\u6307\u793A\u306B\u5F93\u3063\u3066 MIME \u30B9\u30CB\u30C3\u30D5\u30A3\u30F3\u30B0\u3092\u7121\u52B9\u5316\u3067\u304D\u308B\u3001\u6A19\u6E96\u306B\u6E96\u62E0\u3057\u305F\u6700\u65B0\u306EWeb\u30D6\u30E9\u30A6\u30B6\u30FC\u3092\u4F7F\u7528\u3057\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p>",
+                    "otherinfo": "<p>\u3053\u306E\u554F\u984C\u306F\u3001\u30A8\u30E9\u30FC\u30DA\u30FC\u30B8 (401\u3001403\u3001500 \u306A\u3069) \u306B\u3082\u4F9D\u7136\u3068\u3057\u3066\u8A72\u5F53\u3057\u307E\u3059\u3002\u3053\u308C\u3089\u306E\u30DA\u30FC\u30B8\u3082\u30A4\u30F3\u30B8\u30A7\u30AF\u30B7\u30E7\u30F3\u653B\u6483\u306E\u5F71\u97FF\u3092\u53D7\u3051\u308B\u3053\u3068\u304C\u591A\u304F\u3001\u305D\u306E\u5834\u5408\u30D6\u30E9\u30A6\u30B6\u30FC\u304C\u610F\u56F3\u3055\u308C\u305F\u30B3\u30F3\u30C6\u30F3\u30C4\u30BF\u30A4\u30D7\u3092\u7121\u8996\u3057\u3066 MIME \u30B9\u30CB\u30C3\u30D5\u30A3\u30F3\u30B0\u3092\u884C\u3046\u30EA\u30B9\u30AF\u304C\u6B8B\u308B\u305F\u3081\u3067\u3059\u3002</p><p>\u3057\u304D\u3044\u5024\u300C\u9AD8\u300D\u3067\u306F\u3001\u3053\u306E\u30B9\u30AD\u30E3\u30F3\u30EB\u30FC\u30EB\u306F\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u30A8\u30E9\u30FC\u304A\u3088\u3073\u30B5\u30FC\u30D0\u30FC\u30A8\u30E9\u30FC\u306E\u30EC\u30B9\u30DD\u30F3\u30B9\u306B\u5BFE\u3057\u3066\u30A2\u30E9\u30FC\u30C8\u3092\u767A\u751F\u3055\u305B\u307E\u305B\u3093\u3002</p>",
+                    "reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+                    "cweid": "693",
+                    "wascid": "15",
+                    "sourceid": "3",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A05",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A05_2021-Security_Misconfiguration\/"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "CWE-693",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/693.html"
+                        },
+                        {
+                            "tag": "OWASP_2017_A06",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A6_2017-Security_Misconfiguration.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A02",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A02_2025-Security_Misconfiguration\/"
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10037",
+                    "alertRef": "10037",
+                    "alert": "\u30B5\u30FC\u30D0\u30FC\u304C \"X-Powered-By\" HTTP\u30EC\u30B9\u30DD\u30F3\u30B9\u30D8\u30C3\u30C0\u30FC\u30D5\u30A3\u30FC\u30EB\u30C9\u7D4C\u7531\u3067\u60C5\u5831\u3092\u6F0F\u6D29",
+                    "name": "\u30B5\u30FC\u30D0\u30FC\u304C \"X-Powered-By\" HTTP\u30EC\u30B9\u30DD\u30F3\u30B9\u30D8\u30C3\u30C0\u30FC\u30D5\u30A3\u30FC\u30EB\u30C9\u7D4C\u7531\u3067\u60C5\u5831\u3092\u6F0F\u6D29",
+                    "riskcode": "1",
+                    "confidence": "2",
+                    "riskdesc": "\u4F4E (\u4E2D)",
+                    "desc": "<p>\u30B5\u30FC\u30D0\u30FC\u304C1\u3064\u4EE5\u4E0A\u306E \"X-Powered-By\" HTTP\u30EC\u30B9\u30DD\u30F3\u30B9\u30D8\u30C3\u30C0\u30FC\u3092\u4ECB\u3057\u3066\u60C5\u5831\u3092\u6F0F\u6D29\u3057\u3066\u3044\u307E\u3059\u3002</p><p></p><p>\u3053\u306E\u60C5\u5831\u306B\u30A2\u30AF\u30BB\u30B9\u3057\u305F\u653B\u6483\u8005\u306F\u3001Web\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u304C\u4F9D\u5B58\u3057\u3066\u3044\u308B\u4ED6\u306E\u30D5\u30EC\u30FC\u30E0\u30EF\u30FC\u30AF\u3084\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u3092\u7279\u5B9A\u3057\u3001\u305D\u308C\u3089\u306E\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u304C\u62B1\u3048\u308B\u8106\u5F31\u6027\u3092\u60AA\u7528\u3067\u304D\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002</p>",
+                    "instances":[ 
+                        {
+                            "id": "3",
+                            "uri": "http://127.0.0.1:39823/",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/",
+                            "method": "GET",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:39823/ HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Home</title></head><body><h1>Home</h1><a href=\"/contacts/add\">Contact</a></body></html>"
+                        },
+                        {
+                            "id": "8",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add",
+                            "method": "GET",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"278620944479a082\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "9",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "X-Powered-By: PHP/8.4",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=278620944479a082&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"a06e19fe2d13bc88\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "3",
+                    "systemic": false,
+                    "solution": "<p>Web\u30B5\u30FC\u30D0\u30FC\u3001\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u30B5\u30FC\u30D0\u30FC\u3001\u30ED\u30FC\u30C9\u30D0\u30E9\u30F3\u30B5\u30FC\u306A\u3069\u304CX-Powered-By\u30D8\u30C3\u30C0\u30FC\u3092\u6291\u5236\u3059\u308B\u3088\u3046\u306B\u8A2D\u5B9A\u3055\u308C\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002</p>",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework</p><p>https://www.troyhunt.com/shhh-dont-let-your-response-headers/</p>",
+                    "cweid": "497",
+                    "wascid": "13",
+                    "sourceid": "1",
+                    "tags":[ 
+                        {
+                            "tag": "OWASP_2021_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2021\/A01_2021-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "WSTG-v42-INFO-08",
+                            "link": "https:\/\/owasp.org\/www-project-web-security-testing-guide\/v42\/4-Web_Application_Security_Testing\/01-Information_Gathering\/08-Fingerprint_Web_Application_Framework"
+                        },
+                        {
+                            "tag": "POLICY_QA_STD",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        },
+                        {
+                            "tag": "OWASP_2017_A03",
+                            "link": "https:\/\/owasp.org\/www-project-top-ten\/2017\/A3_2017-Sensitive_Data_Exposure.html"
+                        },
+                        {
+                            "tag": "OWASP_2025_A01",
+                            "link": "https:\/\/owasp.org\/Top10\/2025\/A01_2025-Broken_Access_Control\/"
+                        },
+                        {
+                            "tag": "CWE-497",
+                            "link": "https:\/\/cwe.mitre.org\/data\/definitions\/497.html"
+                        }
+                    ]
+                },
+                {
+                    "pluginid": "10112",
+                    "alertRef": "10112",
+                    "alert": "\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u30EC\u30B9\u30DD\u30F3\u30B9\u306E\u7279\u5B9A",
+                    "name": "\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u30EC\u30B9\u30DD\u30F3\u30B9\u306E\u7279\u5B9A",
+                    "riskcode": "0",
+                    "confidence": "2",
+                    "riskdesc": "\u60C5\u5831 (\u4E2D)",
+                    "desc": "<p>\u6307\u5B9A\u3055\u308C\u305F\u30EC\u30B9\u30DD\u30F3\u30B9\u306B\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u30C8\u30FC\u30AF\u30F3\u304C\u542B\u307E\u308C\u3066\u3044\u308B\u3053\u3068\u304C\u8B58\u5225\u3055\u308C\u307E\u3057\u305F\u3002\u300C\u8FFD\u52A0\u60C5\u5831\u300D\u30D5\u30A3\u30FC\u30EB\u30C9\u306B\u306F\u3001\u30D8\u30C3\u30C0\u30FC\u30D9\u30FC\u30B9\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u65B9\u5F0F\u3067\u4F7F\u7528\u53EF\u80FD\u306A\u30D8\u30C3\u30C0\u30FC\u30C8\u30FC\u30AF\u30F3\u306E\u30BB\u30C3\u30C8\u304C\u542B\u307E\u308C\u3066\u3044\u307E\u3059\u3002\u3053\u306E\u30EA\u30AF\u30A8\u30B9\u30C8\u304C\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u65B9\u5F0F\u3092\u300C\u81EA\u52D5\u691C\u51FA\u300D\u306B\u8A2D\u5B9A\u3057\u305F\u30B3\u30F3\u30C6\u30AD\u30B9\u30C8\u5185\u306B\u3042\u308B\u5834\u5408\u3001\u3053\u306E\u30EB\u30FC\u30EB\u306B\u3088\u3063\u3066\u8B58\u5225\u3055\u308C\u305F\u30C8\u30FC\u30AF\u30F3\u3092\u5229\u7528\u3057\u305F\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u65B9\u5F0F\u306B\u5909\u66F4\u3055\u308C\u307E\u3059\u3002</p>",
+                    "instances":[ 
+                        {
+                            "id": "0",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add",
+                            "method": "GET",
+                            "param": "CAKEPHP",
+                            "attack": "",
+                            "evidence": "CAKEPHP",
+                            "otherinfo": "cookie:CAKEPHP",
+                            "request-header": "GET http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:42:00 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"278620944479a082\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "1",
+                    "systemic": false,
+                    "solution": "<p>\u3053\u308C\u306F\u8106\u5F31\u6027\u3067\u306F\u306A\u304F\u60C5\u5831\u63D0\u4F9B\u306E\u30A2\u30E9\u30FC\u30C8\u3067\u3042\u308B\u305F\u3081\u3001\u4FEE\u6B63\u3059\u3079\u304D\u70B9\u306F\u3042\u308A\u307E\u305B\u3093\u3002</p>",
+                    "otherinfo": "<p>cookie:CAKEPHP</p>",
+                    "reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id/</p>",
+                    "cweid": "-1",
+                    "wascid": "-1",
+                    "sourceid": "3",
+                    "tags":[ 
+                    ]
+                },
+                {
+                    "pluginid": "10104",
+                    "alertRef": "10104",
+                    "alert": "\u30E6\u30FC\u30B6\u30FC\u30A8\u30FC\u30B8\u30A7\u30F3\u30C8\u30D5\u30A1\u30B6\u30FC (User Agent Fuzzer)",
+                    "name": "\u30E6\u30FC\u30B6\u30FC\u30A8\u30FC\u30B8\u30A7\u30F3\u30C8\u30D5\u30A1\u30B6\u30FC (User Agent Fuzzer)",
+                    "riskcode": "0",
+                    "confidence": "2",
+                    "riskdesc": "\u60C5\u5831 (\u4E2D)",
+                    "desc": "<p>\u30D5\u30A1\u30BA\u3055\u308C\u305F (fuzzed) \u30E6\u30FC\u30B6\u30FC\u30A8\u30FC\u30B8\u30A7\u30F3\u30C8 (\u4F8B: \u30E2\u30D0\u30A4\u30EB\u30B5\u30A4\u30C8\u3001\u691C\u7D22\u30A8\u30F3\u30B8\u30F3\u306E\u30AF\u30ED\u30FC\u30E9\u30FC\u3068\u3057\u3066\u30A2\u30AF\u30BB\u30B9) \u306B\u57FA\u3065\u3044\u3066\u3001\u30EC\u30B9\u30DD\u30F3\u30B9\u306E\u9055\u3044\u3092\u30C1\u30A7\u30C3\u30AF\u3057\u307E\u3059\u3002\u30EC\u30B9\u30DD\u30F3\u30B9\u306E\u30B9\u30C6\u30FC\u30BF\u30B9\u30B3\u30FC\u30C9\u3068\u30EC\u30B9\u30DD\u30F3\u30B9\u30DC\u30C7\u30A3\u306E\u30CF\u30C3\u30B7\u30E5\u30B3\u30FC\u30C9\u3092\u5143\u306E\u30EC\u30B9\u30DD\u30F3\u30B9\u3068\u6BD4\u8F03\u3057\u307E\u3059\u3002</p><p></p>",
+                    "instances":[ 
+                        {
+                            "id": "12",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add",
+                            "method": "GET",
+                            "param": "\u30D8\u30C3\u30C0\u30FC\uFF1AUser-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "GET http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:43:03 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"a10a6bf37e5eca26\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "13",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "\u30D8\u30C3\u30C0\u30FC\uFF1AUser-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=c13746da952f718f&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:43:03 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"51e2fbf729772a23\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        },
+                        {
+                            "id": "11",
+                            "uri": "http://127.0.0.1:39823/contacts/add",
+                            "nodeName": "http:\/\/127.0.0.1:39823\/contacts\/add ()(data[Contact][message],data[_Token][key])",
+                            "method": "POST",
+                            "param": "\u30D8\u30C3\u30C0\u30FC\uFF1AUser-Agent",
+                            "attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+                            "evidence": "",
+                            "otherinfo": "",
+                            "request-header": "POST http://127.0.0.1:39823/contacts/add HTTP/1.1\r\nHost: 127.0.0.1:39823\r\nConnection: close\r\nContent-Length: 79\r\nContent-Type: application/x-www-form-urlencoded\r\nuser-agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)\r\ncookie: CAKEPHP=k8c2l1v0q9\r\n\r\n",
+                            "request-body": "data%5B_Token%5D%5Bkey%5D=2734d486e58b0be7&data%5BContact%5D%5Bmessage%5D=Hello",
+                            "response-header": "HTTP/1.1 200 OK\r\nHost: 127.0.0.1:39823\r\nDate: Mon, 19 Oct 2026 12:43:03 GMT\r\nConnection: close\r\nX-Powered-By: PHP/8.4\r\nContent-Security-Policy: default-src 'self'; form-action 'self'; frame-ancestors 'none'\r\nX-Frame-Options: DENY\r\nCross-Origin-Embedder-Policy: require-corp\r\nCross-Origin-Opener-Policy: same-origin\r\nCross-Origin-Resource-Policy: same-origin\r\nPermissions-Policy: geolocation=()\r\nCache-Control: no-store\r\nSet-Cookie: CAKEPHP=k8c2l1v0q9; HttpOnly\r\nContent-type: text/html; charset=UTF-8\r\n\r\n",
+                            "response-body": "<!doctype html><html><head><title>Contact</title></head><body><h1>Contact</h1><p>Thank you for your message:</p><p>Hello</p><form method=\"post\" action=\"/contacts/add\"><input type=\"hidden\" name=\"data[_Token][key]\" value=\"11979294ea677a11\"><textarea name=\"data[Contact][message]\"></textarea><button>Send</button></form><a href=\"/\">Home</a></body></html>"
+                        }
+                    ],
+                    "count": "3",
+                    "systemic": true,
+                    "solution": "",
+                    "otherinfo": "",
+                    "reference": "<p>https://owasp.org/wstg</p>",
+                    "cweid": "0",
+                    "wascid": "0",
+                    "sourceid": "649",
+                    "tags":[ 
+                        {
+                            "tag": "CUSTOM_PAYLOADS",
+                            "link": ""
+                        },
+                        {
+                            "tag": "POLICY_PENTEST",
+                            "link": ""
+                        },
+                        {
+                            "tag": "SYSTEMIC",
+                            "link": "https:\/\/www.zaproxy.org\/docs\/desktop\/addons\/common-library\/alerttags\/#systemic"
+                        }
+                    ]
+                }
+            ],
+            "statistics":{ 
+                "stats.responseTime.16": 3
+                ,
+                "stats.contentType.text\/html; charset=UTF-8": 746
+                ,
+                "stats.responseTime.0": 140
+                ,
+                "stats.acsrf.data[_Token][key]": 496
+                ,
+                "stats.tag.Form": 496
+                ,
+                "stats.tag.SetCookie": 496
+                ,
+                "stats.tag.Hidden": 496
+                ,
+                "stats.code.200": 746
+                ,
+                "stats.auth.sessiontoken.CAKEPHP": 2
+                ,
+                "stats.tag.Script": 2
+                ,
+                "stats.responseTime.2": 411
+                ,
+                "stats.responseTime.4": 168
+                ,
+                "stats.responseTime.8": 24
+                ,
+                "stats.tag.Comment": 7
+                
+            }
+        }
+    ],
+    "statistics":{ 
+        "stats.ascan.90035.started": 1
+        ,
+        "stats.pscan.10027.time": 1
+        ,
+        "stats.reports.generated.traditional-json": 1
+        ,
+        "stats.config.scanner.excludedParameters(0).name": 1
+        ,
+        "stats.ascan.40035.started": 1
+        ,
+        "stats.ascan.40027.time": 25
+        ,
+        "stats.ascan.20017.urls": 2
+        ,
+        "stats.pscan.10037.alerts": 3
+        ,
+        "stats.pscan.90022.time": 34
+        ,
+        "stats.ascan.40027.urls": 20
+        ,
+        "stats.ascan.20017.time": 18
+        ,
+        "stats.pscan.10112.time": 37
+        ,
+        "stats.ascan.40026.started": 1
+        ,
+        "stats.pscan.10042.time": 0
+        ,
+        "stats.ascan.40044.time": 60
+        ,
+        "stats.ascan.10058.started": 1
+        ,
+        "stats.pscan.10056.time": 0
+        ,
+        "stats.ascan.90017.urls": 16
+        ,
+        "stats.ascan.40029.started": 1
+        ,
+        "stats.pscan.10061.time": 0
+        ,
+        "stats.ascan.10106.started": 1
+        ,
+        "stats.pscan.10109.time": 0
+        ,
+        "stats.ascan.40008.time": 23
+        ,
+        "stats.ascan.90029.started": 1
+        ,
+        "stats.ascan.40044.started": 1
+        ,
+        "stats.ascan.20015.time": 4
+        ,
+        "stats.log.warn.org.zaproxy.zap.extension.ascanrules.Spring4ShellScanRule.NoHttpResponseException(DefaultBHttpClientConnection.java:333)": 1
+        ,
+        "stats.log.error.org.zaproxy.addon.client.ExtensionClientIntegration": 1
+        ,
+        "stats.ascan.20015.urls": 1
+        ,
+        "stats.ascan.40003.started": 1
+        ,
+        "stats.ascan.40032.started": 1
+        ,
+        "stats.config.api.addrs.addr.name": 1
+        ,
+        "stats.ascan.40017.started": 1
+        ,
+        "stats.selenium.launch.2.firefox-headless": 5
+        ,
+        "stats.ascan.20017.started": 1
+        ,
+        "stats.auto.job.passiveScan-wait.run": 2
+        ,
+        "stats.ascan.0.started": 1
+        ,
+        "stats.config.scanner.excludedParameters(3).type": 1
+        ,
+        "stats.ascan.40008.urls": 14
+        ,
+        "stats.ascan.90034.time": 25
+        ,
+        "stats.pscan.90003.time": 2
+        ,
+        "stats.pscan.10040.time": 0
+        ,
+        "stats.reports.generated.modern": 1
+        ,
+        "stats.pscan.10023.time": 1
+        ,
+        "stats.ascan.90023.started": 1
+        ,
+        "stats.ascan.90034.urls": 13
+        ,
+        "stats.pscan.10029.time": 0
+        ,
+        "stats.ascan.90017.started": 1
+        ,
+        "stats.ascan.10047.time": 7
+        ,
+        "stats.pscan.10017.time": 0
+        ,
+        "stats.ascan.40014.started": 1
+        ,
+        "stats.ascan.10047.started": 1
+        ,
+        "stats.pscan.10011.time": 0
+        ,
+        "stats.ascan.40034.urls": 2
+        ,
+        "stats.pscan.10112.alerts": 2
+        ,
+        "stats.config.scanner.excludeAntiCsrfTokens": 1
+        ,
+        "stats.pscan.10030.time": 0
+        ,
+        "domxss.scan.count": 5
+        ,
+        "stats.api.call.json.httpSessions.action.setActiveSession": 1
+        ,
+        "stats.ascan.40034.time": 6
+        ,
+        "stats.pscan.10039.time": 0
+        ,
+        "stats.pscan.10052.time": 0
+        ,
+        "stats.api.call.json.core.view.version": 1
+        ,
+        "stats.ascan.90026.started": 1
+        ,
+        "stats.pscan.10105.time": 0
+        ,
+        "stats.ascan.90037.time": 34
+        ,
+        "stats.pscan.10035.time": 0
+        ,
+        "stats.ascan.40019.urls": 20
+        ,
+        "stats.ascan.10058.urls": 1
+        ,
+        "stats.selenium.profile.create.failure.Linux": 1
+        ,
+        "stats.ascan.90037.started": 1
+        ,
+        "stats.pscan.90001.time": 0
+        ,
+        "stats.ascan.90036.time": 33
+        ,
+        "stats.auto.jobs.run": 5
+        ,
+        "stats.pscan.10020.time": 1
+        ,
+        "stats.ascan.90020.started": 1
+        ,
+        "stats.pscan.10034.time": 0
+        ,
+        "stats.ascan.10058.time": 7
+        ,
+        "stats.ascan.40022.time": 22
+        ,
+        "stats.log.warn.org.openqa.selenium.manager.SeleniumManager": 1
+        ,
+        "stats.ascan.90035.time": 43
+        ,
+        "stats.ascan.30001.started": 1
+        ,
+        "stats.config.scanner.excludedParameters(2).type": 1
+        ,
+        "stats.pscan.90030.time": 0
+        ,
+        "stats.ascan.6.started": 1
+        ,
+        "stats.ascan.20015.started": 1
+        ,
+        "stats.ascan.40027.started": 1
+        ,
+        "stats.config.view.locale": 1
+        ,
+        "stats.ascan.40019.time": 54
+        ,
+        "stats.ascan.40003.time": 22
+        ,
+        "stats.auto.job.report.run": 2
+        ,
+        "stats.pscan.10097.time": 1
+        ,
+        "stats.ascan.40003.urls": 14
+        ,
+        "stats.ascan.40022.urls": 10
+        ,
+        "stats.ascan.90036.urls": 24
+        ,
+        "stats.pscan.10202.time": 9
+        ,
+        "stats.ascan.6.time": 183
+        ,
+        "stats.ascan.40008.started": 1
+        ,
+        "stats.ascan.40021.started": 1
+        ,
+        "stats.ascan.7.urls": 20
+        ,
+        "stats.log.error": 1
+        ,
+        "stats.ascan.40029.time": 5
+        ,
+        "stats.ascan.90020.time": 56
+        ,
+        "stats.pscan.10054.time": 11
+        ,
+        "stats.auto.job.activeScan.run": 1
+        ,
+        "stats.ascan.0.time": 11
+        ,
+        "stats.ascan.40032.time": 5
+        ,
+        "stats.ascan.90017.time": 28
+        ,
+        "stats.log.warn.org.zaproxy.addon.client.RedirectScript": 5
+        ,
+        "stats.ascan.90035.urls": 28
+        ,
+        "stats.ascan.90020.urls": 38
+        ,
+        "stats.ascan.40032.urls": 2
+        ,
+        "stats.pscan.90011.time": 0
+        ,
+        "stats.pscan.10015.time": 0
+        ,
+        "stats.ascan.7.time": 52
+        ,
+        "stats.ascan.90019.started": 1
+        ,
+        "stats.ascan.40042.started": 1
+        ,
+        "stats.ascan.50000.time": 317
+        ,
+        "stats.config.anticsrf.tokens.token(100).name": 1
+        ,
+        "stats.config.scanner.excludedParameters(0).type": 1
+        ,
+        "stats.ascan.6.urls": 28
+        ,
+        "stats.ascan.40029.urls": 2
+        ,
+        "stats.pscan.90002.time": 0
+        ,
+        "stats.ascan.40045.started": 1
+        ,
+        "stats.pscan.10025.time": 0
+        ,
+        "stats.pscan.10098.time": 0
+        ,
+        "stats.ascan.0.urls": 6
+        ,
+        "stats.ascan.started": 1
+        ,
+        "stats.api.call.json.httpSessions.view.sessions": 1
+        ,
+        "stats.ascan.40012.started": 1
+        ,
+        "stats.network.send.success": 1128
+        ,
+        "stats.ascan.30002.time": 14
+        ,
+        "stats.pscan.50001.time": 5
+        ,
+        "stats.ascan.40048.time": 3
+        ,
+        "stats.ascan.40042.urls": 2
+        ,
+        "stats.pscan.10044.time": 0
+        ,
+        "stats.pscan.10113.time": 3
+        ,
+        "stats.pscan.Parameter Scanner": 463
+        ,
+        "stats.ascan.30002.urls": 6
+        ,
+        "stats.config.scanner.excludedParameters(1).type": 1
+        ,
+        "stats.ascan.40048.urls": 1
+        ,
+        "stats.ascan.40042.time": 7
+        ,
+        "stats.ascan.90026.time": 6
+        ,
+        "stats.network.send.failure": 17
+        ,
+        "stats.ascan.40043.time": 1
+        ,
+        "stats.ascan.40022.started": 1
+        ,
+        "stats.ascan.40043.skipped": 1
+        ,
+        "stats.ascan.10104.time": 77
+        ,
+        "stats.ascan.30001.urls": 2
+        ,
+        "stats.script.call.Graal.js.active": 23
+        ,
+        "stats.pscan.10043.time": 0
+        ,
+        "stats.ascan.40009.time": 19
+        ,
+        "stats.pscan.10057.time": 5
+        ,
+        "stats.config.scanner.excludedParameters(3).name": 1
+        ,
+        "stats.ascan.30001.time": 13
+        ,
+        "stats.ascan.10104.urls": 72
+        ,
+        "stats.ascan.40028.time": 1
+        ,
+        "stats.pscan.10111.time": 1
+        ,
+        "stats.ascan.10048.started": 1
+        ,
+        "stats.ascan.20018.time": 22
+        ,
+        "stats.ascan.40014.time": 9
+        ,
+        "stats.ascan.10048.urls": 4
+        ,
+        "stats.pscan.50003.time": 15
+        ,
+        "stats.ascan.20018.urls": 10
+        ,
+        "stats.ascan.10106.time": 12
+        ,
+        "stats.ascan.100043.started": 1
+        ,
+        "stats.ascan.40028.urls": 1
+        ,
+        "stats.ascan.10048.time": 28
+        ,
+        "stats.ascan.40048.started": 1
+        ,
+        "stats.auth.detect.session.CAKEPHP": 2
+        ,
+        "stats.pscan.10010.time": 1
+        ,
+        "stats.ascan.40009.urls": 8
+        ,
+        "stats.pscan.2.time": 4
+        ,
+        "stats.config.scanner.excludedParameters(2).name": 1
+        ,
+        "stats.ascan.90034.started": 1
+        ,
+        "stats.pscan.10024.time": 0
+        ,
+        "stats.pscan.10021.alerts": 3
+        ,
+        "stats.config.anticsrf.partialMatchingEnabled": 1
+        ,
+        "stats.log.warn.org.zaproxy.zap.session.CookieBasedSessionManagementHelper": 42
+        ,
+        "stats.ascan.10104.started": 1
+        ,
+        "stats.pscan.10062.time": 11
+        ,
+        "stats.pscan.-1.time": 82
+        ,
+        "stats.pscan.10115.time": 0
+        ,
+        "stats.ascan.90021.time": 11
+        ,
+        "stats.auth.sessiontokens.max": 2
+        ,
+        "stats.ascan.40012.urls": 4
+        ,
+        "stats.ascan.40043.started": 1
+        ,
+        "stats.ascan.40018.urls": 44
+        ,
+        "stats.api.call.json.httpSessions.action.addDefaultSessionToken": 1
+        ,
+        "stats.ascan.7.started": 1
+        ,
+        "stats.ascan.100043.time": 750
+        ,
+        "stats.ascan.40018.started": 1
+        ,
+        "stats.config.api.key": 1
+        ,
+        "stats.pscan.10033.time": 0
+        ,
+        "stats.pscan.10108.time": 0
+        ,
+        "stats.ascan.20018.started": 1
+        ,
+        "stats.pscan.10036.time": 0
+        ,
+        "stats.ascan.90021.urls": 6
+        ,
+        "stats.ascan.40012.time": 24
+        ,
+        "stats.pscan.10055.time": 57
+        ,
+        "stats.ascan.30002.started": 1
+        ,
+        "stats.client.launch.fail.firefox": 5
+        ,
+        "stats.ascan.40018.time": 111
+        ,
+        "stats.pscan.10021.time": 27
+        ,
+        "stats.pscan.recordsToScan": 457
+        ,
+        "stats.ascan.40009.started": 1
+        ,
+        "stats.ascan.40020.started": 1
+        ,
+        "stats.ascan.90023.time": 8
+        ,
+        "stats.pscan.Anti CSRF Token Detection": 93
+        ,
+        "stats.ascan.40035.time": 71
+        ,
+        "stats.pscan.10096.time": 2
+        ,
+        "stats.ascan.40021.urls": 10
+        ,
+        "stats.ascan.40035.urls": 52
+        ,
+        "stats.pscan.10054.alerts": 2
+        ,
+        "stats.ascan.40021.time": 23
+        ,
+        "stats.ascan.90037.urls": 32
+        ,
+        "stats.ascan.100043.urls": 12
+        ,
+        "stats.ascan.90019.time": 22
+        ,
+        "stats.ascan.time": 64051
+        ,
+        "stats.auto.plans.run": 1
+        ,
+        "stats.config.anticsrf.tokens.token(100).enabled": 1
+        ,
+        "stats.ascan.90024.time": 6
+        ,
+        "stats.pscan.10050.time": 0
+        ,
+        "stats.config.scanner.excludedParameters(1).name": 1
+        ,
+        "stats.ascan.40017.time": 15
+        ,
+        "stats.pscan.90033.time": 1
+        ,
+        "stats.ascan.10045.urls": 2
+        ,
+        "stats.ascan.40019.started": 1
+        ,
+        "stats.ascan.40017.urls": 6
+        ,
+        "stats.pscan.10019.time": 0
+        ,
+        "domxss.gets.count": 96
+        ,
+        "stats.ascan.urls": 625
+        ,
+        "stats.ascan.10104.alerts": 24
+        ,
+        "stats.ascan.40034.started": 1
+        ,
+        "stats.pscan.3.time": 0
+        ,
+        "stats.ascan.started.policy.user": 1
+        ,
+        "stats.ascan.20019.started": 1
+        ,
+        "stats.ascan.10045.time": 8
+        ,
+        "stats.pscan.10032.time": 6
+        ,
+        "stats.ascan.90036.started": 1
+        ,
+        "stats.ascan.40012.alerts": 1
+        ,
+        "stats.ascan.40016.urls": 2
+        ,
+        "stats.pscan.10038.time": 0
+        ,
+        "stats.log.warn": 49
+        ,
+        "stats.config.api.addrs.addr.regex": 1
+        ,
+        "stats.ascan.40016.time": 13
+        ,
+        "stats.pscan.10037.time": 25
+        ,
+        "stats.ascan.90021.started": 1
+        ,
+        "stats.pscan.10031.time": 0
+        ,
+        "stats.ascan.40026.urls": 23
+        ,
+        "stats.ascan.40020.urls": 20
+        ,
+        "stats.pscan.10028.time": 0
+        ,
+        "stats.ascan.10045.started": 1
+        ,
+        "stats.ascan.20019.urls": 18
+        ,
+        "stats.pscan.10003.time": 32
+        ,
+        "stats.ascan.40028.started": 1
+        ,
+        "stats.pscan.10009.time": 3
+        ,
+        "stats.ascan.40045.urls": 11
+        ,
+        "stats.ascan.90024.started": 1
+        ,
+        "stats.ascan.90019.urls": 16
+        ,
+        "stats.api.call.json.automation.action.runPlan": 1
+        ,
+        "stats.pscan.10041.time": 0
+        ,
+        "stats.api.call.json.automation.view.planProgress": 34
+        ,
+        "stats.ascan.40020.time": 60
+        ,
+        "stats.ascan.40045.time": 17
+        ,
+        "stats.pscan.10116.time": 23
+        ,
+        "stats.ascan.50000.started": 1
+        ,
+        "stats.ascan.40026.time": 59232
+        ,
+        "stats.ascan.90029.time": 19
+        ,
+        "stats.ascan.20019.time": 43
+        ,
+        "stats.ascan.40016.started": 1
+        
+    }
+}
+
