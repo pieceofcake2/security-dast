@@ -7,7 +7,7 @@
     "homepage": "https://pieceofcake2.github.io/security-dast/",
     "require": {
         "php": ">=8.0",
-        "pieceofcake2/report": "dev-feat/checks-and-empty-groups as 1.1.0"
+        "pieceofcake2/report": "^1.1"
     },
     "require-dev": {
         "cakephp/cakephp-codesniffer": "^5.0",

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.1.0
 
 - The report lists the scan rules of ZAP besides the alerts, on pages after the alerts by risk
   (pieceofcake2/report 1.1):
