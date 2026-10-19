@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.0.5
+
+- The docs point the fix of the missing security headers to
+  [pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/), which adds them to every
+  response of CakePHP; the way by hand in `AppController` stays
+
 ## 1.0.4
 
 - The full scan no longer reports Path Traversal (alert 6-5) when a field of a form accepts the file name of the
