@@ -10,11 +10,14 @@ CakePHP 2 アプリケーションのための nginx と Apache の完全な設�
 
 - **Web サーバー** (このページ、推奨): すべてのレスポンスに付きます。CakePHP に届かない `webroot/` のファイル (CSS、
   JavaScript、画像) や、Web サーバー自体のエラーにも付きます。
-- **`AppController`** ([セキュリティヘッダー](alerts.md#セキュリティヘッダー)): 共用のホスティングなど、Web サーバーを
-  変えられないときです。`webroot/` のファイルには付きません。
+- **アプリケーション**: 共用のホスティングなど、Web サーバーを変えられないときです。CakePHP のすべてのレスポンスに
+  付ける [pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/ja/) を使うか、`AppController` で手で付けます
+  ([セキュリティヘッダー](alerts.md#セキュリティヘッダー))。`webroot/` のファイルには付きません。
 
-両方では付けないでください。`X-Frame-Options` が 2 つになるなど、2 回送ったヘッダーはブラウザによっては無効になり、
-`Content-Security-Policy` が 2 つあると両方が効いて、厳しいほうが勝ちます。
+同じヘッダーを両方では付けないでください。`X-Frame-Options` が 2 つになるなど、2 回送ったヘッダーはブラウザによっては
+無効になり、`Content-Security-Policy` が 2 つあると両方が効いて、厳しいほうが勝ちます。分けるのはかまいません。
+たとえば、Content Security Policy はアプリケーションに必要なサイトを許可できるプラグインで、ほかは下の設定で Web
+サーバーで付けます。その場合は snippet からその行を消し、プラグインでは同じヘッダーをオフにしてください。
 
 Content Security Policy は、本番の前にアプリケーションに合わせてください。まず `Content-Security-Policy-Report-Only`
 で始めます ([セキュリティヘッダー](alerts.md#セキュリティヘッダー))。

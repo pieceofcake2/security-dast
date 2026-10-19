@@ -4,8 +4,8 @@ The alerts that ZAP raises most often on a CakePHP 2 application, by the baselin
 they mean, and how to fix them. Each page of the report also has the description and the solution of ZAP, and a link to the page
 of the alert on [zaproxy.org](https://www.zaproxy.org/docs/alerts/).
 
-Most alerts are fixed once for the whole application: the security headers in `AppController` and the web
-server, the cookies in `config/core.php`, and the error pages with the debug level. The alerts of the full scan
+Most alerts are fixed once for the whole application: the security headers in the web server or with
+[pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/), the cookies in `config/core.php`, and the error pages with the debug level. The alerts of the full scan
 (XSS, SQL injection, ...) are fixed in the code of the page: the same places are found by the rules of
 [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/rules), which give more patterns of
 the fix.
@@ -119,8 +119,29 @@ Set them in **one** place:
 
 - **In the web server** (recommended): every response gets them, also the files of `webroot/` and the errors of
   the web server. See [Web Server Settings](web-server.md) for complete settings of nginx and Apache.
-- **In `AppController`**, when you cannot change the web server: every page of CakePHP gets them, the error pages
-  (404, 500) too, as `CakeErrorController` extends `AppController`; the files of `webroot/` do not.
+- **With [pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/)**, when you cannot change the web server, or to keep the
+  Content Security Policy with the application: a dispatcher filter adds them to every response of CakePHP, the
+  redirects, the error pages and the files of the plugins too; the files of `webroot/` do not get them. It sends the
+  policy as `Content-Security-Policy-Report-Only` by default, and allows other sites and Google's tags by name.
+  The headers of the web server, such as `Strict-Transport-Security`, are off by default.
+
+```bash
+composer require pieceofcake2/security-headers
+```
+
+```php
+// config/bootstrap.php (app/Config/bootstrap.php)
+CakePlugin::load('SecurityHeaders');
+
+Configure::write('Dispatcher.filters', [
+    'AssetDispatcher',
+    'CacheDispatcher',
+    'SecurityHeaders.SecurityHeadersFilter',
+]);
+```
+
+- **In `AppController`**, without the plugin: every page of CakePHP gets them, the error pages (404, 500) too, as
+  `CakeErrorController` extends `AppController`; the files of the plugins and of `webroot/` do not.
 
 ```php
 // src/Controller/AppController.php (app/Controller/AppController.php)
@@ -142,12 +163,15 @@ public function beforeFilter()
 }
 ```
 
-Not in both: a header sent twice, e.g. two `X-Frame-Options`, is invalid for some browsers.
+Not in two of them: a header sent twice, e.g. two `X-Frame-Options`, is invalid for some browsers. You can split
+them by header, e.g. `Strict-Transport-Security` in the web server and the others with the plugin.
 
 - **CSP**: `default-src 'self'` allows the scripts, styles and images of the application only. A page with
   inline scripts (`<script>...</script>`, `$this->Html->scriptBlock()`, `onclick="..."`) or files of other
   sites needs more: move the scripts to files of `webroot/js/`, or add the sites to the policy, e.g.
-  `script-src 'self' https://cdn.example.com`. Introduce a policy step by step:
+  `script-src 'self' https://cdn.example.com` (with the plugin:
+  [`contentSecurityPolicyAllow`](https://pieceofcake2.github.io/security-headers/#allowing-other-sites), with the sources of Google Tag Manager and Google
+  Analytics, and a nonce for their inline snippets). Introduce a policy step by step:
   1. Send it as `Content-Security-Policy-Report-Only`: it blocks nothing, and the console of the browser lists
      what it would block.
   2. Go through the pages (the End-to-End tests do), and move the inline scripts and styles to files, or add the
