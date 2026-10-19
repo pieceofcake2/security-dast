@@ -4,7 +4,8 @@ CakePHP 2 アプリケーションで、ZAP がベースラインスキャンと
 にも ZAP の説明と対策があり、[zaproxy.org](https://www.zaproxy.org/docs/alerts/) のアラートのページへのリンクが
 あります。
 
-ほとんどのアラートは、アプリケーション全体に一度で修正できます。セキュリティヘッダーは `AppController` と Web サーバーで、
+ほとんどのアラートは、アプリケーション全体に一度で修正できます。セキュリティヘッダーは Web サーバーか
+[pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/ja/) で、
 Cookie は `config/core.php` で、エラーページはデバッグレベルで修正します。フルスキャンのアラート (XSS、SQL
 インジェクションなど) は、そのページのコードで修正します。同じ箇所は
 [pieceofcake2/security-sast](https://pieceofcake2.github.io/security-sast/ja/rules) のルールでも見つけられ、そちらに
@@ -120,8 +121,30 @@ pieceofcake2/security-sast のルール
 
 - **Web サーバーで** (推奨): `webroot/` のファイルや Web サーバー自体のエラーも含め、すべてのレスポンスに付きます。
   nginx と Apache の完全な設定は [Web サーバーの設定](web-server.md) をご覧ください。
-- **`AppController` で**: Web サーバーを変えられないときです。CakePHP のすべてのページに付き、エラーページ (404、500)
-  にも付きます (`CakeErrorController` は `AppController` を継承しています)。`webroot/` のファイルには付きません。
+- **[pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/ja/) で**: Web サーバーを変えられないときや、Content Security Policy を
+  アプリケーションと一緒に管理したいときです。ディスパッチャーフィルターが、CakePHP のすべてのレスポンスに付けます。
+  リダイレクト、エラーページ、プラグインのファイルにも付き、`webroot/` のファイルには付きません。ポリシーはデフォルトで
+  `Content-Security-Policy-Report-Only` で送り、ほかのサイトや Google のタグを名前で許可できます。
+  `Strict-Transport-Security` など、Web サーバーで付けるヘッダーはデフォルトでオフです。
+
+```bash
+composer require pieceofcake2/security-headers
+```
+
+```php
+// config/bootstrap.php (app/Config/bootstrap.php)
+CakePlugin::load('SecurityHeaders');
+
+Configure::write('Dispatcher.filters', [
+    'AssetDispatcher',
+    'CacheDispatcher',
+    'SecurityHeaders.SecurityHeadersFilter',
+]);
+```
+
+- **`AppController` で** (プラグインを使わない場合): CakePHP のすべてのページに付き、エラーページ (404、500) にも
+  付きます (`CakeErrorController` は `AppController` を継承しています)。プラグインと `webroot/` のファイルには
+  付きません。
 
 ```php
 // src/Controller/AppController.php (app/Controller/AppController.php)
@@ -143,13 +166,15 @@ public function beforeFilter()
 }
 ```
 
-両方では付けないでください。`X-Frame-Options` が 2 つになるなど、2 回送ったヘッダーは、ブラウザによっては無効に
-なります。
+2 か所では付けないでください。`X-Frame-Options` が 2 つになるなど、2 回送ったヘッダーは、ブラウザによっては無効に
+なります。`Strict-Transport-Security` は Web サーバーで、ほかはプラグインで、のようにヘッダーごとに分けるのはかまいません。
 
 - **CSP**: `default-src 'self'` は、アプリケーション自身のスクリプト、スタイル、画像だけを許します。インラインの
   スクリプト (`<script>...</script>`、`$this->Html->scriptBlock()`、`onclick="..."`) やほかのサイトのファイルを使う
   ページでは、足りません。スクリプトを `webroot/js/` のファイルに移すか、`script-src 'self' https://cdn.example.com`
-  のようにサイトをポリシーに足してください。ポリシーは段階的に導入します。
+  のようにサイトをポリシーに足してください (プラグインでは
+  [`contentSecurityPolicyAllow`](https://pieceofcake2.github.io/security-headers/ja/#allowing-other-sites)。Google タグマネージャーと Google アナリティクスの
+  ソースや、インラインのスニペットのための nonce もあります)。ポリシーは段階的に導入します。
   1. `Content-Security-Policy-Report-Only` で送ります。何もブロックせず、ブロックするはずのものをブラウザの
      コンソールに出します。
   2. ページを一通り開き (End-to-End テストが開きます)、インラインのスクリプトとスタイルをファイルに移すか、ページに

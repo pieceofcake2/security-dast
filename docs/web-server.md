@@ -11,11 +11,14 @@ Set the security headers in **one** place:
 
 - **The web server** (this page, recommended): every response gets them, also the files of `webroot/` (CSS,
   JavaScript, images) and the errors of the web server itself, which never reach CakePHP.
-- **`AppController`** ([Security Headers](alerts.md#security-headers)): when you cannot change the web server,
-  e.g. a shared hosting. The files of `webroot/` then miss them.
+- **The application**, when you cannot change the web server, e.g. a shared hosting: with
+  [pieceofcake2/security-headers](https://pieceofcake2.github.io/security-headers/), which adds them to every response of CakePHP, or by hand in
+  `AppController` ([Security Headers](alerts.md#security-headers)). The files of `webroot/` then miss them.
 
-Not both: a header sent twice, e.g. two `X-Frame-Options`, is invalid for some browsers, and two
-`Content-Security-Policy` headers both apply, so the stricter one wins.
+Not both for the same header: a header sent twice, e.g. two `X-Frame-Options`, is invalid for some browsers, and
+two `Content-Security-Policy` headers both apply, so the stricter one wins. Splitting them is fine, e.g. the
+Content Security Policy with the plugin, which allows the sites that the application needs, and the others below
+in the web server: remove those lines from the snippet, and turn off the same headers in the plugin.
 
 Adapt the Content Security Policy to the application before production: start with
 `Content-Security-Policy-Report-Only` ([Security Headers](alerts.md#security-headers)).
