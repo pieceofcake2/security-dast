@@ -40,6 +40,20 @@ vendor/bin/security-dast --scan=full --scan-minutes=20
 
 フルスキャンは、報告書の言語に関係なく、ZAP の Default Policy と同じく、すべてのアクティブスキャンのルールを実行します。
 
+## スキャンルール
+
+スキャンは、ZAP のパッケージ化されたスキャン (`zap-baseline.py`、`zap-full-scan.py`) と同じく、release と beta の
+スキャンルールを実行します。ZAP の Docker イメージには release のルールしかないため、スキャンの開始時に、ZAP が
+beta のパッシブルール (`pscanrulesBeta`) と、フルスキャンでは beta のアクティブルール (`ascanrulesBeta`) を ZAP
+Marketplace からインストールします。そのため、スキャンから `https://www.zaproxy.org` に接続できる必要があります。
+接続できないときは、ZAP はエラーを記録し、release のルールだけで実行します。
+
+beta のパッシブルールには、Content Cacheability (10049)、Permissions Policy Header Not Set (10063)、Insufficient
+Site Isolation Against Spectre (90004。COEP、COOP、CORP のヘッダー)、Dangerous JS Functions (10110)、Source Code
+Disclosure (10099)、HTTP Parameter Override (10026) があります。beta のアクティブルールには、SSRF (40046)、
+Session Fixation (40013)、CORS Misconfiguration (40040)、Backup File Disclosure (10095)、Possible Username
+Enumeration (40023) などがあります。
+
 ## CakePHP 2 と ZAP
 
 ZAP は、CakePHP 2 のアプリケーションに合わせて設定してあります。

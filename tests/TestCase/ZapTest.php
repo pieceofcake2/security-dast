@@ -62,8 +62,23 @@ class ZapTest extends TestCase
             '-config', 'scanner.excludedParameters(2).name=data[_Token][unlocked]', '-config', 'scanner.excludedParameters(2).type=-1',
             '-config', 'scanner.excludedParameters(3).name=data[_Token][debug]', '-config', 'scanner.excludedParameters(3).type=-1',
             '-config', 'view.locale=ja_JP',
+            '-addoninstall', 'pscanrulesBeta',
             '-config', 'spider.maxDepth=3',
         ], $command);
+    }
+
+    /**
+     * The beta scan rules, which the image of ZAP does not have: the passive ones for every scan, the active ones for
+     * the full scan
+     *
+     * @return void
+     */
+    public function testAddOnsOfTheScanRules(): void
+    {
+        $addOns = static fn(Zap $zap): array => array_map(static fn(int $i): string => $zap->zapOptions()[$i + 1], array_keys($zap->zapOptions(), '-addoninstall', true));
+
+        $this->assertSame(['pscanrulesBeta'], $addOns(new Zap()));
+        $this->assertSame(['pscanrulesBeta', 'ascanrulesBeta'], $addOns(new Zap(scan: 'full')));
     }
 
     public function testCommandWithAName(): void
@@ -466,6 +481,13 @@ class ZapTest extends TestCase
         $this->assertSame(['passive'], array_values(array_unique(array_column($result->rules, 'type'))));
         $this->assertNotContains('10202', array_column($result->rules, 'id'));
         $this->assertNotContains('10037', array_column($result->rules, 'id'));
+        // The beta passive rules ran (pscanrulesBeta): the page has no Permissions-Policy, COEP, COOP or CORP, and
+        // every response is cacheable or not
+        $this->assertContains('10063-1', $ids);
+        $this->assertNotEmpty(preg_grep('/\A90004(-|\z)/', $ids));
+        $this->assertNotEmpty(preg_grep('/\A10049(-|\z)/', $ids));
+        // The beta passive rules without alerts are among the passing rules, e.g. Dangerous JS Functions
+        $this->assertContains('10110', array_column($result->rules, 'id'));
         $this->assertContains('10038-1', $ids);
         $this->assertContains('10037', $ids);
 
@@ -479,6 +501,8 @@ class ZapTest extends TestCase
         $active = array_values(array_filter((array)$result->rules, static fn(array $rule): bool => $rule['type'] === 'active'));
         $this->assertGreaterThan(10, count($active));
         $this->assertNotContains('', array_column($active, 'name'));
+        // The beta active rules (ascanrulesBeta), e.g. SSRF, Session Fixation, Backup File Disclosure, CORS
+        $this->assertNotEmpty(array_intersect(['40046', '40013', '10095', '40040'], array_column($active, 'id')));
 
         // As a user: the pages behind the login are crawled
         $server = new WebServer(self::FIXTURES . DS . 'login' . DS . 'webroot', self::FIXTURES . DS . 'login');
@@ -506,6 +530,8 @@ class ZapTest extends TestCase
         }
         $uris = array_merge(...array_map(static fn($alert): array => array_column($alert->instances, 'uri'), $result->alerts));
         $this->assertNotEmpty(preg_grep('#/login#', $uris));
+        // The beta passive rules ran in the daemon too
+        $this->assertContains('10063-1', array_map(static fn($alert): string => $alert->id, $result->alerts));
         // The other site was reached through the proxy, and only the site of the scan is reported
         $this->assertStringContainsString('Example Domain', $other);
         $this->assertSame([], preg_grep('#\Ahttps?://example\.com#', $uris));
