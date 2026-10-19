@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.6
+
+- The docs explain the alert 10038-1 "CSP Header Not Set" that ZAP raises for a report-only Content Security
+  Policy, and how to ignore it, with its reason, until the policy is enforced
+
 ## 1.0.5
 
 - The docs point the fix of the missing security headers to
