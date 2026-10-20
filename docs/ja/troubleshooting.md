@@ -8,6 +8,13 @@ Docker を起動するか、`--docker` で別のコマンド (`podman` など) �
 **ZAP の出力付きの `ZAP failed ...`**: メッセージに ZAP の最後の出力が出ます。ZAP の plan のエラーは、このパッケージの
 不具合です。メッセージを添えて報告してください。
 
+**`ZAP did not answer automation/view/planProgress for 300 seconds`**: 記録したリクエストのスキャンの間、ZAP が
+5 分続けて応答しませんでした。それより短い間の応答の遅れ (能動スキャンで ZAP が忙しいときなど) では、スキャンは
+止まりません。メッセージには、ZAP のコンテナがまだ動いているか、どう止まったか (`OOMKilled` はメモリ不足) と、
+`zap.log` (Linux) かコンテナの出力の最後の行が、API のキーとログインのパスワードを伏せて出ます。そこに
+`java.lang.OutOfMemoryError` があれば、ZAP のメモリが足りません。メモリの多いホストでスキャンするか、
+`--scan-minutes` を下げてください。報告書は ZAP が plan の最後に書くので、書かれません。
+
 **ZAP がアプリケーションに届かない** (報告書に URL がない、ZAP の出力に `Connection refused` がある): Linux では
 コンテナが `--network host` を使うので、Docker がホストのネットワークを使える必要があります (GitHub Actions の
 ランナーでは使えます)。macOS と Windows では、Docker Desktop が用意する `host.docker.internal` でホストに届きます。

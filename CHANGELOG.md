@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## Unreleased
+
+- The scan of the End-to-End tests no longer stops when ZAP leaves the progress of its plan unanswered once, e.g.
+  for longer than the timeout of 30 seconds of a call while the active scan with the beta rules keeps it busy: it
+  asks again, and fails only after 5 minutes without an answer (`ZapDaemon::UNANSWERED`), or at the end of the
+  time of the plan
+- When ZAP stops answering, the message tells whether its container still runs, or how it stopped (status, exit
+  code, `OOMKilled`), and shows the last 20 lines of `zap.log`, or of the output of the container, without the key
+  of the API and the password of the login. The container of ZAP no longer runs with `--rm`, so that one that
+  exited can still tell why; the scan removes it at the end as before
+- An empty answer of ZAP is reported as `ZAP did not answer ...` without a trailing `: `
+
 ## 1.1.1
 
 - The scans run the beta scan rules of ZAP again: the Docker image of ZAP has the release rules only, and since

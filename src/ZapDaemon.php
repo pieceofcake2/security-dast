@@ -19,6 +19,11 @@ use RuntimeException;
 final class ZapDaemon
 {
     /**
+     * Seconds that the progress of a plan may go unanswered, e.g. while the active scan keeps ZAP busy
+     */
+    public const UNANSWERED = 300;
+
+    /**
      * @var \Closure(array<string>, string, array<string, string>): array{0: int, 1: string, 2: string}
      */
     private Closure $run;
@@ -27,6 +32,11 @@ final class ZapDaemon
      * @var \Closure(string): (string|false)
      */
     private Closure $get;
+
+    /**
+     * @var \Closure(int): void
+     */
+    private Closure $sleep;
 
     private ?string $container = null;
 
@@ -50,6 +60,8 @@ final class ZapDaemon
      *  command, with environment variables
      * @param (\Closure(string): (string|false))|null $get Gets a URL of the API
      * @param array<string, string> $env Environment variables of ZAP, e.g. the password of the login
+     * @param (\Closure(int): void)|null $sleep Waits for microseconds
+     * @param int $unanswered Seconds that the progress of a plan may go unanswered
      */
     public function __construct(
         private string $dir,
@@ -61,6 +73,8 @@ final class ZapDaemon
         ?Closure $run = null,
         ?Closure $get = null,
         private array $env = [],
+        ?Closure $sleep = null,
+        private int $unanswered = self::UNANSWERED,
     ) {
         $this->run = $run ?? Closure::fromCallable([Process::class, 'run']);
         $this->get = $get ?? static function (string $url): string|false {
@@ -70,6 +84,9 @@ final class ZapDaemon
             } finally {
                 restore_error_handler();
             }
+        };
+        $this->sleep = $sleep ?? static function (int $microseconds): void {
+            usleep($microseconds);
         };
         $this->key = bin2hex(random_bytes(16));
         $this->keyFile = 'key-' . bin2hex(random_bytes(8)) . '.properties';
@@ -128,7 +145,7 @@ final class ZapDaemon
             if (str_contains((string)($this->get)($this->api('core/view/version')), '"version"')) {
                 return true;
             }
-            usleep(500000);
+            ($this->sleep)(500000);
         }
 
         return false;
@@ -141,7 +158,8 @@ final class ZapDaemon
      */
     public function command(): array
     {
-        $command = [$this->docker, 'run', '-d', '--rm'];
+        // Without --rm, so that a container that exited still tells why (diagnosis()); stop() removes it
+        $command = [$this->docker, 'run', '-d'];
         if ($this->os === 'Linux') {
             array_push($command, '--network', 'host');
             $host = '127.0.0.1';
@@ -189,12 +207,13 @@ final class ZapDaemon
     }
 
     /**
-     * Runs a plan of the Automation Framework on what ZAP recorded, and waits until it finishes
+     * Runs a plan of the Automation Framework on what ZAP recorded, and waits until it finishes. ZAP may leave the
+     * progress unanswered for a while (`$unanswered`), e.g. when the active scan keeps it busy.
      *
      * @param array<string, mixed> $plan Plan
      * @param int $timeout Seconds to wait
      * @return void
-     * @throws \RuntimeException When the plan fails
+     * @throws \RuntimeException When the plan fails, or ZAP stops answering
      */
     public function runPlan(array $plan, int $timeout = 7200): void
     {
@@ -204,8 +223,18 @@ final class ZapDaemon
             throw new RuntimeException('ZAP did not run the plan.');
         }
         $deadline = microtime(true) + $timeout;
+        $answered = microtime(true);
         while (microtime(true) < $deadline) {
-            $progress = $this->call('automation/view/planProgress', ['planId' => (string)$id]);
+            $body = ($this->get)($this->api('automation/view/planProgress', ['planId' => (string)$id]));
+            $progress = self::decode($body);
+            if ($progress === null) {
+                if (microtime(true) - $answered >= $this->unanswered) {
+                    throw new RuntimeException(sprintf('ZAP did not answer automation/view/planProgress for %d seconds%s.%s', $this->unanswered, self::excerpt($body), $this->diagnosis()));
+                }
+                ($this->sleep)(2000000);
+                continue;
+            }
+            $answered = microtime(true);
             if (($progress['finished'] ?? '') !== '') {
                 $errors = array_filter((array)($progress['error'] ?? []), 'is_string');
                 if ($errors !== []) {
@@ -214,7 +243,7 @@ final class ZapDaemon
 
                 return;
             }
-            usleep(2000000);
+            ($this->sleep)(2000000);
         }
         throw new RuntimeException(sprintf('The plan of ZAP did not finish in %d seconds.', $timeout));
     }
@@ -242,6 +271,47 @@ final class ZapDaemon
     }
 
     /**
+     * Whether the container of ZAP still runs, and the last lines of its log, for a ZAP that stopped answering: the
+     * log is `zap.log` of the home of ZAP in the directory (on Linux, `Zap::zapHome()`), or the output of the container
+     *
+     * @return string
+     */
+    private function diagnosis(): string
+    {
+        if ($this->container === null) {
+            return '';
+        }
+        $tmp = sys_get_temp_dir();
+        [$code, $output] = ($this->run)([$this->docker, 'inspect', '--format', '{{.State.Status}} {{.State.ExitCode}} {{.State.OOMKilled}}', $this->container], $tmp, []);
+        [$status, $exitCode, $oomKilled] = explode(' ', trim($output)) + ['', '', ''];
+        if ($code !== 0 || $status === '') {
+            $text = "\nThe container of ZAP is gone.";
+        } elseif ($status === 'running') {
+            $text = "\nThe container of ZAP is still running.";
+        } else {
+            $text = sprintf("\nThe container of ZAP is not running: %s, exit code %s%s.", $status, $exitCode, $oomKilled === 'true' ? ', OOMKilled' : '');
+        }
+
+        $file = $this->dir . DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . '.ZAP' . DIRECTORY_SEPARATOR . 'zap.log';
+        if (is_file($file)) {
+            $name = 'zap.log';
+            // The end only: the log of a long scan is large
+            $log = (string)file_get_contents($file, false, null, max(0, (int)filesize($file) - 65536));
+        } else {
+            $name = 'the output of the container';
+            [, $output, $error] = ($this->run)([$this->docker, 'logs', '--tail', '100', $this->container], $tmp, []);
+            $log = $output . "\n" . $error;
+        }
+        $lines = array_filter(array_map('rtrim', explode("\n", $log)), static fn(string $line): bool => $line !== '');
+        if ($lines === []) {
+            return $text;
+        }
+        $secrets = array_filter([$this->key, ...array_values($this->env)], static fn(string $secret): bool => $secret !== '');
+
+        return $text . sprintf("\nThe last lines of %s:\n", $name) . str_replace($secrets, '***', implode("\n", array_slice($lines, -20)));
+    }
+
+    /**
      * Stops ZAP
      *
      * @return void
@@ -266,13 +336,42 @@ final class ZapDaemon
     private function call(string $path, array $params = []): array
     {
         $body = ($this->get)($this->api($path, $params));
+        $data = self::decode($body);
+        if ($data === null) {
+            throw new RuntimeException(sprintf('ZAP did not answer %s%s.', $path, self::excerpt($body)));
+        }
+
+        return $data;
+    }
+
+    /**
+     * The data of an answer of the API
+     *
+     * @param string|false $body Body of the answer, false without an answer
+     * @return array<string, mixed>|null Null when it is not JSON
+     */
+    private static function decode(string|false $body): ?array
+    {
         try {
             $data = json_decode((string)$body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new RuntimeException(sprintf('ZAP did not answer %s: %s', $path, mb_strimwidth((string)$body, 0, 200, '…')), 0, $e);
+        } catch (JsonException) {
+            return null;
         }
 
         return is_array($data) ? $data : [];
+    }
+
+    /**
+     * The beginning of an answer that is not JSON, for a message
+     *
+     * @param string|false $body Body of the answer
+     * @return string `: ` and the beginning, or nothing without a body
+     */
+    private static function excerpt(string|false $body): string
+    {
+        $body = trim((string)$body);
+
+        return $body !== '' ? ': ' . mb_strimwidth($body, 0, 200, '…') : '';
     }
 
     /**

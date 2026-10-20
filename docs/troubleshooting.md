@@ -8,6 +8,14 @@ cannot use it. Start Docker, or give another command with `--docker`, e.g. `podm
 **`ZAP failed ...` with the output of ZAP**: the message has the last lines of ZAP. A plan error of ZAP is a bug
 of this package: please report it with the message.
 
+**`ZAP did not answer automation/view/planProgress for 300 seconds`**: ZAP did not answer the scan of the
+recorded requests for five minutes in a row; a slow answer for a shorter time, e.g. while the active scan keeps
+ZAP busy, does not stop the scan. The message tells whether the container of ZAP still runs, or how it stopped
+(`OOMKilled`: out of memory), and shows the last lines of `zap.log` (on Linux) or of the output of the container,
+without the key of the API and the password of the login. A `java.lang.OutOfMemoryError` there means that ZAP
+ran out of memory: scan on a host with more memory, or lower `--scan-minutes`. No report is written, as ZAP
+writes it at the end of the plan.
+
 **ZAP cannot reach the application** (no URL in the report, or `Connection refused` in the output of ZAP): on
 Linux, the container uses `--network host`, so the network of the host must be usable by Docker (it is on the
 runners of GitHub Actions). On macOS and Windows, the container reaches the host as `host.docker.internal`,
