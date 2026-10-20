@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.1.2
 
 - The scan of the End-to-End tests no longer stops when ZAP leaves the progress of its plan unanswered once, e.g.
   for longer than the timeout of 30 seconds of a call while the active scan with the beta rules keeps it busy: it
