@@ -200,6 +200,26 @@ class ZapDaemonTest extends TestCase
         $daemon->runPlan(['jobs' => []]);
     }
 
+    public function testRunPlanWhileTheContainerStillRuns(): void
+    {
+        $daemon = new ZapDaemon(TMP, os: 'Darwin', port: 8090, run: static fn(array $command, string $cwd): array => match ($command[1]) {
+            'inspect' => [0, "running 0 false\n", ''],
+            'logs' => [0, '', ''],
+            default => [0, "id\n", ''],
+        }, get: static function (string $url): string|false {
+            if (str_contains($url, 'version')) {
+                return '{"version":"2.17.0"}';
+            }
+
+            return str_contains($url, 'runPlan') ? '{"planId":"6"}' : (str_contains($url, 'planProgress') ? false : '{}');
+        }, unanswered: 0);
+        $daemon->start();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/\AZAP did not answer automation\/view\/planProgress for 0 seconds\.\nThe container of ZAP is still running\.\z/');
+        $daemon->runPlan(['jobs' => []]);
+    }
+
     public function testRunPlanWithoutId(): void
     {
         $daemon = new ZapDaemon(TMP, port: 8090, run: static fn(array $command, string $cwd): array => [0, "id\n", ''], get: static function (string $url): string {
